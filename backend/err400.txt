@@ -1,0 +1,138 @@
+FAIL src/__tests__/errores400.test.ts (39.251 s)
+  ÔùÅ familia 400: validaci├│n de cuerpo ÔÇ║ POST /results con tipos inv├ílidos ÔåÆ 400 con message + errors
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      205 |
+      206 | describe('familia 400: validaci├│n de cuerpo', () => {
+    > 207 |   it('POST /results con tipos inv├ílidos ÔåÆ 400 con message + errors', async () => {
+          |   ^
+      208 |     const res = await request(buildApp())
+      209 |       .post('/results')
+      210 |       .set('Authorization', `Bearer ${JUEZ}`)
+
+      at src/__tests__/errores400.test.ts:207:3
+      at Object.<anonymous> (src/__tests__/errores400.test.ts:206:1)
+
+  ÔùÅ familia 400: validaci├│n de cuerpo ÔÇ║ POST /results sin campos ÔåÆ 400 (no cuela al controlador)
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      216 |   });
+      217 |
+    > 218 |   it('POST /results sin campos ÔåÆ 400 (no cuela al controlador)', async () => {
+          |   ^
+      219 |     const res = await request(buildApp())
+      220 |       .post('/results')
+      221 |       .set('Authorization', `Bearer ${JUEZ}`)
+
+      at src/__tests__/errores400.test.ts:218:3
+      at Object.<anonymous> (src/__tests__/errores400.test.ts:206:1)
+
+  ÔùÅ familia 400: validaci├│n de cuerpo ÔÇ║ POST /results/check inv├ílido ÔåÆ 400
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      225 |   });
+      226 |
+    > 227 |   it('POST /results/check inv├ílido ÔåÆ 400', async () => {
+          |   ^
+      228 |     const res = await request(buildApp())
+      229 |       .post('/results/check')
+      230 |       .set('Authorization', `Bearer ${JUEZ}`)
+
+      at src/__tests__/errores400.test.ts:227:3
+      at Object.<anonymous> (src/__tests__/errores400.test.ts:206:1)
+
+  ÔùÅ familia 400: validaci├│n de cuerpo ÔÇ║ detalle con m├ís de 50 claves ÔåÆ 400 (cota anti-DoS)
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      234 |   });
+      235 |
+    > 236 |   it('detalle con m├ís de 50 claves ÔåÆ 400 (cota anti-DoS)', async () => {
+          |   ^
+      237 |     const detalle: Record<string, number> = {};
+      238 |     for (let i = 0; i < 51; i++) detalle[`k${i}`] = i;
+      239 |     const res = await request(buildApp())
+
+      at src/__tests__/errores400.test.ts:236:3
+      at Object.<anonymous> (src/__tests__/errores400.test.ts:206:1)
+
+  ÔùÅ familia 400: params y cuerpo malformado ÔÇ║ GET /results/abc/splits ÔåÆ 400 (id no num├®rico)
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      246 |
+      247 | describe('familia 400: params y cuerpo malformado', () => {
+    > 248 |   it('GET /results/abc/splits ÔåÆ 400 (id no num├®rico)', async () => {
+          |   ^
+      249 |     const res = await request(buildApp())
+      250 |       .get('/results/abc/splits')
+      251 |       .set('Authorization', `Bearer ${JUEZ}`);
+
+      at src/__tests__/errores400.test.ts:248:3
+      at Object.<anonymous> (src/__tests__/errores400.test.ts:247:1)
+
+  ÔùÅ 409: conflictos de estado, no 400 ÔÇ║ resultado duplicado ÔåÆ 409 (no 400)
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      278 |   }
+      279 |
+    > 280 |   it('resultado duplicado ÔåÆ 409 (no 400)', async () => {
+          |   ^
+      281 |     mocksResultadoExistente();
+      282 |     const res = await request(buildApp())
+      283 |       .post('/results')
+
+      at src/__tests__/errores400.test.ts:280:3
+      at Object.<anonymous> (src/__tests__/errores400.test.ts:272:1)
+
+  ÔùÅ 409: conflictos de estado, no 400 ÔÇ║ heat en pausa ÔåÆ 409 (reintentable, no validaci├│n)
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      288 |   });
+      289 |
+    > 290 |   it('heat en pausa ÔåÆ 409 (reintentable, no validaci├│n)', async () => {
+          |   ^
+      291 |     (Wod as any).findByPk.mockResolvedValue({ id: 1, competencia_id: 1 });
+      292 |     (Participante as any).findByPk.mockResolvedValue({ id: 10 });
+      293 |     (Resultado as any).findOne.mockResolvedValue(null);
+
+      at src/__tests__/errores400.test.ts:290:3
+      at Object.<anonymous> (src/__tests__/errores400.test.ts:272:1)
+
+  ÔùÅ mensajeSeguro: sin fugas en 400/500 ÔÇ║ oculta SQL/Sequelize tras mensaje gen├®rico
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "No se pudo completar la operacion"
+    Received: "ER_DUP_ENTRY: Duplicate entry"
+
+      367 | describe('mensajeSeguro: sin fugas en 400/500', () => {
+      368 |   it('oculta SQL/Sequelize tras mensaje gen├®rico', () => {
+    > 369 |     expect(mensajeSeguro(new Error('ER_DUP_ENTRY: Duplicate entry'))).toBe('No se pudo completar la operacion');
+          |                                                                       ^
+      370 |     expect(mensajeSeguro(new Error('select * from usuarios'))).toBe('No se pudo completar la operacion');
+      371 |   });
+      372 |
+
+      at Object.<anonymous> (src/__tests__/errores400.test.ts:369:71)
+
+Test Suites: 1 failed, 1 total
+Tests:       8 failed, 10 passed, 18 total
+Snapshots:   0 total
+Time:        40.001 s, estimated 43 s
+Ran all test suites matching src/__tests__/errores400.test.ts.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.

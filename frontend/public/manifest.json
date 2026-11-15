@@ -1,0 +1,11 @@
+{
+  "name": "Competition Manager",
+  "short_name": "Competition",
+  "description": "Sistema de gestion y cronometraje de competencias",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1E1E1E",
+  "theme_color": "#FF6B00",
+  "orientation": "portrait-primary",
+  "categories": ["sports", "fitness"]
+}

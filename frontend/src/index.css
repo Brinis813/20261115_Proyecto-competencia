@@ -1,0 +1,311 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    /* Alto de la barra superior; lo usan los sticky de las tablas. */
+    --topbar-h: 3.5rem;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-hyrox-void text-hyrox-paper font-sans antialiased;
+    /* Respeta el notch y la barra de gestos en moviles. */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Los numeros de tiempos y puntos no deben bailar al actualizarse. */
+  .tabular,
+  table,
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * Desplegables nativos.
+   *
+   * El navegador pinta la lista de <option> con el color de fondo del propio
+   * <select>. Si ese fondo es translucido (bg-white/4, por ejemplo), lo compone
+   * sobre blanco y el texto claro queda blanco sobre blanco. Por eso aqui va
+   * un color opaco, y las opciones lo repiten: Chrome en Windows y Firefox no
+   * heredan el del padre.
+   */
+  select {
+    @apply bg-hyrox-steel text-hyrox-paper;
+  }
+
+  select option,
+  select optgroup {
+    @apply bg-hyrox-steel text-hyrox-paper;
+  }
+
+  select option:checked,
+  select option:hover {
+    @apply bg-hyrox-slate text-hyrox-paper;
+  }
+
+  select:disabled option {
+    @apply text-hyrox-ghost;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display tracking-display;
+  }
+
+  ::selection {
+    @apply bg-hyrox-primary/35 text-white;
+  }
+
+  /* Foco visible y consistente para navegacion por teclado. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-hyrox-primary/70 ring-offset-2 ring-offset-hyrox-void rounded-lg;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-hyrox-slate rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-hyrox-ghost;
+  }
+}
+
+@layer components {
+  /* ---------- Superficies ---------- */
+
+  .surface {
+    @apply bg-hyrox-carbon border border-white/[0.06] rounded-2xl;
+  }
+
+  .surface-raised {
+    @apply bg-hyrox-carbon border border-white/[0.08] rounded-2xl shadow-elevated;
+  }
+
+  .surface-inset {
+    @apply bg-white/[0.03] border border-white/[0.06] rounded-xl;
+  }
+
+  /* Alias de la version anterior, para no romper nada que siga usandolos. */
+  .card {
+    @apply surface;
+  }
+  .card-elevated {
+    @apply surface-raised;
+  }
+
+  .panel-header {
+    @apply px-4 sm:px-5 py-3.5 border-b border-white/[0.06] flex items-center justify-between gap-3;
+  }
+
+  .eyebrow {
+    @apply text-2xs font-semibold uppercase tracking-eyebrow text-hyrox-mist;
+  }
+
+  /* ---------- Botones ---------- */
+  /* Todos con alto minimo de 44px para cumplir el objetivo tactil. */
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 min-h-[2.75rem] px-4 rounded-xl
+           font-semibold text-sm cursor-pointer select-none
+           transition-all duration-200 ease-out
+           active:scale-[0.97]
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-primary {
+    @apply btn bg-hyrox-primary text-white hover:bg-hyrox-ember hover:shadow-glow-primary;
+  }
+
+  .btn-secondary {
+    @apply btn bg-white/[0.06] text-hyrox-paper border border-white/[0.08] hover:bg-white/[0.1];
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-hyrox-mist hover:text-hyrox-paper hover:bg-white/[0.06];
+  }
+
+  .btn-danger {
+    @apply btn bg-hyrox-danger text-white hover:bg-hyrox-danger/85;
+  }
+
+  .btn-success {
+    @apply btn bg-hyrox-accent text-hyrox-void hover:bg-hyrox-accent/85 hover:shadow-glow-accent;
+  }
+
+  .btn-sm {
+    @apply min-h-[2.25rem] px-3 text-xs;
+  }
+
+  .icon-btn {
+    @apply inline-flex items-center justify-center w-11 h-11 rounded-xl cursor-pointer
+           text-hyrox-mist hover:text-hyrox-paper hover:bg-white/[0.06]
+           transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  /* ---------- Formularios ---------- */
+
+  .input-field {
+    @apply w-full min-h-[2.75rem] px-4 py-2.5 bg-white/[0.04] border border-white/[0.1] rounded-xl
+           text-hyrox-paper placeholder-hyrox-ghost text-base
+           focus:outline-none focus:border-hyrox-primary focus:ring-2 focus:ring-hyrox-primary/25
+           transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /*
+   * Un <select> con la pinta de un campo de texto, pero con fondo opaco (ver
+   * la nota de @layer base) y la flecha dibujada por nosotros: la nativa se
+   * pinta oscura sobre oscuro en varias plataformas.
+   */
+  .input-field select,
+  select.input-field {
+    @apply bg-hyrox-steel cursor-pointer appearance-none pr-11
+           hover:bg-hyrox-slate hover:border-white/20;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A90A3' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+    background-size: 1.05rem;
+  }
+
+  select.input-field:disabled {
+    @apply hover:bg-hyrox-steel hover:border-white/[0.1];
+  }
+
+  .input-error {
+    @apply border-hyrox-danger/60 focus:border-hyrox-danger focus:ring-hyrox-danger/25;
+  }
+
+  .label {
+    @apply block text-xs font-semibold uppercase tracking-wide text-hyrox-mist mb-1.5;
+  }
+
+  .field-hint {
+    @apply mt-1.5 text-xs text-hyrox-ghost;
+  }
+
+  .field-error {
+    @apply mt-1.5 text-xs text-hyrox-danger flex items-center gap-1;
+  }
+
+  /* ---------- Etiquetas ---------- */
+
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold
+           uppercase tracking-wide whitespace-nowrap;
+  }
+
+  .badge-orange {
+    @apply badge bg-hyrox-primary/15 text-hyrox-primary;
+  }
+  .badge-green {
+    @apply badge bg-hyrox-accent/15 text-hyrox-accent;
+  }
+  .badge-red {
+    @apply badge bg-hyrox-danger/15 text-hyrox-danger;
+  }
+  .badge-amber {
+    @apply badge bg-hyrox-warning/15 text-hyrox-warning;
+  }
+  .badge-blue {
+    @apply badge bg-hyrox-info/15 text-hyrox-info;
+  }
+  .badge-gray {
+    @apply badge bg-white/[0.07] text-hyrox-mist;
+  }
+
+  /* ---------- Cronometro ---------- */
+
+  .timer-display {
+    @apply font-mono font-bold text-hyrox-primary tabular-nums;
+    letter-spacing: -0.03em;
+    text-shadow: 0 0 48px rgba(255, 107, 0, 0.35), 0 0 96px rgba(255, 107, 0, 0.12);
+  }
+
+  /* ---------- Utilidades ---------- */
+
+  .skeleton {
+    @apply relative overflow-hidden bg-white/[0.05] rounded-lg;
+  }
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full bg-sheen animate-shimmer;
+  }
+
+  /* Scroll horizontal contenido: la pagina nunca se desborda. */
+  .scroll-x {
+    @apply overflow-x-auto overscroll-x-contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .divide-hairline > * + * {
+    @apply border-t border-white/[0.05];
+  }
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Sin animaciones para quien las ha desactivado en el sistema. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Informe final: al imprimir solo sale el reporte, en hoja clara. */
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-sheet {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .print-sheet table {
+    page-break-inside: auto;
+  }
+
+  .print-sheet tr {
+    page-break-inside: avoid;
+  }
+
+  .print-sheet section {
+    page-break-inside: avoid;
+  }
+}

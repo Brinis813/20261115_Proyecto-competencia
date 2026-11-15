@@ -1,0 +1,161 @@
+name: CI monorepo
+
+# Principio de menor privilegio: los jobs solo leen el repo (checkout) y
+# suben artifacts; nada necesita escribir en contents.
+permissions:
+  contents: read
+
+# Bloquea el merge a main si algún job falla (configurar main como rama
+# protegida con este workflow como check requerido). Sin tag no hay deploy:
+# el job `docker` solo construye; el deploy a prod se hace por tag manual.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run build
+      - run: npm test
+      - name: Upload frontend coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/
+          retention-days: 14
+
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      # Validación Zod + scoring + aislamiento multi-tenant.
+      - run: npm test -- --passWithNoTests
+      - name: Upload backend coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+          retention-days: 14
+      # Dry-run de migraciones: el DDL debe parsear y ser idempotente.
+      - run: >
+          node -e "
+          require('tsx/cjs');
+          const { SCHEMA_STATEMENTS, MIGRATIONS, RAW_MIGRATIONS } = require('./src/db/schema.ts');
+          if (!SCHEMA_STATEMENTS.length || !MIGRATIONS.length || !RAW_MIGRATIONS.length) process.exit(1);
+          console.log('ddl ok:', SCHEMA_STATEMENTS.length, MIGRATIONS.length, RAW_MIGRATIONS.length);
+          "
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [frontend, backend]
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose build
+
+  smoke:
+    runs-on: ubuntu-latest
+    needs: [docker]
+    env:
+      MYSQL_ROOT_PASSWORD: ci-root
+      MYSQL_DATABASE: hyrox_db
+      MYSQL_USER: hyrox_user
+      MYSQL_PASSWORD: ci-user-pass
+      JWT_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      CORS_ORIGIN: http://localhost
+      SEED_ADMIN_PASSWORD: CiAdmin123!
+      SEED_DEMO: 'false'
+      FRONTEND_PORT: 8080
+      # Puerto INTERNO del backend (el del contenedor). Debe coincidir con
+      # BACKEND_PORT de docker-compose (default 3001): el smoke habla con el
+      # backend por http://127.0.0.1:${BACKEND_PORT} desde dentro del contenedor.
+      BACKEND_PORT: '3001'
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose up -d mysql backend
+      - run: |
+          for i in $(seq 1 30); do
+            if docker compose exec -T backend node -e "fetch('http://127.0.0.1:${BACKEND_PORT:-3001}/api/health').then(r=>r.text()).then(t=>{if(!t.includes('\"database\":\"ok\"'))process.exit(1)}).catch(()=>process.exit(1))"; then
+              echo "health ok"; break
+            fi
+            sleep 5
+            if [ "$i" = 30 ]; then echo "health FAILED"; docker compose logs backend; exit 1; fi
+          done
+      # ── E2E API flow tests ──
+      - name: Login and extract token
+        id: login
+        run: |
+          TOKEN=$(docker compose exec -T backend node -e "
+            fetch('http://127.0.0.1:${BACKEND_PORT:-3001}/api/auth/login', {
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({cedula:'0000000000', password:'CiAdmin123!'})
+            }).then(r=>{
+              const setCookie = r.headers.get('set-cookie') || '';
+              const match = setCookie.match(/token=([^;]+)/);
+              if(!match) process.exit(1);
+              process.stdout.write(match[1]);
+            }).catch(()=>process.exit(1))
+          ")
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+      - name: Get profile
+        run: |
+          docker compose exec -T backend node -e "
+            fetch('http://127.0.0.1:${BACKEND_PORT:-3001}/api/auth/me', {
+              headers:{'Cookie':'token=${{ steps.login.outputs.token }}'}
+            }).then(r=>{if(r.status!==200&&r.status!==401)process.exit(1);console.log('me ok')}).catch(()=>process.exit(1))
+          "
+      - name: Create competencia
+        run: |
+          docker compose exec -T backend node -e "
+            fetch('http://127.0.0.1:${BACKEND_PORT:-3001}/api/competencias', {
+              method:'POST',
+              headers:{'Content-Type':'application/json','Cookie':'token=${{ steps.login.outputs.token }}'},
+              body: JSON.stringify({nombre:'Smoke Test Comp',tipo_flujo:'en_serie',tipo_publicacion:'tiempo_real',estado:'activo'})
+            }).then(r=>{if(!r.ok)process.exit(1);console.log('create ok')}).catch(()=>process.exit(1))
+          "
+      - name: Validate Zod rejection
+        run: |
+          docker compose exec -T backend node -e "
+            fetch('http://127.0.0.1:${BACKEND_PORT:-3001}/api/auth/login', {
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({cedula:'',password:''})
+            }).then(r=>{if(r.status!==400)process.exit(1);console.log('zod rejection ok')}).catch(()=>process.exit(1))
+          "
+      # ── End E2E tests ──
+      - run: test -f frontend/nginx.conf
+      - run: grep -q 'location /api/' frontend/nginx.conf
+      - run: grep -q 'location /socket.io/' frontend/nginx.conf
+      - name: Capture logs on failure
+        if: failure()
+        run: |
+          docker compose logs backend
+          docker compose logs mysql
+      - run: docker compose down -v

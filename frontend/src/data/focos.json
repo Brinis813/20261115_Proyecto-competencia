@@ -1,0 +1,211 @@
+{
+  "_comentario": "Punto donde se hace clic en cada paso, en pixeles de la captura original. Lo usa la pagina de ayuda para pintar el circulo y el script que monta los GIF para dibujarlo dentro. Los pasos que solo muestran el resultado de una accion no llevan punto.",
+  "base": {
+    "ancho": 1366,
+    "alto": 633
+  },
+  "puntos": {
+    "entrar-y-cambiar-password": {
+      "2": [
+        683,
+        284
+      ],
+      "3": [
+        683,
+        507
+      ]
+    },
+    "crear-categorias": {
+      "1": [
+        1275,
+        28
+      ],
+      "2": [
+        679,
+        268
+      ],
+      "3": [
+        679,
+        347
+      ],
+      "4": [
+        473,
+        525
+      ]
+    },
+    "crear-competencia": {
+      "1": [
+        1288,
+        28
+      ],
+      "2": [
+        712,
+        356
+      ],
+      "3": [
+        494,
+        222
+      ],
+      "4": [
+        820,
+        301
+      ],
+      "5": [
+        371,
+        491
+      ]
+    },
+    "alta-jueces": {
+      "1": [
+        1290,
+        28
+      ],
+      "2": [
+        903,
+        464
+      ],
+      "3": [
+        683,
+        460
+      ]
+    },
+    "inscribir-atletas": {
+      "1": [
+        1286,
+        28
+      ],
+      "2": [
+        889,
+        550
+      ]
+    },
+    "carga-masiva": {
+      "1": [
+        363,
+        327
+      ],
+      "2": [
+        1265,
+        465
+      ],
+      "3": [
+        1267,
+        530
+      ]
+    },
+    "asignaciones": {
+      "1": [
+        600,
+        170
+      ],
+      "2": [
+        798,
+        145
+      ],
+      "3": [
+        294,
+        303
+      ],
+      "4": [
+        1235,
+        326
+      ],
+      "5": [
+        1291,
+        310
+      ]
+    },
+    "corregir-resultados": {
+      "1": [
+        600,
+        170
+      ],
+      "2": [
+        1131,
+        117
+      ],
+      "3": [
+        838,
+        399
+      ]
+    },
+    "clasificacion-en-vivo": {
+      "1": [
+        680,
+        478
+      ],
+      "2": [
+        682,
+        246
+      ],
+      "4": [
+        1279,
+        242
+      ],
+      "5": [
+        1316,
+        42
+      ]
+    },
+    "juez-registrar-medicion": {
+      "1": [
+        600,
+        171
+      ],
+      "2": [
+        600,
+        172
+      ],
+      "3": [
+        864,
+        207
+      ],
+      "4": [
+        309,
+        252
+      ],
+      "5": [
+        563,
+        355
+      ],
+      "6": [
+        600,
+        515
+      ]
+    },
+    "juez-abandono": {
+      "1": [
+        864,
+        207
+      ],
+      "2": [
+        600,
+        578
+      ],
+      "3": [
+        805,
+        399
+      ]
+    },
+    "atleta-entrar": {
+      "1": [
+        793,
+        177
+      ],
+      "2": [
+        683,
+        440
+      ]
+    },
+    "atleta-mis-resultados": {
+      "1": [
+        1098,
+        273
+      ],
+      "2": [
+        255,
+        189
+      ]
+    }
+  }
+}

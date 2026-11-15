@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+.DS_Store
+coverage/
+.planning/
+.mimocode/
+
+# graphify (grafo de conocimiento local, no versionado)
+graphify-out/
+
+# Entorno de desarrollo local: no forma parte del despliegue y lleva
+# credenciales de pruebas. El override rompe el arranque en servidores
+# donde no existe la red externa mysql_default.
+docker-compose.override.yml
+docker-compose.local-db.yml
+fix_mysql.bat
+reset_mysql_password.bat
