@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  ReactNode,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import api, { clearToken, onSessionExpired } from '../api/client';
 import type { Usuario, Rol } from '../types';
@@ -126,7 +134,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginParticipante, logout, refrescar, aplicarSesion }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, loginParticipante, logout, refrescar, aplicarSesion }}
+    >
       {children}
     </AuthContext.Provider>
   );

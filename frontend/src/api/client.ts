@@ -78,9 +78,7 @@ api.interceptors.response.use(
     // token expirado. NO en 401 de /auth/login, /auth/me, ni /api/participant
     // (que puede responder 401 legítimo si el usuario no está registrado).
     const esRutaExcluida =
-      url.includes('/auth/login') ||
-      url.includes('/auth/me') ||
-      url.includes('/participant');
+      url.includes('/auth/login') || url.includes('/auth/me') || url.includes('/participant');
 
     if (error.response?.status === 401 && !esRutaExcluida) {
       clearToken();
@@ -88,7 +86,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 /** Limpia la sesión local. Solo llamar en logout explícito o token expirado. */
@@ -104,7 +102,11 @@ export function clearToken() {
  * Convierte cualquier fallo de red o del servidor en un mensaje mostrable.
  * Sin esto la interfaz acaba enseñando "Request failed with status code 500".
  */
-export function mensajeDeError(error: unknown, porDefecto = 'No se pudo completar la operacion'): string {  const err = error as AxiosError<{ message?: string; errors?: Record<string, string[]> }>;
+export function mensajeDeError(
+  error: unknown,
+  porDefecto = 'No se pudo completar la operacion',
+): string {
+  const err = error as AxiosError<{ message?: string; errors?: Record<string, string[]> }>;
 
   if (err?.code === 'ECONNABORTED') return 'El servidor tardo demasiado en responder';
   if (!err?.response) return 'Sin conexion con el servidor. Revisa tu red.';
@@ -119,7 +121,8 @@ export function mensajeDeError(error: unknown, porDefecto = 'No se pudo completa
 
   if (datos?.message) return datos.message;
 
-  if (err.response.status === 429) return 'Demasiados intentos. Espera un momento e intentalo de nuevo.';
+  if (err.response.status === 429)
+    return 'Demasiados intentos. Espera un momento e intentalo de nuevo.';
   if (err.response.status >= 500) return 'Error del servidor. Intentalo de nuevo en unos segundos.';
 
   return porDefecto;

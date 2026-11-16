@@ -26,14 +26,12 @@ export default defineConfig({
         target: 'http://localhost:3001',
         changeOrigin: true,
         configure: (proxy) => {
-          proxy.on('proxyRes', (proxyRes, _req, res) => {
+          proxy.on('proxyRes', (proxyRes) => {
             const setCookies = proxyRes.headers['set-cookie'];
             if (setCookies) {
               // Rewrite cookies to work with the proxy origin
               proxyRes.headers['set-cookie'] = setCookies.map((cookie) =>
-                cookie
-                  .replace(/;\s*Secure/gi, '')
-                  .replace(/;\s*SameSite=\w+/gi, '; SameSite=Lax')
+                cookie.replace(/;\s*Secure/gi, '').replace(/;\s*SameSite=\w+/gi, '; SameSite=Lax'),
               );
             }
           });

@@ -45,11 +45,10 @@ export default class ErrorBoundary extends Component<Props, State> {
         <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 text-center">
           <div className="max-w-md rounded-lg bg-white p-8 shadow-lg">
             <div className="mb-4 text-5xl">⚠️</div>
-            <h1 className="mb-2 text-2xl font-bold text-gray-900">
-              Algo salió mal
-            </h1>
+            <h1 className="mb-2 text-2xl font-bold text-gray-900">Algo salió mal</h1>
             <p className="mb-6 text-gray-600">
-              Ha ocurrido un error inesperado. Puedes intentar recargar la página o volver al inicio.
+              Ha ocurrido un error inesperado. Puedes intentar recargar la página o volver al
+              inicio.
             </p>
             {this.state.error && import.meta.env.DEV && (
               <details className="mb-6 text-left">

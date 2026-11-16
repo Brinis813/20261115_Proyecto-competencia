@@ -19,7 +19,9 @@ vi.mock('../components/eventos/GruposEventos', () => ({
 
 vi.mock('../components/ui', () => ({
   Alert: ({ children, tone }: { children: React.ReactNode; tone?: string }) => (
-    <div data-testid="alert" data-tone={tone}>{children}</div>
+    <div data-testid="alert" data-tone={tone}>
+      {children}
+    </div>
   ),
   EmptyState: ({ title, description }: { title?: string; description?: string }) => (
     <div data-testid="empty-state">

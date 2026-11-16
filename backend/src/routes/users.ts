@@ -35,18 +35,48 @@ router.use(authMiddleware, resolverEvento, adminOnly);
 // Administradores de box: solo el superadmin. Va antes que el resto para que
 // no lo tape ninguna ruta con parametro.
 router.get('/admins', superadminOnly, userController.getAdmins);
-router.post('/admins', superadminOnly, adminWriteRateLimiter(), validate(createAdminSchema), userController.createAdmin);
+router.post(
+  '/admins',
+  superadminOnly,
+  adminWriteRateLimiter(),
+  validate(createAdminSchema),
+  userController.createAdmin,
+);
 
 router.get('/jueces', userController.getJueces);
 router.get('/participantes', userController.getParticipantes);
 
-router.post('/jueces', adminWriteRateLimiter(), validate(createJuezSchema), userController.createJuez);
-router.post('/participantes', adminWriteRateLimiter(), validate(createParticipanteSchema), userController.createParticipante);
+router.post(
+  '/jueces',
+  adminWriteRateLimiter(),
+  validate(createJuezSchema),
+  userController.createJuez,
+);
+router.post(
+  '/participantes',
+  adminWriteRateLimiter(),
+  validate(createParticipanteSchema),
+  userController.createParticipante,
+);
 
-router.put('/jueces/:id', adminWriteRateLimiter(), validate(updateUsuarioSchema), userController.updateUsuario);
-router.put('/participantes/:id', adminWriteRateLimiter(), validate(updateParticipanteSchema), userController.updateParticipante);
+router.put(
+  '/jueces/:id',
+  adminWriteRateLimiter(),
+  validate(updateUsuarioSchema),
+  userController.updateUsuario,
+);
+router.put(
+  '/participantes/:id',
+  adminWriteRateLimiter(),
+  validate(updateParticipanteSchema),
+  userController.updateParticipante,
+);
 
-router.post('/jueces/:id/reset-password', adminWriteRateLimiter(), userController.resetPasswordJuez);
+router.post(
+  '/jueces/:id/reset-password',
+  adminWriteRateLimiter(),
+  userController.resetPasswordJuez,
+);
 
 router.delete('/jueces/:id', adminWriteRateLimiter(), userController.deleteUsuario);
 router.delete('/participantes/:id', adminWriteRateLimiter(), userController.deleteParticipante);

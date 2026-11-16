@@ -77,7 +77,7 @@ describe('getResultsByCompetencia', () => {
       expect.objectContaining({
         where: { wod_id: [10, 11] },
         include: expect.any(Array),
-      })
+      }),
     );
   });
 });
@@ -113,12 +113,12 @@ describe('saveResult flags', () => {
         desempate: 123,
         es_desempate: true,
       }),
-      expect.anything()
+      expect.anything(),
     );
     // Sin evento vinculado -> evento_id null en auditoria
     expect(AuditLog.create).toHaveBeenCalledWith(
       expect.objectContaining({ evento_id: null }),
-      expect.anything()
+      expect.anything(),
     );
     expect(mockBroadcast).toHaveBeenCalledWith(5, { id: 9 });
   });
@@ -135,7 +135,7 @@ describe('resetResult sin juez', () => {
 
     expect(ResultHistory.create).toHaveBeenCalledWith(
       expect.objectContaining({ juez_id: 0, accion: 'reseteado', resultado_id: null }),
-      expect.anything()
+      expect.anything(),
     );
   });
 });
@@ -153,19 +153,29 @@ describe('saveSplits', () => {
     (mockSplit.bulkCreate as jest.Mock).mockResolvedValue([] as any);
 
     await saveSplits(7, [
-      { segmento_numero: 1, segmento_nombre: 'Run', tiempo_acumulado_ms: 1000, tiempo_parcial_ms: 1000 },
-      { segmento_numero: 2, segmento_nombre: 'Row', tiempo_acumulado_ms: 2500, tiempo_parcial_ms: 1500 },
+      {
+        segmento_numero: 1,
+        segmento_nombre: 'Run',
+        tiempo_acumulado_ms: 1000,
+        tiempo_parcial_ms: 1000,
+      },
+      {
+        segmento_numero: 2,
+        segmento_nombre: 'Row',
+        tiempo_acumulado_ms: 2500,
+        tiempo_parcial_ms: 1500,
+      },
     ]);
 
     expect(mockSplit.destroy).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { resultado_id: 7 } })
+      expect.objectContaining({ where: { resultado_id: 7 } }),
     );
     expect(mockSplit.bulkCreate).toHaveBeenCalledWith(
       [
         expect.objectContaining({ resultado_id: 7, segmento_numero: 1, segmento_nombre: 'Run' }),
         expect.objectContaining({ resultado_id: 7, segmento_numero: 2, segmento_nombre: 'Row' }),
       ],
-      expect.anything()
+      expect.anything(),
     );
   });
 });
@@ -182,7 +192,7 @@ describe('getSplits', () => {
       expect.objectContaining({
         where: { resultado_id: 7 },
         order: [['segmento_numero', 'ASC']],
-      })
+      }),
     );
   });
 });

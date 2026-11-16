@@ -16,9 +16,7 @@ export default function SegmentosEditor({ segmentos, onChange }: Props) {
   }
 
   function updateSegmento(index: number, cambios: Partial<SegmentoEsquema>) {
-    onChange(
-      segmentos.map((s, i) => (i === index ? { ...s, ...cambios } : s))
-    );
+    onChange(segmentos.map((s, i) => (i === index ? { ...s, ...cambios } : s)));
   }
 
   return (
@@ -45,7 +43,11 @@ export default function SegmentosEditor({ segmentos, onChange }: Props) {
             label="Duración (min)"
             type="number"
             value={(s.duracion_estimada_ms / 60000).toFixed(1)}
-            onChange={(e) => updateSegmento(i, { duracion_estimada_ms: Math.round(Number(e.target.value) * 60000) })}
+            onChange={(e) =>
+              updateSegmento(i, {
+                duracion_estimada_ms: Math.round(Number(e.target.value) * 60000),
+              })
+            }
             className="w-24"
           />
           <IconButton

@@ -79,7 +79,7 @@ export async function eliminarBox(id: number) {
 
   if (eventos > 0 || administradores > 0) {
     throw new Error(
-      `No se puede borrar: el box todavia tiene ${eventos} evento(s) y ${administradores} usuario(s). Muevelos o borralos primero.`
+      `No se puede borrar: el box todavia tiene ${eventos} evento(s) y ${administradores} usuario(s). Muevelos o borralos primero.`,
     );
   }
 

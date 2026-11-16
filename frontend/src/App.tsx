@@ -69,241 +69,250 @@ export default function App() {
       <AuthProvider>
         <SocketProvider>
           <ErrorBoundary>
-          <Suspense fallback={<PageLoader />}>
-          <Routes>
-            {/* --- Publico --- */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/registro" element={<RegistroPage />} />
-            <Route path="/verificar" element={<VerificarPage />} />
-            {/* La portada lista los eventos; dentro de cada una estan
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                {/* --- Publico --- */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/registro" element={<RegistroPage />} />
+                <Route path="/verificar" element={<VerificarPage />} />
+                {/* La portada lista los eventos; dentro de cada una estan
                 sus competencias, y dentro de cada competencia su clasificacion. */}
-            <Route path="/inicio" element={<PortadaPage />} />
-            <Route path="/eventos/:eventoId" element={<EventoPublicoPage />} />
-            <Route path="/leaderboard/evento/:eventoId" element={<EventoLeaderboardPage />} />
-            <Route path="/leaderboard" element={<Navigate to="/inicio" replace />} />
-            <Route path="/leaderboard/:competenciaId" element={<LeaderboardPage />} />
+                <Route path="/inicio" element={<PortadaPage />} />
+                <Route path="/eventos/:eventoId" element={<EventoPublicoPage />} />
+                <Route path="/leaderboard/evento/:eventoId" element={<EventoLeaderboardPage />} />
+                <Route path="/leaderboard" element={<Navigate to="/inicio" replace />} />
+                <Route path="/leaderboard/:competenciaId" element={<LeaderboardPage />} />
 
-            {/* --- Cuenta --- */}
-            <Route
-              path="/cambiar-password"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'juez']}>
-                  <ChangePasswordPage />
-                </ProtectedRoute>
-              }
-            />
+                {/* --- Cuenta --- */}
+                <Route
+                  path="/cambiar-password"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin', 'juez']}>
+                      <ChangePasswordPage />
+                    </ProtectedRoute>
+                  }
+                />
 
-            {/* --- Eventos: primera pantalla de un administrador --- */}
-            <Route
-              path="/eventos"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <EventosPage />
-                </ProtectedRoute>
-              }
-            />
+                {/* --- Eventos: primera pantalla de un administrador --- */}
+                <Route
+                  path="/eventos"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <EventosPage />
+                    </ProtectedRoute>
+                  }
+                />
 
-            {/* --- Solo el administrador general --- */}
-            <Route
-              path="/admin/boxes"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <BoxesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/administradores"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdministradoresPage />
-                </ProtectedRoute>
-              }
-            />
+                {/* --- Solo el administrador general --- */}
+                <Route
+                  path="/admin/boxes"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <BoxesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/administradores"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AdministradoresPage />
+                    </ProtectedRoute>
+                  }
+                />
 
-            {/* --- Administracion --- */}
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/jueces"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <JuecesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/participantes"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <ParticipantesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/categorias"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <CategoriasPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/competencias"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <CompetenciasPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/competencias/nuevo"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <CompetenciaForm />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/competencias/:competenciaId"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <CompetenciaForm />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/asignaciones"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AsignacionesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/asignaciones/:competenciaId"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AsignacionesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/heats"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <HeatsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/resultados"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <ResultadosPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/resultados/:competenciaId"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <ResultadosPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/carga-masiva"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <CargaMasivaPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/informe"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <InformeFinalPage />
-                </ProtectedRoute>
-              }
-            />
+                {/* --- Administracion --- */}
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/jueces"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <JuecesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/participantes"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <ParticipantesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/categorias"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <CategoriasPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/competencias"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <CompetenciasPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/competencias/nuevo"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <CompetenciaForm />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/competencias/:competenciaId"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <CompetenciaForm />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/asignaciones"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AsignacionesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/asignaciones/:competenciaId"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AsignacionesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/heats"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <HeatsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/resultados"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <ResultadosPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/resultados/:competenciaId"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <ResultadosPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/carga-masiva"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <CargaMasivaPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/informe"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <InformeFinalPage />
+                    </ProtectedRoute>
+                  }
+                />
 
-            {/* --- Juez --- */}
-            <Route
-              path="/juez"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'juez']}>
-                  <JuezCompetenciasPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/juez/:competenciaId"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'juez']}>
-                  <JuezWodsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/juez/:competenciaId/:wodId"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'juez']}>
-                  <JuezMedicionPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/clasificacion"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'juez']}>
-                  <ClasificacionPage />
-                </ProtectedRoute>
-              }
-            />
+                {/* --- Juez --- */}
+                <Route
+                  path="/juez"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin', 'juez']}>
+                      <JuezCompetenciasPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/juez/:competenciaId"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin', 'juez']}>
+                      <JuezWodsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/juez/:competenciaId/:wodId"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin', 'juez']}>
+                      <JuezMedicionPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/clasificacion"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin', 'juez']}>
+                      <ClasificacionPage />
+                    </ProtectedRoute>
+                  }
+                />
 
-            {/* --- Atleta --- */}
-            <Route
-              path="/participante"
-              element={
-                <ProtectedRoute allowedRoles={['participante', 'admin']}>
-                  <ParticipantePage />
-                </ProtectedRoute>
-              }
-            />
+                {/* --- Atleta --- */}
+                <Route
+                  path="/participante"
+                  element={
+                    <ProtectedRoute allowedRoles={['participante', 'admin']}>
+                      <ParticipantePage />
+                    </ProtectedRoute>
+                  }
+                />
 
-            {/* --- Ayuda (cualquier rol con sesion) --- */}
-            <Route
-              path="/ayuda"
-              element={
-                <ProtectedRoute>
-                  <HelpPage />
-                </ProtectedRoute>
-              }
-            />
+                {/* --- Ayuda (cualquier rol con sesion) --- */}
+                <Route
+                  path="/ayuda"
+                  element={
+                    <ProtectedRoute>
+                      <HelpPage />
+                    </ProtectedRoute>
+                  }
+                />
 
-            {/* --- Raiz y compatibilidad con las URLs anteriores --- */}
-            <Route path="/" element={<HomeRedirect />} />
-            <Route path="/change-password" element={<Navigate to="/cambiar-password" replace />} />
-            <Route path="/admin/users" element={<Navigate to="/admin/jueces" replace />} />
-            <Route path="/admin/assignments" element={<Navigate to="/admin/asignaciones" replace />} />
-            <Route path="/judge/*" element={<Navigate to="/juez" replace />} />
-            <Route path="/participant" element={<Navigate to="/participante" replace />} />
-            <Route path="/leaderboard/competencia/:competenciaId" element={<RedirigirLeaderboard />} />
-            {/* Typo frecuente: se tipea "leadboard" sin las letras "er". */}
-            <Route path="/leadboard" element={<Navigate to="/leaderboard" replace />} />
-            <Route path="/leadboard/*" element={<Navigate to="/leaderboard" replace />} />
+                {/* --- Raiz y compatibilidad con las URLs anteriores --- */}
+                <Route path="/" element={<HomeRedirect />} />
+                <Route
+                  path="/change-password"
+                  element={<Navigate to="/cambiar-password" replace />}
+                />
+                <Route path="/admin/users" element={<Navigate to="/admin/jueces" replace />} />
+                <Route
+                  path="/admin/assignments"
+                  element={<Navigate to="/admin/asignaciones" replace />}
+                />
+                <Route path="/judge/*" element={<Navigate to="/juez" replace />} />
+                <Route path="/participant" element={<Navigate to="/participante" replace />} />
+                <Route
+                  path="/leaderboard/competencia/:competenciaId"
+                  element={<RedirigirLeaderboard />}
+                />
+                {/* Typo frecuente: se tipea "leadboard" sin las letras "er". */}
+                <Route path="/leadboard" element={<Navigate to="/leaderboard" replace />} />
+                <Route path="/leadboard/*" element={<Navigate to="/leaderboard" replace />} />
 
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-          </Suspense>
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </Suspense>
           </ErrorBoundary>
 
           <BotonAyuda />

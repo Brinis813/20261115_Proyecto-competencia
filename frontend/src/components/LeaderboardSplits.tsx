@@ -11,8 +11,9 @@ export default function LeaderboardSplits({ resultadoId }: Props) {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    api.get<SplitRegistro[]>(`/results/${resultadoId}/splits`)
-      .then(res => setSplits(res.data))
+    api
+      .get<SplitRegistro[]>(`/results/${resultadoId}/splits`)
+      .then((res) => setSplits(res.data))
       .finally(() => setCargando(false));
   }, [resultadoId]);
 
@@ -20,7 +21,7 @@ export default function LeaderboardSplits({ resultadoId }: Props) {
 
   return (
     <div className="text-xs space-y-1">
-      {splits.map(s => (
+      {splits.map((s) => (
         <div key={s.segmento_numero} className="flex justify-between">
           <span>{s.segmento_nombre}</span>
           <span className="font-mono">{(s.tiempo_acumulado_ms / 1000).toFixed(1)}s</span>

@@ -32,10 +32,7 @@ function firmaValida(cabecera: Buffer): boolean {
     return true;
   }
   // WebP: RIFF....WEBP
-  if (
-    cabecera.toString('ascii', 0, 4) === 'RIFF' &&
-    cabecera.toString('ascii', 8, 12) === 'WEBP'
-  ) {
+  if (cabecera.toString('ascii', 0, 4) === 'RIFF' && cabecera.toString('ascii', 8, 12) === 'WEBP') {
     return true;
   }
   return false;

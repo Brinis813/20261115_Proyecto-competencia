@@ -1,4 +1,4 @@
-import { Router, type Request, type Response, type NextFunction } from 'express';
+import { Router, type Request, type Response } from 'express';
 import fs from 'fs';
 import multer from 'multer';
 import path from 'path';
@@ -34,7 +34,10 @@ const subirPortada = multer({
     destination: (_req, _file, cb) => cb(null, PORTADAS_DIR),
     filename: (req, _file, cb) => {
       const id = Number(req.params.id);
-      cb(null, `evento_${Number.isInteger(id) ? id : 'x'}_${Date.now()}${EXTENSIONES.get(_file.mimetype) ?? '.jpg'}`);
+      cb(
+        null,
+        `evento_${Number.isInteger(id) ? id : 'x'}_${Date.now()}${EXTENSIONES.get(_file.mimetype) ?? '.jpg'}`,
+      );
     },
   }),
   limits: { fileSize: 5 * 1024 * 1024 },
@@ -98,7 +101,7 @@ router.use(authMiddleware);
 /**
  * Eventos del usuario, ya ordenadas para el panel: en curso, proximas y
  * pasadas. El superadmin las ve todas.
- */router.get('/', async (req: AuthRequest, res: Response) => {
+ */ router.get('/', async (req: AuthRequest, res: Response) => {
   try {
     if (req.user?.tipo !== 'usuario') {
       return res.status(403).json({ message: 'Solo el personal del evento tiene panel' });
@@ -124,13 +127,28 @@ router.use(authMiddleware);
 /* Scoring policy: solo admin del evento                         */
 /* ------------------------------------------------------------------ */
 
-const scoringSchema = z.object({
-  scoringType: z.enum(['POINTS_ACCUMULATION', 'WINNER_PER_Competencia']).optional(),
-  tiebreakPolicy: z.enum(['NONE', 'BEST_INDIVIDUAL_RANK', 'DESIGNATED_TIEBREAK_Competencia', 'LAST_Competencia_SCORE']).optional(),
-  tiebreakCompetenciaId: z.number().int().positive().nullable().optional(),
-}).refine((d) => d.scoringType !== undefined || d.tiebreakPolicy !== undefined || d.tiebreakCompetenciaId !== undefined, {
-  message: 'Indica al menos un campo: scoringType, tiebreakPolicy o tiebreakCompetenciaId',
-});
+const scoringSchema = z
+  .object({
+    scoringType: z.enum(['POINTS_ACCUMULATION', 'WINNER_PER_Competencia']).optional(),
+    tiebreakPolicy: z
+      .enum([
+        'NONE',
+        'BEST_INDIVIDUAL_RANK',
+        'DESIGNATED_TIEBREAK_Competencia',
+        'LAST_Competencia_SCORE',
+      ])
+      .optional(),
+    tiebreakCompetenciaId: z.number().int().positive().nullable().optional(),
+  })
+  .refine(
+    (d) =>
+      d.scoringType !== undefined ||
+      d.tiebreakPolicy !== undefined ||
+      d.tiebreakCompetenciaId !== undefined,
+    {
+      message: 'Indica al menos un campo: scoringType, tiebreakPolicy o tiebreakCompetenciaId',
+    },
+  );
 
 /** Cambia el criterio global de ganador y/o el desempate global. */
 router.put(
@@ -148,14 +166,24 @@ router.put(
     try {
       const { scoringType, tiebreakPolicy, tiebreakCompetenciaId } = req.body as {
         scoringType?: 'POINTS_ACCUMULATION' | 'WINNER_PER_Competencia';
-        tiebreakPolicy?: 'NONE' | 'BEST_INDIVIDUAL_RANK' | 'DESIGNATED_TIEBREAK_Competencia' | 'LAST_Competencia_SCORE';
+        tiebreakPolicy?:
+          | 'NONE'
+          | 'BEST_INDIVIDUAL_RANK'
+          | 'DESIGNATED_TIEBREAK_Competencia'
+          | 'LAST_Competencia_SCORE';
         tiebreakCompetenciaId?: number | null;
       };
-      res.json(await eventoService.actualizarScoringType(id, { scoringType, tiebreakPolicy, tiebreakCompetenciaId }));
+      res.json(
+        await eventoService.actualizarScoringType(id, {
+          scoringType,
+          tiebreakPolicy,
+          tiebreakCompetenciaId,
+        }),
+      );
     } catch (error: any) {
       res.status(400).json({ message: error.message ?? 'No se pudo actualizar el criterio' });
     }
-  }
+  },
 );
 
 /* ------------------------------------------------------------------ */
@@ -200,29 +228,35 @@ router.put(
       await fs.promises.unlink(req.file.path).catch(() => undefined);
       res.status(400).json({ message: error.message ?? 'No se pudo guardar la portada' });
     }
-  }
+  },
 );
 
 /** Quita la portada del evento (borra el archivo). */
-router.delete('/:id/imagen', resolverEvento, adminOnly, adminWriteRateLimiter(), async (req: AuthRequest, res: Response) => {
-  const id = Number(req.params.id);
-  if (!Number.isInteger(id) || id <= 0) {
-    res.status(400).json({ message: 'Identificador invalido' });
-    return;
-  }
-  if (!puedeEditarEvento(req, id)) {
-    res.status(403).json({ message: 'No administras este evento' });
-    return;
-  }
-  try {
-    const anterior = await eventoService.eventoPublico(id);
-    const resultado = await eventoService.actualizarImagen(id, null);
-    borrarPortadaAnterior(anterior?.imagen_url ?? null);
-    res.json({ message: 'Portada eliminada', ...resultado });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message ?? 'No se pudo eliminar la portada' });
-  }
-});
+router.delete(
+  '/:id/imagen',
+  resolverEvento,
+  adminOnly,
+  adminWriteRateLimiter(),
+  async (req: AuthRequest, res: Response) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      res.status(400).json({ message: 'Identificador invalido' });
+      return;
+    }
+    if (!puedeEditarEvento(req, id)) {
+      res.status(403).json({ message: 'No administras este evento' });
+      return;
+    }
+    try {
+      const anterior = await eventoService.eventoPublico(id);
+      const resultado = await eventoService.actualizarImagen(id, null);
+      borrarPortadaAnterior(anterior?.imagen_url ?? null);
+      res.json({ message: 'Portada eliminada', ...resultado });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message ?? 'No se pudo eliminar la portada' });
+    }
+  },
+);
 
 /**
  * Los errores de multer (archivo muy grande, tipo no admitido) son culpa del

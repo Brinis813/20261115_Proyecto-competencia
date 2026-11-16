@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, Download, ListChecks, RotateCcw, Trophy } from 'lucide-react';
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  ListChecks,
+  RotateCcw,
+  Trophy,
+} from 'lucide-react';
 import api, { mensajeDeError } from '../../api/client';
 import AppShell from '../../components/layout/AppShell';
 import {
@@ -13,14 +21,26 @@ import {
   Spinner,
   cx,
 } from '../../components/ui';
-import { formatearValor, unidadDeWod, type Asignacion, type Participante, type ResultadosPorCompetencia, type ResultadoFila, type Competencia } from '../../types';
+import {
+  formatearValor,
+  unidadDeWod,
+  type Asignacion,
+  type Participante,
+  type ResultadosPorCompetencia,
+  type ResultadoFila,
+  type Competencia,
+} from '../../types';
 import { csvResultadosCompetencia, descargarTexto, nombreArchivo } from '../../utils/export';
 import { formatearCategorias } from '../../utils/formato';
 
 /** Revision y correccion de mediciones. Resetear una la deja libre para medirla de nuevo. */
 export default function ResultadosPage() {
   const { competenciaId } = useParams();
-  return competenciaId ? <PanelResultados competenciaId={Number(competenciaId)} /> : <SelectorCompetencia />;
+  return competenciaId ? (
+    <PanelResultados competenciaId={Number(competenciaId)} />
+  ) : (
+    <SelectorCompetencia />
+  );
 }
 
 function SelectorCompetencia() {
@@ -46,7 +66,11 @@ function SelectorCompetencia() {
         {cargando ? (
           <SkeletonList rows={3} />
         ) : competencias.length === 0 ? (
-          <EmptyState icon={ListChecks} title="No hay competencias" description="Crea una competencia para empezar a medir." />
+          <EmptyState
+            icon={ListChecks}
+            title="No hay competencias"
+            description="Crea una competencia para empezar a medir."
+          />
         ) : (
           <ul className="divide-hairline">
             {competencias.map((competencia) => (
@@ -60,8 +84,12 @@ function SelectorCompetencia() {
                     <ListChecks className="w-4.5 h-4.5" aria-hidden="true" />
                   </span>
                   <span className="flex-1 min-w-0">
-                    <span className="block font-semibold text-hyrox-paper truncate">{competencia.nombre}</span>
-                    <span className="block text-xs text-hyrox-mist">{competencia.wods?.length ?? 0} wods</span>
+                    <span className="block font-semibold text-hyrox-paper truncate">
+                      {competencia.nombre}
+                    </span>
+                    <span className="block text-xs text-hyrox-mist">
+                      {competencia.wods?.length ?? 0} wods
+                    </span>
                     <span className="block text-2xs text-hyrox-ghost truncate">
                       Categorias: {formatearCategorias(competencia.divisiones)}
                     </span>
@@ -136,7 +164,10 @@ function PanelResultados({ competenciaId }: { competenciaId: number }) {
 
   // Antes del `return` de carga: un hook detras de un return condicional se
   // salta en el primer render y React aborta la pagina en el segundo.
-  const categorias = useMemo(() => construirCategorias(competencia?.divisiones ?? null, datos?.participantes ?? []), [competencia, datos]);
+  const categorias = useMemo(
+    () => construirCategorias(competencia?.divisiones ?? null, datos?.participantes ?? []),
+    [competencia, datos],
+  );
 
   /** Descarga las mediciones de la competencia en CSV (atleta, marca, puntos, estado y juez). */
   async function exportarCSV() {
@@ -154,8 +185,8 @@ function PanelResultados({ competenciaId }: { competenciaId: number }) {
           datos.wods ?? [],
           datos.participantes ?? [],
           Array.isArray(resAsig.data) ? resAsig.data : [],
-          Array.isArray(resAtletas.data) ? resAtletas.data : []
-        )
+          Array.isArray(resAtletas.data) ? resAtletas.data : [],
+        ),
       );
     } catch (err) {
       setError(mensajeDeError(err, 'No se pudo exportar el CSV'));
@@ -180,21 +211,46 @@ function PanelResultados({ competenciaId }: { competenciaId: number }) {
       subtitle="Revisa y corrige las mediciones registradas"
       actions={
         <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm" icon={Download} onClick={exportarCSV} loading={exportando} disabled={!datos}>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={Download}
+            onClick={exportarCSV}
+            loading={exportando}
+            disabled={!datos}
+          >
             <span className="hidden sm:inline">CSV</span>
           </Button>
-          <Button variant="ghost" size="sm" icon={Trophy} onClick={() => navigate(`/leaderboard/${competenciaId}`)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={Trophy}
+            onClick={() => navigate(`/leaderboard/${competenciaId}`)}
+          >
             <span className="hidden sm:inline">Clasificacion</span>
           </Button>
-          <Button variant="ghost" size="sm" icon={ArrowLeft} onClick={() => navigate('/admin/resultados')}>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={ArrowLeft}
+            onClick={() => navigate('/admin/resultados')}
+          >
             <span className="hidden sm:inline">Competencias</span>
           </Button>
         </div>
       }
     >
       <div className="max-w-4xl space-y-3">
-        {error && <Alert tone="error" onDismiss={() => setError('')}>{error}</Alert>}
-        {exito && <Alert tone="success" onDismiss={() => setExito('')}>{exito}</Alert>}
+        {error && (
+          <Alert tone="error" onDismiss={() => setError('')}>
+            {error}
+          </Alert>
+        )}
+        {exito && (
+          <Alert tone="success" onDismiss={() => setExito('')}>
+            {exito}
+          </Alert>
+        )}
 
         {wods.length === 0 ? (
           <div className="surface">
@@ -216,10 +272,14 @@ function PanelResultados({ competenciaId }: { competenciaId: number }) {
                   className="w-full flex items-center gap-3 px-4 sm:px-5 py-4 text-left hover:bg-white/[0.03] transition-colors cursor-pointer"
                 >
                   <span className="grid place-items-center w-9 h-9 rounded-xl bg-hyrox-primary/12 shrink-0">
-                    <span className="font-display text-base font-extrabold text-hyrox-primary">{wod.orden}</span>
+                    <span className="font-display text-base font-extrabold text-hyrox-primary">
+                      {wod.orden}
+                    </span>
                   </span>
                   <span className="flex-1 min-w-0">
-                    <span className="block font-semibold text-hyrox-paper truncate">{wod.nombre_ejercicio}</span>
+                    <span className="block font-semibold text-hyrox-paper truncate">
+                      {wod.nombre_ejercicio}
+                    </span>
                     <span className="block text-2xs text-hyrox-mist">
                       {filas.length} mediciones · Max {wod.puntaje_maximo} pts
                     </span>
@@ -252,11 +312,16 @@ function PanelResultados({ competenciaId }: { competenciaId: number }) {
                                 <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-hyrox-primary">
                                   {categoria.etiqueta}
                                 </h3>
-                                <span className="text-2xs text-hyrox-ghost">{grupo.length} mediciones</span>
+                                <span className="text-2xs text-hyrox-ghost">
+                                  {grupo.length} mediciones
+                                </span>
                               </div>
                               <ul className="divide-hairline">
                                 {grupo.map((fila, indice) => (
-                                  <li key={fila.resultado_id} className="flex items-center gap-3 px-4 sm:px-5 py-3">
+                                  <li
+                                    key={fila.resultado_id}
+                                    className="flex items-center gap-3 px-4 sm:px-5 py-3"
+                                  >
                                     <span className="w-7 text-center font-mono text-2xs font-bold text-hyrox-ghost shrink-0">
                                       {indice + 1}
                                     </span>
@@ -272,7 +337,7 @@ function PanelResultados({ competenciaId }: { competenciaId: number }) {
                                       <span
                                         className={cx(
                                           'block font-mono font-bold text-sm',
-                                          fila.abandono ? 'text-hyrox-danger' : 'text-hyrox-paper'
+                                          fila.abandono ? 'text-hyrox-danger' : 'text-hyrox-paper',
                                         )}
                                       >
                                         {formatearValor(
@@ -280,7 +345,7 @@ function PanelResultados({ competenciaId }: { competenciaId: number }) {
                                           wod.tipo_medicion,
                                           fila.abandono,
                                           fila.capado,
-                                          unidadDeWod(wod)
+                                          unidadDeWod(wod),
                                         )}
                                       </span>
                                       <span className="block text-2xs text-hyrox-primary font-mono">
@@ -333,7 +398,7 @@ function claveCategoria(valor: string | null | undefined): string {
 
 function construirCategorias(
   divisiones: string[] | null | undefined,
-  participantes: ResultadoFila[]
+  participantes: ResultadoFila[],
 ): Array<{ clave: string; etiqueta: string }> {
   const mapa = new Map<string, string>();
 

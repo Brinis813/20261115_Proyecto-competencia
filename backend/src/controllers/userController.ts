@@ -22,14 +22,21 @@ export async function createJuez(req: AuthRequest, res: Response) {
       tempPassword: result.tempPassword,
     });
   } catch (error: any) {
-    log.error('createJuez error:', error?.message, error?.original?.message || error?.parent?.message);
+    log.error(
+      'createJuez error:',
+      error?.message,
+      error?.original?.message || error?.parent?.message,
+    );
     res.status(400).json({ message: mensajeSeguro(error) });
   }
 }
 
 export async function createParticipante(req: AuthRequest, res: Response) {
   try {
-    const participante = await userService.createParticipante({ ...req.body, evento_id: eventoDestino(req.alcance) });
+    const participante = await userService.createParticipante({
+      ...req.body,
+      evento_id: eventoDestino(req.alcance),
+    });
     res.status(201).json({ message: 'Participante creado', participante });
   } catch (error: any) {
     res.status(400).json({ message: mensajeSeguro(error) });

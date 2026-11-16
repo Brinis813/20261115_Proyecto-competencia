@@ -93,15 +93,13 @@ describe('refreshToken', () => {
 
   it('rechaza refresh con sesión de más de 7 días', () => {
     expect(() =>
-      refreshToken({ ...basePayload, origenMs: Date.now() - 8 * 24 * 3600 * 1000 })
+      refreshToken({ ...basePayload, origenMs: Date.now() - 8 * 24 * 3600 * 1000 }),
     ).toThrow(/caducada/i);
     expect(mockJwt.sign).not.toHaveBeenCalled();
   });
 
   it('genera tokens diferentes en cada llamada (expiracion fresca)', () => {
-    mockJwt.sign
-      .mockReturnValueOnce('token-1' as any)
-      .mockReturnValueOnce('token-2' as any);
+    mockJwt.sign.mockReturnValueOnce('token-1' as any).mockReturnValueOnce('token-2' as any);
 
     const r1 = refreshToken(basePayload);
     const r2 = refreshToken(basePayload);
@@ -154,16 +152,17 @@ describe('loginUsuario', () => {
     const bcrypt = require('bcrypt');
     bcrypt.compare.mockResolvedValue(false);
 
-    await expect(loginUsuario('00000', 'wrong')).rejects.toThrow(
-      'Cedula o contrasena incorrectos',
-    );
+    await expect(loginUsuario('00000', 'wrong')).rejects.toThrow('Cedula o contrasena incorrectos');
   });
 
   it('lanza error si el email no esta verificado', async () => {
     const { Usuario } = require('../models');
     Usuario.findOne.mockResolvedValue({
-      id: 1, cedula: '12345', password: 'hashed',
-      email_verificado: false, rol: 'admin',
+      id: 1,
+      cedula: '12345',
+      password: 'hashed',
+      email_verificado: false,
+      rol: 'admin',
     });
     const bcrypt = require('bcrypt');
     bcrypt.compare.mockResolvedValue(true);
@@ -176,10 +175,18 @@ describe('loginUsuario', () => {
   it('retorna token y perfil cuando las credenciales son validas', async () => {
     const { Usuario } = require('../models');
     Usuario.findOne.mockResolvedValue({
-      id: 1, cedula: '12345', password: 'hashed',
-      email_verificado: true, rol: 'admin', password_cambiado: true,
-      nombre: 'Juan', apellidos: 'Perez', box: 'CF', email: 'j@j.com',
-      es_superadmin: false, box_id: 1,
+      id: 1,
+      cedula: '12345',
+      password: 'hashed',
+      email_verificado: true,
+      rol: 'admin',
+      password_cambiado: true,
+      nombre: 'Juan',
+      apellidos: 'Perez',
+      box: 'CF',
+      email: 'j@j.com',
+      es_superadmin: false,
+      box_id: 1,
     });
     const bcrypt = require('bcrypt');
     bcrypt.compare.mockResolvedValue(true);

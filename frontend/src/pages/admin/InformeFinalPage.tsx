@@ -36,7 +36,10 @@ interface EventoPublico {
 interface RespuestaEvento {
   evento: { id: number; nombre: string };
   general: LeaderboardEntry[] | null;
-  porCompetencia: Array<{ competencia: { id: number; nombre: string }; leaderboard: LeaderboardEntry[] }>;
+  porCompetencia: Array<{
+    competencia: { id: number; nombre: string };
+    leaderboard: LeaderboardEntry[];
+  }>;
 }
 
 interface BloqueCompetencia {
@@ -61,7 +64,9 @@ export default function InformeFinalPage() {
   const [participantes, setParticipantes] = useState<Participante[]>([]);
   const [bloques, setBloques] = useState<BloqueCompetencia[]>([]);
   const [general, setGeneral] = useState<LeaderboardEntry[] | null>(null);
-  const [clasificacionPorCompetencia, setClasificacionPorCompetencia] = useState<Map<number, LeaderboardEntry[]>>(new Map());
+  const [clasificacionPorCompetencia, setClasificacionPorCompetencia] = useState<
+    Map<number, LeaderboardEntry[]>
+  >(new Map());
 
   const cargar = useCallback(async () => {
     if (!compId) {
@@ -79,24 +84,33 @@ export default function InformeFinalPage() {
         api.get<RespuestaEvento>(`/leaderboard/evento/${compId}`),
       ]);
 
-      const competencias = (Array.isArray(resCompetencias.data) ? resCompetencias.data : []).sort((a, b) => a.id - b.id);
+      const competencias = (Array.isArray(resCompetencias.data) ? resCompetencias.data : []).sort(
+        (a, b) => a.id - b.id,
+      );
       setEvento(resComp.data);
       setJueces(Array.isArray(resJueces.data) ? resJueces.data : []);
       setParticipantes(Array.isArray(resAtletas.data) ? resAtletas.data : []);
       setGeneral(resBoard.data.general);
-      setClasificacionPorCompetencia(new Map(resBoard.data.porCompetencia.map((p) => [p.competencia.id, p.leaderboard])));
+      setClasificacionPorCompetencia(
+        new Map(resBoard.data.porCompetencia.map((p) => [p.competencia.id, p.leaderboard])),
+      );
 
       // El detalle por competencia se carga por separado: si una competencia falla no tumba el informe.
       const resultados = await Promise.all(
         competencias.map(async (competencia): Promise<BloqueCompetencia> => {
           const [res, asig] = await Promise.all([
             api.get<{ wods: LeaderboardWod[]; participantes: ResultadoFila[] }>(
-              `/results/competencia/${competencia.id}`
+              `/results/competencia/${competencia.id}`,
             ),
             api.get<Asignacion[]>(`/competencias/${competencia.id}/assignments`),
           ]);
-          return { competencia, wods: res.data.wods ?? [], filas: res.data.participantes ?? [], asignaciones: asig.data ?? [] };
-        })
+          return {
+            competencia,
+            wods: res.data.wods ?? [],
+            filas: res.data.participantes ?? [],
+            asignaciones: asig.data ?? [],
+          };
+        }),
       );
       setBloques(resultados);
     } catch (err) {
@@ -137,10 +151,7 @@ export default function InformeFinalPage() {
   function descargarCSV() {
     const datos = datosInforme();
     if (!datos || !evento) return;
-    descargarTexto(
-      nombreArchivo(`informe_${evento.nombre}`, 'csv'),
-      csvInformeEvento(datos)
-    );
+    descargarTexto(nombreArchivo(`informe_${evento.nombre}`, 'csv'), csvInformeEvento(datos));
   }
 
   if (!compId) {
@@ -172,10 +183,21 @@ export default function InformeFinalPage() {
           Panel
         </Link>
         <span className="flex-1" />
-        <Button variant="secondary" size="sm" icon={Download} onClick={descargarCSV} disabled={cargando || !evento}>
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={Download}
+          onClick={descargarCSV}
+          disabled={cargando || !evento}
+        >
           CSV (Excel)
         </Button>
-        <Button size="sm" icon={Printer} onClick={() => window.print()} disabled={cargando || !evento}>
+        <Button
+          size="sm"
+          icon={Printer}
+          onClick={() => window.print()}
+          disabled={cargando || !evento}
+        >
           Imprimir / PDF
         </Button>
       </div>
@@ -195,15 +217,12 @@ export default function InformeFinalPage() {
           <article className="print-sheet bg-white text-slate-900 rounded-2xl shadow-xl overflow-hidden">
             {/* Encabezado */}
             {evento.imagen_url && (
-              <PortadaImagen
-                src={evento.imagen_url}
-                alt=""
-                aspecto="aspect-[21/9]"
-                tono="claro"
-              />
+              <PortadaImagen src={evento.imagen_url} alt="" aspecto="aspect-[21/9]" tono="claro" />
             )}
             <header className="px-6 sm:px-8 pt-7 pb-5 border-b-2 border-slate-900">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Informe final</p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+                Informe final
+              </p>
               <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">{evento.nombre}</h1>
               <p className="text-sm text-slate-600 mt-1">
                 {[evento.sede, rangoCorto(evento.fecha_inicio, evento.fecha_fin)]
@@ -211,8 +230,8 @@ export default function InformeFinalPage() {
                   .join(' · ')}
               </p>
               <p className="text-xs text-slate-500 mt-1">
-                Generado el {new Date().toLocaleString()} · {participantes.length} atletas · {jueces.length} jueces ·{' '}
-                {bloques.length} Competencias
+                Generado el {new Date().toLocaleString()} · {participantes.length} atletas ·{' '}
+                {jueces.length} jueces · {bloques.length} Competencias
               </p>
             </header>
 
@@ -224,7 +243,15 @@ export default function InformeFinalPage() {
                     Clasificación general
                   </h2>
                   <Tabla
-                    columnas={['Puesto', 'Atleta', 'Cédula', 'Box', 'Categoría', 'Puntos', 'Empate']}
+                    columnas={[
+                      'Puesto',
+                      'Atleta',
+                      'Cédula',
+                      'Box',
+                      'Categoría',
+                      'Puntos',
+                      'Empate',
+                    ]}
                     filas={general.map((e) => [
                       e.puesto,
                       `${e.nombre} ${e.apellidos}`.trim(),
@@ -247,12 +274,16 @@ export default function InformeFinalPage() {
                       {bloque.competencia.nombre}
                     </h2>
                     {bloque.competencia.descripcion && (
-                      <p className="text-xs text-slate-600 mb-3">{bloque.competencia.descripcion}</p>
+                      <p className="text-xs text-slate-600 mb-3">
+                        {bloque.competencia.descripcion}
+                      </p>
                     )}
 
                     {clasificacion.length > 0 && (
                       <>
-                        <h3 className="text-xs font-bold text-slate-700 mt-3 mb-2">Clasificación</h3>
+                        <h3 className="text-xs font-bold text-slate-700 mt-3 mb-2">
+                          Clasificación
+                        </h3>
                         <Tabla
                           columnas={['Puesto', 'Atleta', 'Cédula', 'Categoría', 'Puntos']}
                           filas={clasificacion.map((e) => [
@@ -284,7 +315,7 @@ export default function InformeFinalPage() {
                               wod?.tipo_medicion ?? 'repeticiones',
                               f.abandono,
                               f.capado,
-                              unidadDeWod(wod)
+                              unidadDeWod(wod),
                             ),
                             `${f.puntos_calculados} pts`,
                             textoEstado(f),
@@ -314,12 +345,19 @@ export default function InformeFinalPage() {
                           if (a.usuario_id === j.id) asignados.add(a.participante_id);
                         }
                       }
-                      return [`${j.nombre} ${j.apellidos}`.trim(), j.cedula, j.box ?? '', asignados.size];
+                      return [
+                        `${j.nombre} ${j.apellidos}`.trim(),
+                        j.cedula,
+                        j.box ?? '',
+                        asignados.size,
+                      ];
                     })}
                   />
                 )}
 
-                <h3 className="text-xs font-bold text-slate-700 mt-4 mb-2">Asignaciones juez - atleta</h3>
+                <h3 className="text-xs font-bold text-slate-700 mt-4 mb-2">
+                  Asignaciones juez - atleta
+                </h3>
                 <Tabla
                   columnas={['Competencia', 'WOD', 'Juez', 'Atleta']}
                   filas={bloques.flatMap((b) => {
@@ -330,7 +368,9 @@ export default function InformeFinalPage() {
                         b.competencia.nombre,
                         wod ? `${wod.orden}. ${wod.nombre_ejercicio}` : 'Todos',
                         a.Usuario ? `${a.Usuario.nombre} ${a.Usuario.apellidos}`.trim() : '',
-                        a.Participante ? `${a.Participante.nombre} ${a.Participante.apellidos}`.trim() : '',
+                        a.Participante
+                          ? `${a.Participante.nombre} ${a.Participante.apellidos}`.trim()
+                          : '',
                       ];
                     });
                   })}
@@ -345,7 +385,9 @@ export default function InformeFinalPage() {
                 <Tabla
                   columnas={['Atleta', 'Cédula', 'Box', 'Categoría']}
                   filas={[...participantes]
-                    .sort((a, b) => `${a.apellidos} ${a.nombre}`.localeCompare(`${b.apellidos} ${b.nombre}`))
+                    .sort((a, b) =>
+                      `${a.apellidos} ${a.nombre}`.localeCompare(`${b.apellidos} ${b.nombre}`),
+                    )
                     .map((p) => [
                       `${p.nombre} ${p.apellidos}`.trim(),
                       p.cedula,
@@ -354,7 +396,6 @@ export default function InformeFinalPage() {
                     ])}
                 />
               </section>
-
             </div>
 
             <footer className="px-6 sm:px-8 py-4 border-t border-slate-200 text-xs text-slate-500">
@@ -369,7 +410,8 @@ export default function InformeFinalPage() {
 
 function rangoCorto(inicio: string, fin: string): string {
   try {
-    const f = (iso: string) => new Date(iso.length <= 10 ? `${iso}T12:00:00` : iso).toLocaleDateString();
+    const f = (iso: string) =>
+      new Date(iso.length <= 10 ? `${iso}T12:00:00` : iso).toLocaleDateString();
     return inicio === fin ? f(inicio) : `${f(inicio)} - ${f(fin)}`;
   } catch {
     return '';

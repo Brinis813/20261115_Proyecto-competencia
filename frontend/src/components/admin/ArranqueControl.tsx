@@ -30,7 +30,13 @@ const ETIQUETA_ESTADO: Record<string, string> = {
  * Socket.IO a la sala de la competencia. Incluye los comandos de emergencia:
  * pausa global, reanudar, finalizar y abortar (resetea los relojes a 00:00).
  */
-export default function ArranqueControl({ competenciaId, competenciaNombre }: { competenciaId: number; competenciaNombre: string }) {
+export default function ArranqueControl({
+  competenciaId,
+  competenciaNombre,
+}: {
+  competenciaId: number;
+  competenciaNombre: string;
+}) {
   const [abierto, setAbierto] = useState(false);
   const [estado, setEstado] = useState<CompetenciaStartPayload | null>(null);
   const [cargando, setCargando] = useState(false);
@@ -41,7 +47,9 @@ export default function ArranqueControl({ competenciaId, competenciaNombre }: { 
   const [exito, setExito] = useState('');
   // Confirmación previa a las acciones de emergencia: pausar congela el heat
   // completo y abortar resetea los relojes, ninguna debe salir por un toque.
-  const [confirmar, setConfirmar] = useState<'pausar' | 'reanudar' | 'fin' | 'abortar' | null>(null);
+  const [confirmar, setConfirmar] = useState<'pausar' | 'reanudar' | 'fin' | 'abortar' | null>(
+    null,
+  );
 
   // El estado se precarga al montar para que la insignia (Armado, En curso…)
   // se vea sin abrir el panel. Solo lee; no arma nada solo.
@@ -62,7 +70,9 @@ export default function ArranqueControl({ competenciaId, competenciaNombre }: { 
     setCargando(true);
     setError('');
     try {
-      const res = await api.get<CompetenciaStartPayload | null>(`/competencias/${competenciaId}/arranque`);
+      const res = await api.get<CompetenciaStartPayload | null>(
+        `/competencias/${competenciaId}/arranque`,
+      );
       setEstado(res.data);
     } catch (err) {
       setError(mensajeDeError(err, 'No se pudo cargar el arranque'));
@@ -93,32 +103,56 @@ export default function ArranqueControl({ competenciaId, competenciaNombre }: { 
   }
 
   const armar = (modo: ModoArranque) =>
-    accionar(modo, () => {
-      if (modo === 'cuenta_regresiva') {
-        return api.post(`/competencias/${competenciaId}/arranque`, { modo, countdownSeg });
-      }
-      if (modo === 'programado') {
-        const ms = new Date(programadoPara).getTime();
-        if (!programadoPara || !Number.isFinite(ms)) {
-          return Promise.reject(new Error('Elige la fecha y hora del arranque'));
+    accionar(
+      modo,
+      () => {
+        if (modo === 'cuenta_regresiva') {
+          return api.post(`/competencias/${competenciaId}/arranque`, { modo, countdownSeg });
         }
-        return api.post(`/competencias/${competenciaId}/arranque`, { modo, programadoParaMs: ms });
-      }
-      return api.post(`/competencias/${competenciaId}/arranque`, { modo });
-    }, 'Orden emitida a los jueces');
+        if (modo === 'programado') {
+          const ms = new Date(programadoPara).getTime();
+          if (!programadoPara || !Number.isFinite(ms)) {
+            return Promise.reject(new Error('Elige la fecha y hora del arranque'));
+          }
+          return api.post(`/competencias/${competenciaId}/arranque`, {
+            modo,
+            programadoParaMs: ms,
+          });
+        }
+        return api.post(`/competencias/${competenciaId}/arranque`, { modo });
+      },
+      'Orden emitida a los jueces',
+    );
 
-  const activo = estado != null && ['armado', 'cuenta_regresiva', 'en_curso', 'pausado'].includes(estado.estado);
+  const activo =
+    estado != null && ['armado', 'cuenta_regresiva', 'en_curso', 'pausado'].includes(estado.estado);
 
   /** Ejecuta la acción de emergencia ya confirmada por el admin. */
   function confirmarAccion() {
     if (confirmar === 'pausar') {
-      void accionar('pausar', () => api.post(`/competencias/${competenciaId}/arranque/pausa`), 'Heat en pausa: jueces congelados');
+      void accionar(
+        'pausar',
+        () => api.post(`/competencias/${competenciaId}/arranque/pausa`),
+        'Heat en pausa: jueces congelados',
+      );
     } else if (confirmar === 'reanudar') {
-      void accionar('reanudar', () => api.post(`/competencias/${competenciaId}/arranque/reanudar`), 'Heat reanudado');
+      void accionar(
+        'reanudar',
+        () => api.post(`/competencias/${competenciaId}/arranque/reanudar`),
+        'Heat reanudado',
+      );
     } else if (confirmar === 'fin') {
-      void accionar('fin', () => api.post(`/competencias/${competenciaId}/arranque/fin`), 'Heat finalizado');
+      void accionar(
+        'fin',
+        () => api.post(`/competencias/${competenciaId}/arranque/fin`),
+        'Heat finalizado',
+      );
     } else if (confirmar === 'abortar') {
-      void accionar('abortar', () => api.delete(`/competencias/${competenciaId}/arranque`), 'Heat abortado: relojes a 00:00');
+      void accionar(
+        'abortar',
+        () => api.delete(`/competencias/${competenciaId}/arranque`),
+        'Heat abortado: relojes a 00:00',
+      );
     }
     setConfirmar(null);
   }
@@ -132,17 +166,20 @@ export default function ArranqueControl({ competenciaId, competenciaNombre }: { 
     },
     reanudar: {
       titulo: `Reanudar “${competenciaNombre}”`,
-      mensaje: 'El heat continúa desde el segundo donde se pausó y los jueces pueden seguir registrando.',
+      mensaje:
+        'El heat continúa desde el segundo donde se pausó y los jueces pueden seguir registrando.',
       boton: 'Reanudar heat',
     },
     fin: {
       titulo: `Finalizar “${competenciaNombre}”`,
-      mensaje: 'Se detienen los cronómetros de los jueces. Úsalo cuando el heat terminó y ya no se registra más.',
+      mensaje:
+        'Se detienen los cronómetros de los jueces. Úsalo cuando el heat terminó y ya no se registra más.',
       boton: 'Finalizar heat',
     },
     abortar: {
       titulo: `Abortar “${competenciaNombre}”`,
-      mensaje: 'Resetea los relojes a 00:00 y saca a los jueces del heat. Los resultados ya guardados no se borran.',
+      mensaje:
+        'Resetea los relojes a 00:00 y saca a los jueces del heat. Los resultados ya guardados no se borran.',
       boton: 'Abortar y resetear',
     },
   } as const;
@@ -157,7 +194,9 @@ export default function ArranqueControl({ competenciaId, competenciaNombre }: { 
       >
         <Timer className="w-4 h-4 text-hyrox-primary shrink-0" aria-hidden="true" />
         <span className="text-xs font-bold text-hyrox-paper flex-1">Arranque sincronizado</span>
-        {estado && <span className="badge-gray">{ETIQUETA_ESTADO[estado.estado] ?? estado.estado}</span>}
+        {estado && (
+          <span className="badge-gray">{ETIQUETA_ESTADO[estado.estado] ?? estado.estado}</span>
+        )}
         {abierto ? (
           <ChevronUp className="w-4 h-4 text-hyrox-mist shrink-0" aria-hidden="true" />
         ) : (
@@ -167,8 +206,16 @@ export default function ArranqueControl({ competenciaId, competenciaNombre }: { 
 
       {abierto && (
         <div className="px-3.5 pb-3.5 pt-1 space-y-3 border-t border-white/[0.06]">
-          {error && <Alert tone="error" onDismiss={() => setError('')}>{error}</Alert>}
-          {exito && <Alert tone="success" onDismiss={() => setExito('')}>{exito}</Alert>}
+          {error && (
+            <Alert tone="error" onDismiss={() => setError('')}>
+              {error}
+            </Alert>
+          )}
+          {exito && (
+            <Alert tone="success" onDismiss={() => setExito('')}>
+              {exito}
+            </Alert>
+          )}
 
           {cargando ? (
             <p className="text-2xs text-hyrox-ghost py-2">Cargando estado…</p>

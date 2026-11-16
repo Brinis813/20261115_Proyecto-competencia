@@ -61,7 +61,9 @@ export default function RegistroNoReps({
                 No-rep #{entradas.length - indice}
               </span>
               <span className="ml-auto font-mono text-2xs text-hyrox-mist">{entrada.marca}</span>
-              <span className="font-mono text-2xs font-bold text-hyrox-danger">{entrada.efecto}</span>
+              <span className="font-mono text-2xs font-bold text-hyrox-danger">
+                {entrada.efecto}
+              </span>
             </li>
           ))}
         </ul>

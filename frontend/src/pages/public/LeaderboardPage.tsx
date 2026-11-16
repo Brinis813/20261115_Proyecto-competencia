@@ -15,7 +15,12 @@ import { useLiveLeaderboard } from '../../hooks/useLiveLeaderboard';
 import { useLeaderboardStore, type EntradaConMovimiento } from '../../stores/leaderboardStore';
 import { PublicHeader } from '../../components/layout/AppShell';
 import { Alert, EmptyState, IconButton, SkeletonList, cx } from '../../components/ui';
-import { formatearValor, unidadDeWod, ETIQUETA_TIEBREAK_COMPETENCIA, type LeaderboardWod } from '../../types';
+import {
+  formatearValor,
+  unidadDeWod,
+  ETIQUETA_TIEBREAK_COMPETENCIA,
+  type LeaderboardWod,
+} from '../../types';
 
 const INTERVALO_ROTACION = 9000;
 
@@ -72,15 +77,19 @@ export default function LeaderboardPage() {
     if (wodActivo >= wods.length) setWodActivo(0);
   }, [wods.length, wodActivo]);
 
-  const categorias = useMemo(() => construirCategorias(entradas, competenciaDivisiones), [entradas, competenciaDivisiones]);
-  const categoria = categorias[categoriaActiva] ?? categorias[0] ?? { clave: '__sin_categoria__', etiqueta: 'Sin categoria' };
+  const categorias = useMemo(
+    () => construirCategorias(entradas, competenciaDivisiones),
+    [entradas, competenciaDivisiones],
+  );
+  const categoria = categorias[categoriaActiva] ??
+    categorias[0] ?? { clave: '__sin_categoria__', etiqueta: 'Sin categoria' };
   const entradasCategoria = useMemo(
     () => entradas.filter((e) => claveCategoria(e.categoria) === categoria.clave),
-    [entradas, categoria.clave]
+    [entradas, categoria.clave],
   );
   const conResultadosCategoria = useMemo(
     () => entradasCategoria.filter((e) => e.wods_completados > 0).length,
-    [entradasCategoria]
+    [entradasCategoria],
   );
 
   useEffect(() => {
@@ -99,7 +108,7 @@ export default function LeaderboardPage() {
 
   const conResultados = useMemo(
     () => entradas.filter((e) => e.wods_completados > 0).length,
-    [entradas]
+    [entradas],
   );
 
   if (!Number.isFinite(competenciaId) || competenciaId <= 0) {
@@ -114,7 +123,12 @@ export default function LeaderboardPage() {
   }
 
   return (
-    <div className={cx('min-h-screen bg-hyrox-void', pantallaCompleta && 'fixed inset-0 z-40 overflow-y-auto')}>
+    <div
+      className={cx(
+        'min-h-screen bg-hyrox-void',
+        pantallaCompleta && 'fixed inset-0 z-40 overflow-y-auto',
+      )}
+    >
       {!pantallaCompleta && (
         <PublicHeader
           actions={
@@ -144,7 +158,7 @@ export default function LeaderboardPage() {
             <h1
               className={cx(
                 'font-display font-extrabold tracking-display text-hyrox-paper leading-none truncate',
-                pantallaCompleta ? 'text-4xl sm:text-6xl' : 'text-3xl sm:text-4xl'
+                pantallaCompleta ? 'text-4xl sm:text-6xl' : 'text-3xl sm:text-4xl',
               )}
             >
               {competenciaNombre ?? 'Clasificacion'}
@@ -160,14 +174,20 @@ export default function LeaderboardPage() {
               </span>
               <IndicadorEnVivo actualizadoEn={actualizadoEn} />
               {competenciaTiebreak && (
-                <span className="badge-gray" title="Criterio aplicado a los empates en esta competencia">
-                  Desempate: {ETIQUETA_TIEBREAK_COMPETENCIA[competenciaTiebreak] ?? competenciaTiebreak}
+                <span
+                  className="badge-gray"
+                  title="Criterio aplicado a los empates en esta competencia"
+                >
+                  Desempate:{' '}
+                  {ETIQUETA_TIEBREAK_COMPETENCIA[competenciaTiebreak] ?? competenciaTiebreak}
                 </span>
               )}
             </div>
             {categorias.length > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="text-2xs uppercase tracking-[0.18em] text-hyrox-ghost">Categorias</span>
+                <span className="text-2xs uppercase tracking-[0.18em] text-hyrox-ghost">
+                  Categorias
+                </span>
                 {categorias.map((item, indice) => (
                   <button
                     key={item.clave}
@@ -178,7 +198,8 @@ export default function LeaderboardPage() {
                     }}
                     className={cx(
                       'badge-gray cursor-pointer transition-colors',
-                      indice === categoriaActiva && 'bg-hyrox-primary/20 text-hyrox-paper border-hyrox-primary/30'
+                      indice === categoriaActiva &&
+                        'bg-hyrox-primary/20 text-hyrox-paper border-hyrox-primary/30',
                     )}
                   >
                     {item.etiqueta}
@@ -198,7 +219,11 @@ export default function LeaderboardPage() {
           </div>
 
           {pantallaCompleta && (
-            <IconButton icon={Minimize2} label="Salir de pantalla completa" onClick={() => setPantallaCompleta(false)} />
+            <IconButton
+              icon={Minimize2}
+              label="Salir de pantalla completa"
+              onClick={() => setPantallaCompleta(false)}
+            />
           )}
         </div>
 
@@ -232,7 +257,11 @@ export default function LeaderboardPage() {
                 description="Cuando el administrador asigne participantes a esta competencia apareceran aqui."
               />
             ) : entradasCategoria.length === 0 ? (
-              <EmptyState icon={Users} title="Sin atletas en esta categoria" description="Cambia de categoria." />
+              <EmptyState
+                icon={Users}
+                title="Sin atletas en esta categoria"
+                description="Cambia de categoria."
+              />
             ) : (
               <TablaGeneral
                 entradas={entradasCategoria}
@@ -297,11 +326,18 @@ function IndicadorEnVivo({ actualizadoEn }: { actualizadoEn: number | null }) {
 
   const segundos = Math.floor((Date.now() - actualizadoEn) / 1000);
   const texto =
-    segundos < 15 ? 'ahora mismo' : segundos < 60 ? `hace ${segundos}s` : `hace ${Math.floor(segundos / 60)} min`;
+    segundos < 15
+      ? 'ahora mismo'
+      : segundos < 60
+        ? `hace ${segundos}s`
+        : `hace ${Math.floor(segundos / 60)} min`;
 
   return (
     <span className="inline-flex items-center gap-1.5" role="status">
-      <span className="w-1.5 h-1.5 rounded-full bg-hyrox-accent animate-pulse-dot" aria-hidden="true" />
+      <span
+        className="w-1.5 h-1.5 rounded-full bg-hyrox-accent animate-pulse-dot"
+        aria-hidden="true"
+      />
       Actualizado {texto}
     </span>
   );
@@ -319,7 +355,7 @@ function etiquetaCategoria(valor: string | null | undefined): string {
 
 function construirCategorias(
   entradas: EntradaConMovimiento[],
-  divisiones?: string[] | null
+  divisiones?: string[] | null,
 ): Array<{ clave: string; etiqueta: string }> {
   const mapa = new Map<string, string>();
 
@@ -354,7 +390,7 @@ const FilaRow = React.memo(function FilaRow({
       className={cx(
         'transition-colors duration-300',
         resaltado && 'animate-flash-row',
-        entrada.puesto === 1 && 'bg-hyrox-primary/[0.06]'
+        entrada.puesto === 1 && 'bg-hyrox-primary/[0.06]',
       )}
     >
       <td className="px-3 py-3">
@@ -372,7 +408,7 @@ const FilaRow = React.memo(function FilaRow({
             className={cx(
               'font-semibold truncate',
               grande ? 'text-lg' : 'text-sm',
-              entrada.puesto === 1 ? 'text-hyrox-paper' : 'text-hyrox-paper/90'
+              entrada.puesto === 1 ? 'text-hyrox-paper' : 'text-hyrox-paper/90',
             )}
           >
             {entrada.nombre} {entrada.apellidos}
@@ -399,7 +435,7 @@ const FilaRow = React.memo(function FilaRow({
         <span
           className={cx(
             'font-mono font-bold text-hyrox-primary tabular-nums',
-            grande ? 'text-2xl' : entrada.puesto === 1 ? 'text-xl' : 'text-base'
+            grande ? 'text-2xl' : entrada.puesto === 1 ? 'text-xl' : 'text-base',
           )}
         >
           {entrada.puntos_total}
@@ -426,7 +462,9 @@ function TablaGeneral({
   return (
     <div className="scroll-x overflow-y-auto flex-1">
       <table className="w-full min-w-[22rem]">
-        <caption className="sr-only">Clasificacion general de la competencia para la categoria {categoria}, ordenada por puntos</caption>
+        <caption className="sr-only">
+          Clasificacion general de la competencia para la categoria {categoria}, ordenada por puntos
+        </caption>
         <thead>
           <tr className="border-b border-white/[0.06] bg-white/[0.02]">
             <th scope="col" className="w-14 px-3 py-2.5 text-left eyebrow">
@@ -482,7 +520,7 @@ function Puesto({
       <span
         className={cx(
           'grid place-items-center w-8 h-8 rounded-lg border font-mono font-bold text-sm tabular-nums',
-          (podio && COLOR_PODIO[puesto]) || 'bg-white/[0.04] text-hyrox-mist border-white/[0.06]'
+          (podio && COLOR_PODIO[puesto]) || 'bg-white/[0.04] text-hyrox-mist border-white/[0.06]',
         )}
       >
         {puesto}
@@ -490,20 +528,28 @@ function Puesto({
 
       {/* El movimiento no se comunica solo con color: lleva flecha y texto. */}
       {movimiento === 'sube' && (
-        <span className="flex items-center text-hyrox-accent text-2xs font-bold" title={`Sube ${delta} puestos`}>
+        <span
+          className="flex items-center text-hyrox-accent text-2xs font-bold"
+          title={`Sube ${delta} puestos`}
+        >
           <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
           {delta}
           <span className="sr-only">puestos ganados</span>
         </span>
       )}
       {movimiento === 'baja' && (
-        <span className="flex items-center text-hyrox-danger text-2xs font-bold" title={`Baja ${delta} puestos`}>
+        <span
+          className="flex items-center text-hyrox-danger text-2xs font-bold"
+          title={`Baja ${delta} puestos`}
+        >
           <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
           {delta}
           <span className="sr-only">puestos perdidos</span>
         </span>
       )}
-      {movimiento === 'igual' && <Minus className="w-3 h-3 text-hyrox-ghost/40" aria-hidden="true" />}
+      {movimiento === 'igual' && (
+        <Minus className="w-3 h-3 text-hyrox-ghost/40" aria-hidden="true" />
+      )}
     </span>
   );
 }
@@ -566,7 +612,9 @@ function PanelWod({
         )}
         <div className="flex items-center gap-3">
           <span className="grid place-items-center w-10 h-10 rounded-xl bg-hyrox-primary/12 shrink-0">
-            <span className="font-display text-lg font-extrabold text-hyrox-primary">{wod.orden}</span>
+            <span className="font-display text-lg font-extrabold text-hyrox-primary">
+              {wod.orden}
+            </span>
           </span>
           <div className="min-w-0 flex-1">
             <h3 className="font-display text-lg font-bold text-hyrox-paper leading-tight truncate">
@@ -600,7 +648,7 @@ function PanelWod({
                 <span
                   className={cx(
                     'block h-1 rounded-full transition-all duration-500',
-                    i === indice ? 'bg-hyrox-primary' : 'bg-white/[0.1] group-hover:bg-white/25'
+                    i === indice ? 'bg-hyrox-primary' : 'bg-white/[0.1] group-hover:bg-white/25',
                   )}
                 />
               </button>
@@ -617,19 +665,24 @@ function PanelWod({
             {filasPorCategoria.map((grupo) => (
               <section key={grupo.clave}>
                 <div className="px-4 sm:px-5 py-3 border-b border-white/[0.04] bg-white/[0.02] flex items-center justify-between gap-3">
-                  <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-hyrox-primary">{grupo.etiqueta}</h4>
+                  <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-hyrox-primary">
+                    {grupo.etiqueta}
+                  </h4>
                   <span className="text-2xs text-hyrox-ghost">{grupo.filas.length} atletas</span>
                 </div>
                 {grupo.filas.map(({ entrada, resultado }) => {
                   const medido = Boolean(resultado?.valor_bruto);
                   return (
-                    <div key={entrada.participante_id} className="flex items-center gap-3 px-4 sm:px-5 py-3">
+                    <div
+                      key={entrada.participante_id}
+                      className="flex items-center gap-3 px-4 sm:px-5 py-3"
+                    >
                       <span
                         className={cx(
                           'grid place-items-center w-7 h-7 rounded-lg font-mono font-bold text-2xs tabular-nums shrink-0',
                           resultado?.posicion && resultado.posicion <= 3 && medido
                             ? COLOR_PODIO[resultado.posicion]
-                            : 'bg-white/[0.04] text-hyrox-ghost'
+                            : 'bg-white/[0.04] text-hyrox-ghost',
                         )}
                       >
                         {medido ? resultado!.posicion : '–'}
@@ -642,7 +695,11 @@ function PanelWod({
                       <span
                         className={cx(
                           'font-mono text-sm font-bold tabular-nums shrink-0',
-                          resultado?.abandono ? 'text-hyrox-danger' : medido ? 'text-hyrox-paper' : 'text-hyrox-ghost/40'
+                          resultado?.abandono
+                            ? 'text-hyrox-danger'
+                            : medido
+                              ? 'text-hyrox-paper'
+                              : 'text-hyrox-ghost/40',
                         )}
                       >
                         {formatearValor(
@@ -650,7 +707,7 @@ function PanelWod({
                           wod.tipo_medicion,
                           resultado?.abandono,
                           resultado?.capado,
-                          unidadDeWod(wod)
+                          unidadDeWod(wod),
                         )}
                       </span>
 
@@ -658,7 +715,7 @@ function PanelWod({
                         <span
                           className={cx(
                             'font-mono text-sm font-bold tabular-nums',
-                            medido ? 'text-hyrox-primary' : 'text-hyrox-ghost/40'
+                            medido ? 'text-hyrox-primary' : 'text-hyrox-ghost/40',
                           )}
                         >
                           {resultado?.puntos_calculados ?? 0}

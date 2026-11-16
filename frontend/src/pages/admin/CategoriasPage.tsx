@@ -60,7 +60,7 @@ export default function CategoriasPage() {
     const termino = busqueda.trim().toLowerCase();
     if (!termino) return categorias;
     return categorias.filter((c) =>
-      `${c.nombre} ${c.genero} ${c.tipo_participacion}`.toLowerCase().includes(termino)
+      `${c.nombre} ${c.genero} ${c.tipo_participacion}`.toLowerCase().includes(termino),
     );
   }, [categorias, busqueda]);
 
@@ -89,7 +89,8 @@ export default function CategoriasPage() {
     if (!form.nombre.trim()) errs.nombre = 'El nombre es obligatorio';
     else if (form.nombre.trim().length > 100) errs.nombre = 'Máximo 100 caracteres';
     if (!form.genero) errs.genero = 'El género es obligatorio';
-    if (!form.tipo_participacion) errs.tipo_participacion = 'El tipo de participación es obligatorio';
+    if (!form.tipo_participacion)
+      errs.tipo_participacion = 'El tipo de participación es obligatorio';
 
     setErroresForm(errs);
     return Object.keys(errs).length === 0;
@@ -104,7 +105,8 @@ export default function CategoriasPage() {
     const cuerpo = {
       nombre: form.nombre.trim(),
       genero: form.genero as 'Masculino' | 'Femenino' | 'Mixto',
-      tipo_participacion: form.tipo_participacion as 'Individual' | 'Escalado' | 'Duplas' | 'Equipos' | 'Relevos',
+      tipo_participacion: form.tipo_participacion as
+        'Individual' | 'Escalado' | 'Duplas' | 'Equipos' | 'Relevos',
     };
 
     try {
@@ -150,7 +152,10 @@ export default function CategoriasPage() {
     >
       {/* Buscador */}
       <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-hyrox-mist pointer-events-none" aria-hidden="true" />
+        <Search
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-hyrox-mist pointer-events-none"
+          aria-hidden="true"
+        />
         <input
           type="search"
           placeholder="Buscar por nombre, género o tipo de participación..."
@@ -160,7 +165,11 @@ export default function CategoriasPage() {
         />
       </div>
 
-      {error && <Alert tone="error" className="mb-4">{error}</Alert>}
+      {error && (
+        <Alert tone="error" className="mb-4">
+          {error}
+        </Alert>
+      )}
 
       {cargando ? (
         <SkeletonList rows={4} />
@@ -168,8 +177,19 @@ export default function CategoriasPage() {
         <EmptyState
           icon={Tags}
           title="Sin categorías"
-          description={busqueda ? 'No hay resultados para tu búsqueda.' : 'Crea la primera categoría del evento.'}
-          action={!busqueda ? <Button onClick={abrirCreacion}><Plus className="w-4 h-4" />Nueva categoría</Button> : undefined}
+          description={
+            busqueda
+              ? 'No hay resultados para tu búsqueda.'
+              : 'Crea la primera categoría del evento.'
+          }
+          action={
+            !busqueda ? (
+              <Button onClick={abrirCreacion}>
+                <Plus className="w-4 h-4" />
+                Nueva categoría
+              </Button>
+            ) : undefined
+          }
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -226,7 +246,12 @@ export default function CategoriasPage() {
             </label>
             <select
               value={form.tipo_participacion}
-              onChange={(e) => setForm({ ...form, tipo_participacion: e.target.value as FormState['tipo_participacion'] })}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  tipo_participacion: e.target.value as FormState['tipo_participacion'],
+                })
+              }
               className="input-field"
               required
             >
@@ -243,14 +268,19 @@ export default function CategoriasPage() {
           </div>
 
           <p className="text-xs text-hyrox-mist/70 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-            Los pesos, distancias y repeticiones ya no viven aquí: se definen por categoría
-            dentro de cada competencia, en sus estaciones y movimientos.
+            Los pesos, distancias y repeticiones ya no viven aquí: se definen por categoría dentro
+            de cada competencia, en sus estaciones y movimientos.
           </p>
 
           {errorForm && <Alert tone="error">{errorForm}</Alert>}
 
           <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="ghost" onClick={() => setFormAbierto(false)} disabled={guardando}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setFormAbierto(false)}
+              disabled={guardando}
+            >
               Cancelar
             </Button>
             <Button type="submit" loading={guardando}>
@@ -318,12 +348,7 @@ function CategoriaCard({
           </div>
         </div>
         <div className="flex gap-1 shrink-0">
-          <IconButton
-            icon={Pencil}
-            label="Editar categoría"
-            size="sm"
-            onClick={onEditar}
-          />
+          <IconButton icon={Pencil} label="Editar categoría" size="sm" onClick={onEditar} />
           <IconButton
             icon={Trash2}
             label="Eliminar categoría"
@@ -331,7 +356,11 @@ function CategoriaCard({
             variant="danger"
             onClick={onEliminar}
             disabled={tieneAtletas}
-            title={tieneAtletas ? `Tiene ${categoria.total_participantes} atleta(s). Reasígnalos antes de eliminar.` : undefined}
+            title={
+              tieneAtletas
+                ? `Tiene ${categoria.total_participantes} atleta(s). Reasígnalos antes de eliminar.`
+                : undefined
+            }
           />
         </div>
       </div>
@@ -339,7 +368,8 @@ function CategoriaCard({
       {/* Atletas */}
       {tieneAtletas && (
         <p className="text-xs text-hyrox-mist">
-          {categoria.total_participantes} atleta{categoria.total_participantes !== 1 ? 's' : ''} asignado{categoria.total_participantes !== 1 ? 's' : ''}
+          {categoria.total_participantes} atleta{categoria.total_participantes !== 1 ? 's' : ''}{' '}
+          asignado{categoria.total_participantes !== 1 ? 's' : ''}
         </p>
       )}
     </div>

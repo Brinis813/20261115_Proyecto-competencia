@@ -31,7 +31,7 @@ export async function seedInitialAdmin(): Promise<void> {
     await conn.query(
       `INSERT INTO usuarios (nombre, apellidos, cedula, box, box_id, rol, es_superadmin, password, password_cambiado)
        VALUES (?, ?, ?, ?, NULL, 'admin', TRUE, ?, FALSE)`,
-      ['Admin', 'Sistema', env.SEED_ADMIN_CEDULA, 'Competition HQ', hash]
+      ['Admin', 'Sistema', env.SEED_ADMIN_CEDULA, 'Competition HQ', hash],
     );
 
     log.raw('');
@@ -61,14 +61,14 @@ export async function ensureSuperadmin(): Promise<void> {
   try {
     const [rows] = await conn.query<any[]>(
       `SELECT id, es_superadmin FROM usuarios WHERE cedula = ? LIMIT 1`,
-      [env.SEED_ADMIN_CEDULA]
+      [env.SEED_ADMIN_CEDULA],
     );
     if (!rows[0]) return;
     if (rows[0].es_superadmin) return;
 
     await conn.query(
       `UPDATE usuarios SET rol = 'admin', es_superadmin = TRUE, box_id = NULL WHERE id = ?`,
-      [rows[0].id]
+      [rows[0].id],
     );
     log.info(`superadmin habilitado para la cedula ${env.SEED_ADMIN_CEDULA} (id ${rows[0].id})`);
   } catch (err) {

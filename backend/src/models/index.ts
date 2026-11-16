@@ -1,7 +1,13 @@
 export { Usuario } from './Usuario';
 export { Categoria } from './Categoria';
 export { Participante } from './Participante';
-export { Competencia, TIPOS_PARTICIPACION, type TipoParticipacion, type CompetenciaTieBreakPolicy, COMPETENCIA_TIEBREAK_POLICIES } from './Competencia';
+export {
+  Competencia,
+  TIPOS_PARTICIPACION,
+  type TipoParticipacion,
+  type CompetenciaTieBreakPolicy,
+  COMPETENCIA_TIEBREAK_POLICIES,
+} from './Competencia';
 export { Wod } from './Wod';
 export { Asignacion } from './Asignacion';
 export { Resultado } from './Resultado';
@@ -9,7 +15,15 @@ export { default as ResultadoSplit } from './ResultadoSplit';
 export { CompetenciaCategoria } from './CompetenciaCategoria';
 export { AuditLog } from './AuditLog';
 export { ResultHistory } from './ResultHistory';
-export { Evento, estadoDeEvento, type EstadoEvento, type ScoringType, SCORING_TYPES, type EventoTieBreakPolicy, EVENTO_TIEBREAK_POLICIES } from './Evento';
+export {
+  Evento,
+  estadoDeEvento,
+  type EstadoEvento,
+  type ScoringType,
+  SCORING_TYPES,
+  type EventoTieBreakPolicy,
+  EVENTO_TIEBREAK_POLICIES,
+} from './Evento';
 export { EventoUsuario, type RolEnEvento } from './EventoUsuario';
 export { Box } from './Box';
 export { Arranque } from './Arranque';

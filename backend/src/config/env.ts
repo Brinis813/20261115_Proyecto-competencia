@@ -92,7 +92,9 @@ export const env = parsed.data;
  * (además de exponer la API). El arranque aborta con mensaje claro.
  */
 if (env.NODE_ENV === 'production' && env.CORS_ORIGIN.trim() === '*') {
-  console.error("\nCORS_ORIGIN='*' no está permitido en producción con cookies HttpOnly: indica los orígenes exactos.\n");
+  console.error(
+    "\nCORS_ORIGIN='*' no está permitido en producción con cookies HttpOnly: indica los orígenes exactos.\n",
+  );
   process.exit(1);
 }
 
@@ -100,7 +102,9 @@ if (env.NODE_ENV === 'production' && env.CORS_ORIGIN.trim() === '*') {
 export const corsOrigins: string[] | '*' =
   env.CORS_ORIGIN.trim() === '*'
     ? '*'
-    : env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean);
+    : env.CORS_ORIGIN.split(',')
+        .map((o) => o.trim())
+        .filter(Boolean);
 
 export const isProduction = env.NODE_ENV === 'production';
 

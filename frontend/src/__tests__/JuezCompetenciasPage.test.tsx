@@ -3,7 +3,15 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 vi.mock('../components/layout/AppShell', () => ({
-  default: ({ title, subtitle, children }: { title?: string; subtitle?: string; children: React.ReactNode }) => (
+  default: ({
+    title,
+    subtitle,
+    children,
+  }: {
+    title?: string;
+    subtitle?: string;
+    children: React.ReactNode;
+  }) => (
     <div data-testid="app-shell">
       {title && <h1>{title}</h1>}
       {subtitle && <p>{subtitle}</p>}

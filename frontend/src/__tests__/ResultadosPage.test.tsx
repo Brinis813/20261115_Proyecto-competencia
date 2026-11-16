@@ -13,7 +13,9 @@ vi.mock('../components/layout/AppShell', () => ({
 
 vi.mock('../components/ui', () => ({
   Alert: ({ children, tone }: { children: React.ReactNode; tone?: string }) => (
-    <div data-testid="alert" data-tone={tone}>{children}</div>
+    <div data-testid="alert" data-tone={tone}>
+      {children}
+    </div>
   ),
   Button: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
     <button onClick={onClick}>{children}</button>
@@ -23,7 +25,9 @@ vi.mock('../components/ui', () => ({
     <div data-testid="empty-state">{title && <span>{title}</span>}</div>
   ),
   IconButton: ({ label, onClick }: { label?: string; onClick?: () => void }) => (
-    <button aria-label={label} onClick={onClick}>icon</button>
+    <button aria-label={label} onClick={onClick}>
+      icon
+    </button>
   ),
   SkeletonList: ({ rows: _rows }: { rows?: number }) => <div data-testid="skeleton-list" />,
   Spinner: () => <div data-testid="spinner" />,

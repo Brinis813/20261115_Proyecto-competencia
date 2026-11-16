@@ -8,7 +8,10 @@ import { ETIQUETA_MEDICION, unidadDeWod, type Competencia } from '../../types';
 import { formatearCategorias } from '../../utils/formato';
 
 /** Meta de distancia del WOD (número único o matriz por categoría). */
-function textoMetaDistancia(wod: { esquema?: { distancia_meta?: unknown } | null; unidad_distancia?: string | null }): string {
+function textoMetaDistancia(wod: {
+  esquema?: { distancia_meta?: unknown } | null;
+  unidad_distancia?: string | null;
+}): string {
   const meta = wod.esquema?.distancia_meta;
   const unidad = wod.unidad_distancia ?? 'm';
   if (typeof meta === 'number') return meta > 0 ? `meta ${meta} ${unidad}` : '';
@@ -37,7 +40,9 @@ export default function JuezWodsPage() {
     api
       .get<Competencia[]>('/competencias/judge')
       .then((res) => {
-        const encontrado = (Array.isArray(res.data) ? res.data : []).find((w) => w.id === Number(competenciaId));
+        const encontrado = (Array.isArray(res.data) ? res.data : []).find(
+          (w) => w.id === Number(competenciaId),
+        );
         if (!encontrado) {
           setError('No estas asignado a esta competencia o ya no existe.');
           return;
@@ -56,7 +61,12 @@ export default function JuezWodsPage() {
       subtitle="Elige el WOD a evaluar"
       actions={
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" icon={Trophy} onClick={() => navigate(`/leaderboard/${competenciaId}`)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={Trophy}
+            onClick={() => navigate(`/leaderboard/${competenciaId}`)}
+          >
             <span className="hidden sm:inline">Clasificacion</span>
           </Button>
           <Button variant="ghost" size="sm" icon={ArrowLeft} onClick={() => navigate('/juez')}>
@@ -96,18 +106,27 @@ export default function JuezWodsPage() {
                     {wod.imagen_url ? (
                       <img src={wod.imagen_url} alt="" className="w-full h-full object-cover" />
                     ) : (
-                      <span className="font-display text-lg font-extrabold text-hyrox-primary">{wod.orden}</span>
+                      <span className="font-display text-lg font-extrabold text-hyrox-primary">
+                        {wod.orden}
+                      </span>
                     )}
                   </span>
                   <span className="flex-1 min-w-0">
-                    <span className="block font-semibold text-hyrox-paper truncate">{wod.nombre_ejercicio}</span>
+                    <span className="block font-semibold text-hyrox-paper truncate">
+                      {wod.nombre_ejercicio}
+                    </span>
                     <span className="flex items-center gap-2 mt-0.5 text-xs text-hyrox-mist">
                       <Timer className="w-3 h-3" aria-hidden="true" />
                       {ETIQUETA_MEDICION[wod.tipo_medicion]}
                       {wod.tipo_medicion === 'distancia' && (
                         <>
                           <span aria-hidden="true">&middot;</span>
-                          en {unidadDeWod(wod) === 'km' ? 'kilómetros' : unidadDeWod(wod) === 'mi' ? 'millas' : 'metros'}
+                          en{' '}
+                          {unidadDeWod(wod) === 'km'
+                            ? 'kilómetros'
+                            : unidadDeWod(wod) === 'mi'
+                              ? 'millas'
+                              : 'metros'}
                           {textoMetaDistancia(wod) && (
                             <>
                               <span aria-hidden="true">&middot;</span>

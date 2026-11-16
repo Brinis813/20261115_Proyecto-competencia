@@ -38,13 +38,8 @@ jest.mock('../sockets/handlers', () => ({
   broadcastLeaderboard: jest.fn(),
 }));
 
-import {
-  saveResult,
-  resetResult,
-  getResultsByParticipant,
-} from '../services/resultService';
+import { saveResult, resetResult, getResultsByParticipant } from '../services/resultService';
 import { Resultado, Wod, AuditLog, ResultHistory, Competencia } from '../models';
-import ResultadoSplit from '../models/ResultadoSplit';
 import { broadcastLeaderboard } from '../sockets/handlers';
 
 const mockResultado = Resultado as jest.Mocked<typeof Resultado>;
@@ -52,7 +47,6 @@ const mockWod = Wod as jest.Mocked<typeof Wod>;
 const mockAuditLog = AuditLog as jest.Mocked<typeof AuditLog>;
 const mockResultHistory = ResultHistory as jest.Mocked<typeof ResultHistory>;
 const mockCompetencia = Competencia as jest.Mocked<typeof Competencia>;
-const mockResultadoSplit = ResultadoSplit as jest.Mocked<typeof ResultadoSplit>;
 const mockBroadcast = broadcastLeaderboard as jest.MockedFunction<typeof broadcastLeaderboard>;
 
 beforeEach(() => jest.clearAllMocks());
@@ -67,7 +61,7 @@ describe('saveResult', () => {
         wod_id: 99,
         juez_id: 2,
         valor_bruto: '120',
-      })
+      }),
     ).rejects.toThrow('WOD no encontrado');
   });
 
@@ -97,7 +91,7 @@ describe('saveResult', () => {
         capado: false,
         disqualificado: false,
       }),
-      expect.anything()
+      expect.anything(),
     );
   });
 
@@ -122,7 +116,7 @@ describe('saveResult', () => {
         wod_id: 10,
         accion: 'creado',
       }),
-      expect.anything()
+      expect.anything(),
     );
 
     expect(mockAuditLog.create).toHaveBeenCalledWith(
@@ -132,7 +126,7 @@ describe('saveResult', () => {
         entidad_id: 7,
         usuario_id: 2,
       }),
-      expect.anything()
+      expect.anything(),
     );
   });
 
@@ -166,9 +160,7 @@ describe('resetResult', () => {
     mockWod.findByPk.mockResolvedValue({ id: 10, competencia_id: 5 } as any);
     mockResultado.destroy.mockResolvedValue(0);
 
-    await expect(resetResult(1, 10)).rejects.toThrow(
-      'No se encontro un resultado para resetear'
-    );
+    await expect(resetResult(1, 10)).rejects.toThrow('No se encontro un resultado para resetear');
   });
 
   it('elimina el resultado y registra historial', async () => {
@@ -190,7 +182,7 @@ describe('resetResult', () => {
         juez_id: 2,
         accion: 'reseteado',
       }),
-      expect.anything()
+      expect.anything(),
     );
   });
 
@@ -216,10 +208,8 @@ describe('getResultsByParticipant', () => {
     expect(mockResultado.findAll).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { participante_id: 3 },
-        include: expect.arrayContaining([
-          expect.objectContaining({ model: expect.anything() }),
-        ]),
-      })
+        include: expect.arrayContaining([expect.objectContaining({ model: expect.anything() })]),
+      }),
     );
   });
 });

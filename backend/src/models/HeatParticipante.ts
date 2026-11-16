@@ -60,7 +60,7 @@ HeatParticipante.init(
         fields: ['heat_id', 'carril_numero'],
       },
     ],
-  }
+  },
 );
 
 Heat.belongsToMany(Participante, {

@@ -46,7 +46,7 @@ async function detectarEsquemaLegacy(conn: mysql.Connection): Promise<ContextoLe
   // Sin tabla de ejercicios legacy no hay nada que mudar.
   const [tablas] = await conn.query<any[]>(
     `SELECT TABLE_NAME AS t FROM information_schema.TABLES
-     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('wods', 'circuitos', 'competencias', 'eventos')`
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('wods', 'circuitos', 'competencias', 'eventos')`,
   );
   const hay = new Set((tablas as Array<{ t: string }>).map((r) => r.t));
   if (!hay.has('wods') || !hay.has('competencias') || !hay.has('eventos')) return null;
@@ -58,7 +58,7 @@ async function detectarEsquemaLegacy(conn: mysql.Connection): Promise<ContextoLe
   if (!nombresWods.has('nombre')) return null;
 
   const [pruebasLegacy] = await conn.query<FilaPruebaLegacy[]>(
-    `SELECT * FROM wods WHERE nombre IS NOT NULL AND (nombre_ejercicio IS NULL OR nombre_ejercicio = '')`
+    `SELECT * FROM wods WHERE nombre IS NOT NULL AND (nombre_ejercicio IS NULL OR nombre_ejercicio = '')`,
   );
   const [colsComp] = await conn.query<any[]>(`SHOW COLUMNS FROM competencias`);
   const nombresComp = new Set((colsComp as Array<{ Field: string }>).map((c) => c.Field));
@@ -74,13 +74,15 @@ async function detectarEsquemaLegacy(conn: mysql.Connection): Promise<ContextoLe
 /** Normaliza enums y nulabilidad heredados para que la mudanza no falle. */
 async function normalizarTablasLegacy(conn: mysql.Connection): Promise<void> {
   try {
-    await conn.query(`DELETE FROM competencias WHERE fecha_inicio IS NOT NULL AND nombre = 'Competencia inicial'`);
     await conn.query(
-      `UPDATE competencias SET tiebreak_policy = 'DESIGNATED_CIRCUIT_SPLIT'
-       WHERE tiebreak_policy NOT IN ('NONE','TIEBREAK_MARK','DESIGNATED_CIRCUIT_SPLIT')`
+      `DELETE FROM competencias WHERE fecha_inicio IS NOT NULL AND nombre = 'Competencia inicial'`,
     );
     await conn.query(
-      `ALTER TABLE competencias MODIFY COLUMN tiebreak_policy ENUM('NONE','TIEBREAK_MARK','DESIGNATED_CIRCUIT_SPLIT') NOT NULL DEFAULT 'DESIGNATED_CIRCUIT_SPLIT'`
+      `UPDATE competencias SET tiebreak_policy = 'DESIGNATED_CIRCUIT_SPLIT'
+       WHERE tiebreak_policy NOT IN ('NONE','TIEBREAK_MARK','DESIGNATED_CIRCUIT_SPLIT')`,
+    );
+    await conn.query(
+      `ALTER TABLE competencias MODIFY COLUMN tiebreak_policy ENUM('NONE','TIEBREAK_MARK','DESIGNATED_CIRCUIT_SPLIT') NOT NULL DEFAULT 'DESIGNATED_CIRCUIT_SPLIT'`,
     );
     // Restos del contenedor: las fechas eran NOT NULL sin default y el
     // INSERT de pruebas (que no lleva fechas) fallaba con "Field
@@ -91,10 +93,14 @@ async function normalizarTablasLegacy(conn: mysql.Connection): Promise<void> {
     // La tabla `wods` legacy trae `nombre` (de cuando guardaba pruebas)
     // como NOT NULL sin default; los ejercicios nuevos no la escriben.
     const [colsWodsNorm] = await conn.query<any[]>(`SHOW COLUMNS FROM wods`);
-    const colNombre = (colsWodsNorm as Array<{ Field: string; Null: string; Default: unknown }>).find(
-      (col) => col.Field === 'nombre'
-    );
-    if (colNombre && colNombre.Null === 'NO' && (colNombre.Default === null || colNombre.Default === undefined)) {
+    const colNombre = (
+      colsWodsNorm as Array<{ Field: string; Null: string; Default: unknown }>
+    ).find((col) => col.Field === 'nombre');
+    if (
+      colNombre &&
+      colNombre.Null === 'NO' &&
+      (colNombre.Default === null || colNombre.Default === undefined)
+    ) {
       await conn.query(`ALTER TABLE wods MODIFY COLUMN nombre VARCHAR(150) NULL DEFAULT NULL`);
       log.info('columna legacy normalizada: wods.nombre ahora admite NULL');
     }
@@ -107,7 +113,7 @@ async function normalizarTablasLegacy(conn: mysql.Connection): Promise<void> {
 async function mudarPruebas(
   conn: mysql.Connection,
   hay: Set<string>,
-  pruebasLegacy: FilaPruebaLegacy[]
+  pruebasLegacy: FilaPruebaLegacy[],
 ): Promise<Map<number, number>> {
   const mapaPrueba = new Map<number, number>(); // wods.id viejo -> competencias.id nuevo
   for (const vieja of pruebasLegacy) {
@@ -118,10 +124,12 @@ async function mudarPruebas(
       try {
         const [cont] = await conn.query<any[]>(
           `SELECT evento_id FROM competencias WHERE id = ? LIMIT 1`,
-          [vieja.competencia_id]
+          [vieja.competencia_id],
         );
         eventoId = cont[0]?.evento_id ?? null;
-      } catch { eventoId = null; }
+      } catch {
+        eventoId = null;
+      }
     }
     if (!eventoId) {
       const [ev] = await conn.query<any[]>(`SELECT id FROM eventos ORDER BY id ASC LIMIT 1`);
@@ -136,12 +144,14 @@ async function mudarPruebas(
     // evento, se reutiliza en vez de duplicar.
     const [ya] = await conn.query<any[]>(
       `SELECT id FROM competencias WHERE nombre = ? AND evento_id = ? LIMIT 1`,
-      [vieja.nombre, eventoId]
+      [vieja.nombre, eventoId],
     );
     let nuevaId: number = ya[0]?.id ?? null;
     if (!nuevaId) {
       const divisiones =
-        typeof vieja.divisiones === 'string' ? vieja.divisiones : JSON.stringify(vieja.divisiones ?? null);
+        typeof vieja.divisiones === 'string'
+          ? vieja.divisiones
+          : JSON.stringify(vieja.divisiones ?? null);
       const [res] = await conn.query<any>(
         `INSERT INTO competencias
           (nombre, descripcion, metodo_desempate, tipo_flujo, tipo_publicacion,
@@ -165,12 +175,14 @@ async function mudarPruebas(
           vieja.rondas ?? 1,
           divisiones,
           eventoId,
-        ]
+        ],
       );
       nuevaId = res.insertId;
       log.info(`prueba legacy mudada: wods.id=${vieja.id} -> competencias.id=${nuevaId}`);
     } else {
-      log.info(`prueba legacy ya existia, se reutiliza: wods.id=${vieja.id} -> competencias.id=${nuevaId}`);
+      log.info(
+        `prueba legacy ya existia, se reutiliza: wods.id=${vieja.id} -> competencias.id=${nuevaId}`,
+      );
     }
     mapaPrueba.set(vieja.id, nuevaId);
 
@@ -184,23 +196,32 @@ async function mudarPruebas(
 }
 
 /** Reenlaza el WOD de desempate legacy (circuitos) al ejercicio ya mudado. */
-async function reenlazarDesempate(conn: mysql.Connection, circuitoId: number, competenciaId: number): Promise<void> {
+async function reenlazarDesempate(
+  conn: mysql.Connection,
+  circuitoId: number,
+  competenciaId: number,
+): Promise<void> {
   try {
     const [circ] = await conn.query<any[]>(
       `SELECT orden, nombre_ejercicio FROM circuitos WHERE id = ? LIMIT 1`,
-      [circuitoId]
+      [circuitoId],
     );
     if (circ[0]) {
       const [ej] = await conn.query<any[]>(
         `SELECT id FROM wods WHERE competencia_id = ? AND orden = ? AND nombre_ejercicio = ? LIMIT 1`,
-        [competenciaId, circ[0].orden, circ[0].nombre_ejercicio]
+        [competenciaId, circ[0].orden, circ[0].nombre_ejercicio],
       );
       if (ej[0]?.id) {
-        await conn.query(`UPDATE competencias SET wod_desempate_id = ? WHERE id = ?`, [ej[0].id, competenciaId]);
+        await conn.query(`UPDATE competencias SET wod_desempate_id = ? WHERE id = ?`, [
+          ej[0].id,
+          competenciaId,
+        ]);
       }
     }
   } catch (err) {
-    log.warn(`no se pudo reenlazar el desempate de la competencia ${competenciaId}: ${(err as Error).message}`);
+    log.warn(
+      `no se pudo reenlazar el desempate de la competencia ${competenciaId}: ${(err as Error).message}`,
+    );
   }
 }
 
@@ -208,7 +229,7 @@ async function reenlazarDesempate(conn: mysql.Connection, circuitoId: number, co
 async function mudarEjercicios(
   conn: mysql.Connection,
   hay: Set<string>,
-  mapaPrueba: Map<number, number>
+  mapaPrueba: Map<number, number>,
 ): Promise<void> {
   if (!hay.has('circuitos') || mapaPrueba.size === 0) return;
   const [colsEj] = await conn.query<any[]>(`SHOW COLUMNS FROM circuitos`);
@@ -218,15 +239,16 @@ async function mudarEjercicios(
   for (const [viejaPruebaId, nuevaPruebaId] of mapaPrueba) {
     const [ejercicios] = await conn.query<any[]>(
       `SELECT * FROM circuitos WHERE wod_id = ? ORDER BY orden ASC`,
-      [viejaPruebaId]
+      [viejaPruebaId],
     );
     for (const ej of ejercicios as any[]) {
       const [existe] = await conn.query<any[]>(
         `SELECT id FROM wods WHERE competencia_id = ? AND orden = ? AND nombre_ejercicio = ? LIMIT 1`,
-        [nuevaPruebaId, ej.orden, ej.nombre_ejercicio]
+        [nuevaPruebaId, ej.orden, ej.nombre_ejercicio],
       );
       if (!existe[0]) {
-        const esquema = typeof ej.esquema === 'string' ? ej.esquema : JSON.stringify(ej.esquema ?? null);
+        const esquema =
+          typeof ej.esquema === 'string' ? ej.esquema : JSON.stringify(ej.esquema ?? null);
         await conn.query(
           `INSERT INTO wods
             (competencia_id, orden, nombre, nombre_ejercicio, tipo_medicion,
@@ -242,19 +264,24 @@ async function mudarEjercicios(
             ej.tiempo_cap ?? 0,
             esquema,
             ej.puntaje_maximo ?? 100,
-          ]
+          ],
         );
       }
     }
     if ((ejercicios as unknown[]).length > 0) {
       await conn.query(`DELETE FROM circuitos WHERE wod_id = ?`, [viejaPruebaId]);
-      log.info(`ejercicios mudados de la prueba vieja wods.id=${viejaPruebaId}: ${(ejercicios as unknown[]).length}`);
+      log.info(
+        `ejercicios mudados de la prueba vieja wods.id=${viejaPruebaId}: ${(ejercicios as unknown[]).length}`,
+      );
     }
   }
 }
 
 /** Limpia el origen y el contenedor fantasma tras la mudanza. */
-async function limpiarOrigen(conn: mysql.Connection, mapaPrueba: Map<number, number>): Promise<void> {
+async function limpiarOrigen(
+  conn: mysql.Connection,
+  mapaPrueba: Map<number, number>,
+): Promise<void> {
   // Limpieza del origen: las pruebas ya mudadas salen de `wods` para que
   // no contaminen las consultas de ejercicios.
   for (const viejaPruebaId of mapaPrueba.keys()) {
@@ -267,21 +294,23 @@ async function limpiarOrigen(conn: mysql.Connection, mapaPrueba: Map<number, num
   try {
     const [fantasmas] = await conn.query<any[]>(
       `SELECT id, nombre FROM competencias
-       WHERE fecha_inicio IS NOT NULL AND nombre = 'Competencia inicial'`
+       WHERE fecha_inicio IS NOT NULL AND nombre = 'Competencia inicial'`,
     );
     for (const f of fantasmas as any[]) {
       await conn.query(`DELETE FROM competencias WHERE id = ?`, [f.id]);
       log.info(`contenedor legacy eliminado: competencias.id=${f.id} ("${f.nombre}")`);
     }
     const [otros] = await conn.query<any[]>(
-      `SELECT id, nombre FROM competencias WHERE fecha_inicio IS NOT NULL`
+      `SELECT id, nombre FROM competencias WHERE fecha_inicio IS NOT NULL`,
     );
     if ((otros as unknown[]).length > 0) {
       log.warn(
-        `contenedores legacy sin migrar en competencias: ${(otros as any[]).map((o) => `${o.id} ("${o.nombre}")`).join(', ')}`
+        `contenedores legacy sin migrar en competencias: ${(otros as any[]).map((o) => `${o.id} ("${o.nombre}")`).join(', ')}`,
       );
     }
-  } catch { /* tabla sin columnas legacy: nada que limpiar */ }
+  } catch {
+    /* tabla sin columnas legacy: nada que limpiar */
+  }
 }
 
 export async function migrarPruebasLegacy(conn: mysql.Connection): Promise<void> {

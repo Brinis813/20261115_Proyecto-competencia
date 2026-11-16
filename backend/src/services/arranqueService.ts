@@ -69,7 +69,9 @@ function snapshot(fila: Arranque, competencia: Competencia): CompetenciaStartPay
 }
 
 /** Último arranque de la competencia (o null si nunca se armó). Lo lee un juez al reconectar. */
-export async function obtenerSnapshot(competenciaId: number): Promise<CompetenciaStartPayload | null> {
+export async function obtenerSnapshot(
+  competenciaId: number,
+): Promise<CompetenciaStartPayload | null> {
   const [fila, competencia] = await Promise.all([
     Arranque.findOne({ where: { competencia_id: competenciaId }, order: [['id', 'DESC']] }),
     Competencia.findByPk(competenciaId),
@@ -81,7 +83,7 @@ export async function obtenerSnapshot(competenciaId: number): Promise<Competenci
 export async function programarArranque(
   competenciaId: number,
   input: { modo: ModoArranque; countdownSeg?: number; programadoParaMs?: number },
-  usuarioId: number
+  usuarioId: number,
 ): Promise<CompetenciaStartPayload> {
   const competencia = await Competencia.findByPk(competenciaId);
   if (!competencia) throw new Error('Competencia no encontrado');
@@ -127,7 +129,7 @@ export async function programarArranque(
         version: 1,
         creado_por: usuarioId,
       },
-      { transaction: t }
+      { transaction: t },
     );
 
     // Poda: el historial solo sirve para auditar lo reciente; se conservan los
@@ -151,9 +153,12 @@ export async function programarArranque(
 /** Cancela o finaliza el último arranque (también se difunde a los jueces). */
 export async function cambiarEstado(
   competenciaId: number,
-  estado: Extract<EstadoArranque, 'finalizado' | 'cancelado'>
+  estado: Extract<EstadoArranque, 'finalizado' | 'cancelado'>,
 ): Promise<CompetenciaStartPayload | null> {
-  const fila = await Arranque.findOne({ where: { competencia_id: competenciaId }, order: [['id', 'DESC']] });
+  const fila = await Arranque.findOne({
+    where: { competencia_id: competenciaId },
+    order: [['id', 'DESC']],
+  });
   if (!fila) return null;
   await fila.update({ estado, version: fila.version + 1 });
   const competencia = (await Competencia.findByPk(competenciaId))!;
@@ -167,14 +172,17 @@ export async function cambiarEstado(
  * especiales (la re-sincronización no necesita saber de pausas).
  */
 export async function pausarArranque(competenciaId: number): Promise<CompetenciaStartPayload> {
-  const fila = await Arranque.findOne({ where: { competencia_id: competenciaId }, order: [['id', 'DESC']] });
+  const fila = await Arranque.findOne({
+    where: { competencia_id: competenciaId },
+    order: [['id', 'DESC']],
+  });
   if (!fila) throw new Error('Esta competencia no tiene ningún arranque activo');
   if (fila.estado !== 'en_curso') throw new Error('Solo se puede pausar un heat en curso');
   // UPDATE condicional: dos pausas concurrentes (doble clic) solo aplican
   // una; la perdedora ve affectedRows=0 y recibe error en vez de pausar dos veces.
   const [afectadas] = await Arranque.update(
     { estado: 'pausado', pausado_en_ms: Date.now(), version: fila.version + 1 },
-    { where: { id: fila.id, estado: 'en_curso' } }
+    { where: { id: fila.id, estado: 'en_curso' } },
   );
   if (afectadas === 0) throw new Error('El heat ya cambio de estado; recarga e intentalo de nuevo');
   await fila.reload();
@@ -184,7 +192,10 @@ export async function pausarArranque(competenciaId: number): Promise<Competencia
 
 /** Reanuda un heat pausado recalculando el desfase para mantener la sincronía. */
 export async function reanudarArranque(competenciaId: number): Promise<CompetenciaStartPayload> {
-  const fila = await Arranque.findOne({ where: { competencia_id: competenciaId }, order: [['id', 'DESC']] });
+  const fila = await Arranque.findOne({
+    where: { competencia_id: competenciaId },
+    order: [['id', 'DESC']],
+  });
   if (!fila) throw new Error('Esta competencia no tiene ningún arranque activo');
   if (fila.estado !== 'pausado' || fila.pausado_en_ms == null) {
     throw new Error('El heat no está en pausa');
@@ -201,7 +212,7 @@ export async function reanudarArranque(competenciaId: number): Promise<Competenc
       pausa_acumulada_ms: (fila.pausa_acumulada_ms ?? 0) + enPausa,
       version: fila.version + 1,
     },
-    { where: { id: fila.id, estado: 'pausado' } }
+    { where: { id: fila.id, estado: 'pausado' } },
   );
   if (afectadas === 0) throw new Error('El heat ya cambio de estado; recarga e intentalo de nuevo');
   await fila.reload();

@@ -18,8 +18,8 @@ export async function vistaHeats(req: AuthRequest, res: Response) {
       await heatService.obtenerHeats(
         categoriaId,
         Number.isInteger(competenciaId) && competenciaId > 0 ? competenciaId : null,
-        req.alcance
-      )
+        req.alcance,
+      ),
     );
   } catch (error: any) {
     log.error('vistaHeats error:', error?.message);
@@ -33,9 +33,9 @@ export async function generarHeats(req: AuthRequest, res: Response) {
     return res.status(400).json({ message: 'Indica la categoría (categoria_id)' });
   }
   try {
-    res.status(201).json(
-      await heatService.generarHeats(categoria_id, capacidad_maxima, modo, req.alcance)
-    );
+    res
+      .status(201)
+      .json(await heatService.generarHeats(categoria_id, capacidad_maxima, modo, req.alcance));
   } catch (error: any) {
     log.error('generarHeats error:', error?.message);
     res.status(400).json({ message: mensajeSeguro(error) });
@@ -48,7 +48,9 @@ export async function crearHeat(req: AuthRequest, res: Response) {
     return res.status(400).json({ message: 'Indica la categoría (categoria_id)' });
   }
   try {
-    res.status(201).json(await heatService.crearHeatVacio(categoria_id, capacidad_maxima, req.alcance));
+    res
+      .status(201)
+      .json(await heatService.crearHeatVacio(categoria_id, capacidad_maxima, req.alcance));
   } catch (error: any) {
     log.error('crearHeat error:', error?.message);
     res.status(400).json({ message: mensajeSeguro(error) });
@@ -62,12 +64,7 @@ export async function moverAtleta(req: AuthRequest, res: Response) {
   }
   try {
     res.json(
-      await heatService.moverAtleta(
-        participante_id,
-        heat_id,
-        carril_numero ?? null,
-        req.alcance
-      )
+      await heatService.moverAtleta(participante_id, heat_id, carril_numero ?? null, req.alcance),
     );
   } catch (error: any) {
     log.error('moverAtleta error:', error?.message);
@@ -122,7 +119,13 @@ export async function horarioAuto(req: AuthRequest, res: Response) {
   }
   try {
     res.json(
-      await heatService.programarHorarioAuto(categoria_id, competencia_id, hora_heat_1, transicion_min, req.alcance)
+      await heatService.programarHorarioAuto(
+        categoria_id,
+        competencia_id,
+        hora_heat_1,
+        transicion_min,
+        req.alcance,
+      ),
     );
   } catch (error: any) {
     log.error('horarioAuto error:', error?.message);
@@ -136,7 +139,9 @@ export async function horarioManual(req: AuthRequest, res: Response) {
     return res.status(400).json({ message: 'Indica categoria_id y competencia_id' });
   }
   try {
-    res.json(await heatService.programarHorarioManual(categoria_id, competencia_id, horarios, req.alcance));
+    res.json(
+      await heatService.programarHorarioManual(categoria_id, competencia_id, horarios, req.alcance),
+    );
   } catch (error: any) {
     log.error('horarioManual error:', error?.message);
     res.status(400).json({ message: mensajeSeguro(error) });

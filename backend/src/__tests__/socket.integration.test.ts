@@ -28,25 +28,48 @@ jest.mock('../config/database', () => ({
 
 jest.mock('sequelize', () => {
   class MockModel {
-    static init() { return this; }
-    static findAll() { return []; }
-    static findOne() { return null; }
-    static findByPk() { return null; }
-    static create() { return {}; }
-    static update() { return [0]; }
-    static destroy() { return 0; }
-    static belongsTo() { return this as any; }
-    static hasMany() { return this as any; }
-    static belongsToMany() { return this as any; }
+    static init() {
+      return this;
+    }
+    static findAll() {
+      return [];
+    }
+    static findOne() {
+      return null;
+    }
+    static findByPk() {
+      return null;
+    }
+    static create() {
+      return {};
+    }
+    static update() {
+      return [0];
+    }
+    static destroy() {
+      return 0;
+    }
+    static belongsTo() {
+      return this as any;
+    }
+    static hasMany() {
+      return this as any;
+    }
+    static belongsToMany() {
+      return this as any;
+    }
   }
   return {
-    DataTypes: new Proxy({}, {
-      get(_target, prop) {
-        if (prop === 'ENUM') return (..._vals: any[]) => ({ type: 'ENUM' });
-        if (prop === 'STRING') return (_len?: number) => ({ type: 'STRING' });
-        return { type: String(prop) };
+    DataTypes: new Proxy(
+      {},
+      {
+        get(_target, prop) {
+          if (prop === 'ENUM') return (..._vals: any[]) => ({ type: 'ENUM' });
+          if (prop === 'STRING') return (_len?: number) => ({ type: 'STRING' });
+          return { type: String(prop) };
+        },
       },
-    }),
+    ),
     Model: MockModel,
     Op: {
       in: Symbol('Op.in'),
@@ -128,7 +151,7 @@ function makeToken(payload: Record<string, any> = {}): string {
   return jwt.sign(
     { id: 1, cedula: '12345', rol: 'juez', tipo: 'usuario', ...payload },
     JWT_SECRET,
-    { expiresIn: '1h' }
+    { expiresIn: '1h' },
   );
 }
 
@@ -145,10 +168,8 @@ const mockLeaderboard = {
 /* Test suite                                                          */
 /* ------------------------------------------------------------------ */
 
-const PORT = 0; // random available port
-
 function createServerAndConnect(
-  auth?: Record<string, any> | null
+  auth?: Record<string, any> | null,
 ): Promise<{ client: ClientSocket; port: number }> {
   return new Promise((resolve, reject) => {
     const server = http.createServer();
@@ -208,7 +229,7 @@ beforeEach(() => {
 
 describe('Socket.IO connection', () => {
   it('connects with valid token (authenticated)', async () => {
-    const { client, port } = await createServerAndConnect();
+    const { client } = await createServerAndConnect();
 
     expect(client.connected).toBe(true);
     expect(client.id).toBeDefined();
@@ -472,10 +493,14 @@ describe('check-participant-lock', () => {
     const { client } = await createServerAndConnect({ id: 5, rol: 'juez' });
 
     const result = await new Promise<any>((res) => {
-      client.emit('check-participant-lock', {
-        participante_id: 10,
-        wod_id: 1,
-      }, (data: any) => res(data));
+      client.emit(
+        'check-participant-lock',
+        {
+          participante_id: 10,
+          wod_id: 1,
+        },
+        (data: any) => res(data),
+      );
     });
 
     expect(result).toEqual({ locked: false, message: '' });
@@ -488,10 +513,14 @@ describe('check-participant-lock', () => {
     const { client } = await createServerAndConnect(null);
 
     const result = await new Promise<any>((res) => {
-      client.emit('check-participant-lock', {
-        participante_id: 10,
-        wod_id: 1,
-      }, (data: any) => res(data));
+      client.emit(
+        'check-participant-lock',
+        {
+          participante_id: 10,
+          wod_id: 1,
+        },
+        (data: any) => res(data),
+      );
     });
 
     expect(result).toEqual({ locked: false, message: '' });
@@ -504,10 +533,14 @@ describe('check-participant-lock', () => {
     const { client } = await createServerAndConnect({ rol: 'participante' });
 
     const result = await new Promise<any>((res) => {
-      client.emit('check-participant-lock', {
-        participante_id: 10,
-        wod_id: 1,
-      }, (data: any) => res(data));
+      client.emit(
+        'check-participant-lock',
+        {
+          participante_id: 10,
+          wod_id: 1,
+        },
+        (data: any) => res(data),
+      );
     });
 
     expect(result).toEqual({ locked: false, message: '' });
@@ -537,10 +570,14 @@ describe('lock-participant / unlock-participant', () => {
     const { client: client2 } = await createServerAndConnect({ id: 6, rol: 'juez' });
 
     const checkResult = await new Promise<any>((res) => {
-      client2.emit('check-participant-lock', {
-        participante_id: 10,
-        wod_id: 1,
-      }, (data: any) => res(data));
+      client2.emit(
+        'check-participant-lock',
+        {
+          participante_id: 10,
+          wod_id: 1,
+        },
+        (data: any) => res(data),
+      );
     });
 
     expect(checkResult.locked).toBe(true);
@@ -555,10 +592,14 @@ describe('lock-participant / unlock-participant', () => {
 
     // Check again — should be unlocked
     const checkResult2 = await new Promise<any>((res) => {
-      client2.emit('check-participant-lock', {
-        participante_id: 10,
-        wod_id: 1,
-      }, (data: any) => res(data));
+      client2.emit(
+        'check-participant-lock',
+        {
+          participante_id: 10,
+          wod_id: 1,
+        },
+        (data: any) => res(data),
+      );
     });
 
     expect(checkResult2.locked).toBe(false);
@@ -584,10 +625,14 @@ describe('lock-participant / unlock-participant', () => {
 
     const { client: client2 } = await createServerAndConnect({ id: 8, rol: 'juez' });
     const checkResult = await new Promise<any>((res) => {
-      client2.emit('check-participant-lock', {
-        participante_id: 11,
-        wod_id: 1,
-      }, (data: any) => res(data));
+      client2.emit(
+        'check-participant-lock',
+        {
+          participante_id: 11,
+          wod_id: 1,
+        },
+        (data: any) => res(data),
+      );
     });
 
     expect(checkResult.locked).toBe(false);
@@ -598,7 +643,8 @@ describe('lock-participant / unlock-participant', () => {
     await closeServer(client);
   });
 
-  it('participant cannot lock', async () => {    const { client } = await createServerAndConnect({ id: 10, rol: 'participante' });
+  it('participant cannot lock', async () => {
+    const { client } = await createServerAndConnect({ id: 10, rol: 'participante' });
 
     client.emit('lock-participant', {
       participante_id: 10,
@@ -611,10 +657,14 @@ describe('lock-participant / unlock-participant', () => {
     const { client: client2 } = await createServerAndConnect({ id: 5, rol: 'juez' });
 
     const checkResult = await new Promise<any>((res) => {
-      client2.emit('check-participant-lock', {
-        participante_id: 10,
-        wod_id: 1,
-      }, (data: any) => res(data));
+      client2.emit(
+        'check-participant-lock',
+        {
+          participante_id: 10,
+          wod_id: 1,
+        },
+        (data: any) => res(data),
+      );
     });
 
     expect(checkResult.locked).toBe(false);
@@ -637,10 +687,14 @@ describe('lock-participant / unlock-participant', () => {
 
     // Check should still be unlocked
     const checkResult = await new Promise<any>((res) => {
-      client.emit('check-participant-lock', {
-        participante_id: 10,
-        wod_id: 1,
-      }, (data: any) => res(data));
+      client.emit(
+        'check-participant-lock',
+        {
+          participante_id: 10,
+          wod_id: 1,
+        },
+        (data: any) => res(data),
+      );
     });
 
     expect(checkResult.locked).toBe(false);
@@ -656,11 +710,15 @@ describe('lock-participant / unlock-participant', () => {
     (Asignacion.findOne as unknown as jest.Mock).mockResolvedValue({ id: 1 });
 
     const ack = await new Promise<any>((res) => {
-      client.emit('lock-participant', {
-        participante_id: 20,
-        wod_id: 1,
-        judgeName: 'Juez ACK',
-      }, (data: any) => res(data));
+      client.emit(
+        'lock-participant',
+        {
+          participante_id: 20,
+          wod_id: 1,
+          judgeName: 'Juez ACK',
+        },
+        (data: any) => res(data),
+      );
     });
     expect(ack).toEqual({ ok: true });
 
@@ -675,11 +733,15 @@ describe('lock-participant / unlock-participant', () => {
     (Asignacion.findOne as unknown as jest.Mock).mockResolvedValue(null);
 
     const ack = await new Promise<any>((res) => {
-      client.emit('lock-participant', {
-        participante_id: 21,
-        wod_id: 1,
-        judgeName: 'Juez Ajeno',
-      }, (data: any) => res(data));
+      client.emit(
+        'lock-participant',
+        {
+          participante_id: 21,
+          wod_id: 1,
+          judgeName: 'Juez Ajeno',
+        },
+        (data: any) => res(data),
+      );
     });
     expect(ack).toEqual({ ok: false });
 
@@ -694,11 +756,15 @@ describe('lock-participant / unlock-participant', () => {
     (Asignacion.findOne as unknown as jest.Mock).mockResolvedValue({ id: 1 });
 
     const ack1 = await new Promise<any>((res) => {
-      client.emit('lock-participant', {
-        participante_id: 22,
-        wod_id: 1,
-        judgeName: 'Juez Recon',
-      }, (data: any) => res(data));
+      client.emit(
+        'lock-participant',
+        {
+          participante_id: 22,
+          wod_id: 1,
+          judgeName: 'Juez Recon',
+        },
+        (data: any) => res(data),
+      );
     });
     expect(ack1).toEqual({ ok: true });
 
@@ -709,11 +775,15 @@ describe('lock-participant / unlock-participant', () => {
     // Reconexión: el re-lock con ACK confirma que quedó registrado.
     const { client: recon } = await createServerAndConnect({ id: 5, rol: 'juez' });
     const ack2 = await new Promise<any>((res) => {
-      recon.emit('lock-participant', {
-        participante_id: 22,
-        wod_id: 1,
-        judgeName: 'Juez Recon',
-      }, (data: any) => res(data));
+      recon.emit(
+        'lock-participant',
+        {
+          participante_id: 22,
+          wod_id: 1,
+          judgeName: 'Juez Recon',
+        },
+        (data: any) => res(data),
+      );
     });
     expect(ack2).toEqual({ ok: true });
 
@@ -740,11 +810,15 @@ describe('lock-participant / unlock-participant', () => {
     await new Promise<void>((resolve) => soloCookie.on('connect', () => resolve()));
 
     const ack = await new Promise<any>((res) => {
-      soloCookie.emit('lock-participant', {
-        participante_id: 23,
-        wod_id: 1,
-        judgeName: 'Juez Cookie',
-      }, (data: any) => res(data));
+      soloCookie.emit(
+        'lock-participant',
+        {
+          participante_id: 23,
+          wod_id: 1,
+          judgeName: 'Juez Cookie',
+        },
+        (data: any) => res(data),
+      );
     });
     // ok:true prueba que la cookie autenticó (sin ella sería espectador → false).
     expect(ack).toEqual({ ok: true });
@@ -869,10 +943,14 @@ describe('disconnect cleanup', () => {
     const { client: client2 } = await createServerAndConnect({ id: 6, rol: 'juez' });
 
     const checkResult = await new Promise<any>((res) => {
-      client2.emit('check-participant-lock', {
-        participante_id: 10,
-        wod_id: 1,
-      }, (data: any) => res(data));
+      client2.emit(
+        'check-participant-lock',
+        {
+          participante_id: 10,
+          wod_id: 1,
+        },
+        (data: any) => res(data),
+      );
     });
 
     expect(checkResult.locked).toBe(false);
@@ -994,10 +1072,8 @@ describe('leaderboard failure', () => {
 
     // El socket sigue vivo: otro evento responde con normalidad.
     const check = new Promise<any>((res) => {
-      client.emit(
-        'check-participant-lock',
-        { participante_id: 10, wod_id: 1 },
-        (respuesta: any) => res(respuesta)
+      client.emit('check-participant-lock', { participante_id: 10, wod_id: 1 }, (respuesta: any) =>
+        res(respuesta),
       );
     });
     expect(await check).toEqual({ locked: false, message: '' });

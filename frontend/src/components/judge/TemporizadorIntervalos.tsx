@@ -4,8 +4,14 @@ import { useIntervalTimer, type ConfigIntervalos } from '../../hooks/useInterval
 /** Formatos habituales de intervalos. */
 export const PRESETS: Record<string, { etiqueta: string; config: ConfigIntervalos }> = {
   emom: { etiqueta: 'EMOM 10', config: { segundosTrabajo: 60, segundosDescanso: 0, rondas: 10 } },
-  tabata: { etiqueta: 'Tabata 8', config: { segundosTrabajo: 20, segundosDescanso: 10, rondas: 8 } },
-  e2mom: { etiqueta: 'E2MOM 10', config: { segundosTrabajo: 120, segundosDescanso: 0, rondas: 10 } },
+  tabata: {
+    etiqueta: 'Tabata 8',
+    config: { segundosTrabajo: 20, segundosDescanso: 10, rondas: 8 },
+  },
+  e2mom: {
+    etiqueta: 'E2MOM 10',
+    config: { segundosTrabajo: 120, segundosDescanso: 0, rondas: 10 },
+  },
 };
 
 /**
@@ -25,7 +31,8 @@ export default function TemporizadorIntervalos({
   /** Se dispara al cerrar cada ronda, por si el padre acumula reps por ronda. */
   onRondaCompletada?: (ronda: number) => void;
 }) {
-  const { ronda, fase, segundosRestantes, enMarcha, terminado, start, stop, reset } = useIntervalTimer(config);
+  const { ronda, fase, segundosRestantes, enMarcha, terminado, start, stop, reset } =
+    useIntervalTimer(config);
 
   const enDescanso = fase === 'descanso';
   // Ajustar la configuracion a mitad de una serie descuadraria el reloj.
@@ -74,7 +81,10 @@ export default function TemporizadorIntervalos({
               disabled={bloqueado}
               value={config[clave]}
               onChange={(e) =>
-                onCambiarConfig({ ...config, [clave]: Math.max(minimo, Number(e.target.value) || minimo) })
+                onCambiarConfig({
+                  ...config,
+                  [clave]: Math.max(minimo, Number(e.target.value) || minimo),
+                })
               }
               className="input-field font-mono text-center disabled:opacity-50"
             />
@@ -84,10 +94,14 @@ export default function TemporizadorIntervalos({
 
       <div
         className={`rounded-2xl border p-6 text-center transition-colors ${
-          enDescanso ? 'border-hyrox-danger/35 bg-hyrox-danger/[0.07]' : 'border-hyrox-accent/35 bg-hyrox-accent/[0.06]'
+          enDescanso
+            ? 'border-hyrox-danger/35 bg-hyrox-danger/[0.07]'
+            : 'border-hyrox-accent/35 bg-hyrox-accent/[0.06]'
         }`}
       >
-        <span className={enDescanso ? 'badge-red' : 'badge-green'}>{enDescanso ? 'Descanso' : 'Trabajo'}</span>
+        <span className={enDescanso ? 'badge-red' : 'badge-green'}>
+          {enDescanso ? 'Descanso' : 'Trabajo'}
+        </span>
         <p
           className={`timer-display leading-none text-6xl sm:text-7xl mt-3 ${
             enDescanso ? 'text-hyrox-danger' : 'text-hyrox-accent'
@@ -97,7 +111,9 @@ export default function TemporizadorIntervalos({
         >
           {segundosRestantes}
         </p>
-        <p className="text-2xs text-hyrox-mist mt-2 uppercase tracking-eyebrow">Segundos restantes</p>
+        <p className="text-2xs text-hyrox-mist mt-2 uppercase tracking-eyebrow">
+          Segundos restantes
+        </p>
       </div>
 
       {/* Progreso de rondas. Por encima de 20 la fila de puntos se vuelve
@@ -161,7 +177,12 @@ export default function TemporizadorIntervalos({
             )}
           </>
         )}
-        <button type="button" onClick={reset} className="btn-secondary min-h-[3rem] px-5" aria-label="Reiniciar intervalos">
+        <button
+          type="button"
+          onClick={reset}
+          className="btn-secondary min-h-[3rem] px-5"
+          aria-label="Reiniciar intervalos"
+        >
           <RotateCcw className="w-5 h-5" aria-hidden="true" />
         </button>
       </div>

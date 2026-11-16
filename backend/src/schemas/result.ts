@@ -20,7 +20,10 @@ export const saveResultSchema = z.object({
       }
       const splits = (detalle as Record<string, unknown>).splits;
       if (splits !== undefined && (!Array.isArray(splits) || splits.length > 200)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Los splits superan los 200 segmentos' });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Los splits superan los 200 segmentos',
+        });
       }
     }),
   desempate: z.number().int().min(0).max(2_000_000_000).nullable().optional(),

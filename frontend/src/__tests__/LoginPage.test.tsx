@@ -124,7 +124,13 @@ describe('LoginPage', () => {
 
   it('displays links for registration and leaderboard', () => {
     render(<LoginPage />, { wrapper });
-    expect(screen.getByRole('link', { name: /crea tu cuenta/i })).toHaveAttribute('href', '/registro');
-    expect(screen.getByRole('link', { name: /ver clasificacion en vivo/i })).toHaveAttribute('href', '/inicio');
+    expect(screen.getByRole('link', { name: /crea tu cuenta/i })).toHaveAttribute(
+      'href',
+      '/registro',
+    );
+    expect(screen.getByRole('link', { name: /ver clasificacion en vivo/i })).toHaveAttribute(
+      'href',
+      '/inicio',
+    );
   });
 });

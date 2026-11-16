@@ -8,12 +8,7 @@ import { Usuario, Participante, EventoUsuario, Box, Evento } from '../models';
  * minuscula, numero y simbolo para pasar la validacion del cambio.
  */
 function generarPasswordTemporal(): string {
-  const grupos = [
-    'ABCDEFGHJKLMNPQRSTUVWXYZ',
-    'abcdefghjkmnpqrstuvwxyz',
-    '23456789',
-    '!@#$%&*',
-  ];
+  const grupos = ['ABCDEFGHJKLMNPQRSTUVWXYZ', 'abcdefghjkmnpqrstuvwxyz', '23456789', '!@#$%&*'];
   const todos = grupos.join('');
   const longitud = 14;
 
@@ -91,7 +86,11 @@ export async function createAdmin(data: {
     email_verificado: true,
   });
 
-  const { password: _pw1, verificacion_token: _vt, ...sinSecretos } = usuario.toJSON() as Record<string, unknown>;
+  const {
+    password: _pw1,
+    verificacion_token: _vt,
+    ...sinSecretos
+  } = usuario.toJSON() as Record<string, unknown>;
   return { usuario: { ...sinSecretos, box_nombre: box.nombre }, tempPassword };
 }
 
@@ -192,7 +191,7 @@ export async function getAllParticipantes(filtro: Record<string, any> = {}) {
 /** Solo se permiten estos campos: evita que un PUT toque rol o password. */
 export async function updateUsuario(
   id: number,
-  data: Partial<{ nombre: string; apellidos: string; box: string }>
+  data: Partial<{ nombre: string; apellidos: string; box: string }>,
 ) {
   const usuario = await Usuario.findByPk(id);
   if (!usuario) throw new Error('Usuario no encontrado');
@@ -210,7 +209,15 @@ export async function updateUsuario(
 
 export async function updateParticipante(
   id: number,
-  data: Partial<{ nombre: string; apellidos: string; box: string; email: string | null; categoria: string | null; categoria_id: number | null; fecha_nacimiento: string }>
+  data: Partial<{
+    nombre: string;
+    apellidos: string;
+    box: string;
+    email: string | null;
+    categoria: string | null;
+    categoria_id: number | null;
+    fecha_nacimiento: string;
+  }>,
 ) {
   const participante = await Participante.findByPk(id);
   if (!participante) throw new Error('Participante no encontrado');
@@ -225,7 +232,15 @@ export async function updateParticipante(
   }
 
   const permitidos: Record<string, any> = {};
-  for (const campo of ['nombre', 'apellidos', 'box', 'email', 'categoria', 'categoria_id', 'fecha_nacimiento'] as const) {
+  for (const campo of [
+    'nombre',
+    'apellidos',
+    'box',
+    'email',
+    'categoria',
+    'categoria_id',
+    'fecha_nacimiento',
+  ] as const) {
     if (data[campo] !== undefined) permitidos[campo] = data[campo];
   }
 
@@ -275,10 +290,14 @@ export async function deleteUsuario(id: number) {
     Resultado.count({ where: { juez_id: id } }),
   ]);
   if (asignaciones > 0) {
-    throw new Error(`No se puede eliminar: el usuario tiene ${asignaciones} asignacion(es) activa(s). Elimina las asignaciones primero.`);
+    throw new Error(
+      `No se puede eliminar: el usuario tiene ${asignaciones} asignacion(es) activa(s). Elimina las asignaciones primero.`,
+    );
   }
   if (resultadosJuez > 0) {
-    throw new Error(`No se puede eliminar: el usuario tiene ${resultadosJuez} resultado(s) como juez. No es posible eliminar jueces con historial.`);
+    throw new Error(
+      `No se puede eliminar: el usuario tiene ${resultadosJuez} resultado(s) como juez. No es posible eliminar jueces con historial.`,
+    );
   }
 
   await usuario.destroy();
@@ -295,10 +314,14 @@ export async function deleteParticipante(id: number) {
     Resultado.count({ where: { participante_id: id } }),
   ]);
   if (resultados > 0) {
-    throw new Error(`No se puede eliminar: el participante tiene ${resultados} resultado(s) registrado(s). Elimina los resultados primero.`);
+    throw new Error(
+      `No se puede eliminar: el participante tiene ${resultados} resultado(s) registrado(s). Elimina los resultados primero.`,
+    );
   }
   if (asignaciones > 0) {
-    throw new Error(`No se puede eliminar: el participante tiene ${asignaciones} asignacion(es) activa(s). Elimina las asignaciones primero.`);
+    throw new Error(
+      `No se puede eliminar: el participante tiene ${asignaciones} asignacion(es) activa(s). Elimina las asignaciones primero.`,
+    );
   }
 
   await participante.destroy();
@@ -328,9 +351,11 @@ export interface ResultadoCargaMasiva {
 /** Parsea un CSV simple (separado por comas) con encabezados en la primera fila. */
 export function parseCSV(texto: string): FilaCSV[] {
   const lineas = texto.split(/\r?\n/).filter((l) => l.trim() !== '');
-  if (lineas.length < 2) throw new Error('El archivo debe tener encabezados y al menos una fila de datos');
+  if (lineas.length < 2)
+    throw new Error('El archivo debe tener encabezados y al menos una fila de datos');
   // Tope anti-DoS: 5000 filas bastan para cualquier carga real.
-  if (lineas.length - 1 > 5000) throw new Error('El archivo supera las 5000 filas; dividelo en partes');
+  if (lineas.length - 1 > 5000)
+    throw new Error('El archivo supera las 5000 filas; dividelo en partes');
 
   const encabezados = lineas[0].split(',').map((h) => h.trim().toLowerCase().replace(/\s+/g, '_'));
 
@@ -346,7 +371,10 @@ export function parseCSV(texto: string): FilaCSV[] {
   return filas;
 }
 
-export async function bulkCreate(filas: FilaCSV[], evento_id?: number | null): Promise<ResultadoCargaMasiva> {
+export async function bulkCreate(
+  filas: FilaCSV[],
+  evento_id?: number | null,
+): Promise<ResultadoCargaMasiva> {
   const resultado: ResultadoCargaMasiva = {
     total: filas.length,
     exitosos: 0,

@@ -29,7 +29,7 @@ export default function MediaAyuda({
         className={cx(
           'grid place-items-center rounded-xl border border-dashed border-white/10 bg-hyrox-carbon/60 text-hyrox-ghost',
           proporcion,
-          className
+          className,
         )}
       >
         <div className="flex flex-col items-center gap-2 px-4 text-center">
@@ -49,7 +49,7 @@ export default function MediaAyuda({
       className={cx(
         'w-full rounded-xl border border-white/[0.08] bg-hyrox-carbon object-contain',
         proporcion,
-        className
+        className,
       )}
     />
   );

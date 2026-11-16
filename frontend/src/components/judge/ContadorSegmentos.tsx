@@ -80,7 +80,8 @@ export default function ContadorSegmentos({
       <div>
         <h3 className="eyebrow">{wod.nombre_ejercicio}</h3>
         <p className="text-2xs text-hyrox-ghost mt-0.5">
-          {participante.nombre} {participante.apellidos} · {completados} de {segmentos.length} segmentos
+          {participante.nombre} {participante.apellidos} · {completados} de {segmentos.length}{' '}
+          segmentos
         </p>
       </div>
 
@@ -111,7 +112,7 @@ export default function ContadorSegmentos({
                   ? 'border-hyrox-primary/30 bg-hyrox-primary/[0.07]'
                   : esActual
                     ? 'border-hyrox-primary/50 bg-hyrox-primary/10'
-                    : 'border-white/[0.06] bg-white/[0.02] opacity-60'
+                    : 'border-white/[0.06] bg-white/[0.02] opacity-60',
               )}
             >
               <span className="grid place-items-center w-6 h-6 rounded-md bg-white/[0.06] font-mono text-2xs shrink-0">
@@ -119,7 +120,9 @@ export default function ContadorSegmentos({
               </span>
               <span className="flex-1 min-w-0 truncate text-hyrox-paper">
                 {segmento.nombre}
-                {segmento.distancia && <span className="text-hyrox-ghost"> · {segmento.distancia}</span>}
+                {segmento.distancia && (
+                  <span className="text-hyrox-ghost"> · {segmento.distancia}</span>
+                )}
               </span>
               {split && (
                 <span className="font-mono text-2xs tabular-nums text-hyrox-mist shrink-0">
@@ -152,7 +155,13 @@ export default function ContadorSegmentos({
         </Button>
       </div>
 
-      <Button type="button" icon={Save} onClick={onSave} disabled={completados === 0 || enPausa} className="w-full">
+      <Button
+        type="button"
+        icon={Save}
+        onClick={onSave}
+        disabled={completados === 0 || enPausa}
+        className="w-full"
+      >
         Guardar resultado
       </Button>
     </div>

@@ -13,8 +13,26 @@ const router = Router();
  * resolverEvento fija req.alcance para los autenticados; los anónimos
  * entran como público (el controlador omite el chequeo BOLA sin usuario).
  */
-router.get('/public/:competenciaId', publicLeaderboardRateLimiter(), optionalAuth, resolverEvento, leaderboardController.getLeaderboard);
-router.get('/evento/:eventoId', publicLeaderboardRateLimiter(), optionalAuth, resolverEvento, leaderboardController.getEventoLeaderboard);
-router.get('/:competenciaId', publicLeaderboardRateLimiter(), optionalAuth, resolverEvento, leaderboardController.getLeaderboard);
+router.get(
+  '/public/:competenciaId',
+  publicLeaderboardRateLimiter(),
+  optionalAuth,
+  resolverEvento,
+  leaderboardController.getLeaderboard,
+);
+router.get(
+  '/evento/:eventoId',
+  publicLeaderboardRateLimiter(),
+  optionalAuth,
+  resolverEvento,
+  leaderboardController.getEventoLeaderboard,
+);
+router.get(
+  '/:competenciaId',
+  publicLeaderboardRateLimiter(),
+  optionalAuth,
+  resolverEvento,
+  leaderboardController.getLeaderboard,
+);
 
 export default router;

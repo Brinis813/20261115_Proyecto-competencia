@@ -106,7 +106,11 @@ export default function BoxesPage() {
       }
     >
       <div className="space-y-4">
-        {error && <Alert tone="error" onDismiss={() => setError('')}>{error}</Alert>}
+        {error && (
+          <Alert tone="error" onDismiss={() => setError('')}>
+            {error}
+          </Alert>
+        )}
 
         {cargando ? (
           <Panel>
@@ -118,7 +122,11 @@ export default function BoxesPage() {
               icon={Building2}
               title="Todavia no hay boxes"
               description="Crea el primero y luego asigna administradores y eventos."
-              action={<Button icon={Plus} onClick={abrirNuevo}>Nuevo box</Button>}
+              action={
+                <Button icon={Plus} onClick={abrirNuevo}>
+                  Nuevo box
+                </Button>
+              }
             />
           </Panel>
         ) : (
@@ -142,7 +150,11 @@ export default function BoxesPage() {
                       )}
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <IconButton icon={Pencil} label={`Editar ${box.nombre}`} onClick={() => abrirEdicion(box)} />
+                      <IconButton
+                        icon={Pencil}
+                        label={`Editar ${box.nombre}`}
+                        onClick={() => abrirEdicion(box)}
+                      />
                       <IconButton
                         icon={Trash2}
                         label={`Eliminar ${box.nombre}`}

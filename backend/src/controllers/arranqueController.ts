@@ -59,8 +59,11 @@ export async function estadoArranque(req: AuthRequest, res: Response) {
     if (req.user!.rol === 'juez') {
       // El juez asignado entra por asignación explícita, sin exigir
       // membresía de evento (cubre jueces CSV sin EventoUsuario).
-      const asignado = await Asignacion.findOne({ where: { competencia_id: competenciaId, usuario_id: req.user!.id } });
-      if (!asignado) return res.status(403).json({ message: 'No estás asignado a esta competencia' });
+      const asignado = await Asignacion.findOne({
+        where: { competencia_id: competenciaId, usuario_id: req.user!.id },
+      });
+      if (!asignado)
+        return res.status(403).json({ message: 'No estás asignado a esta competencia' });
     } else if (!puedeEditar(req, competencia.evento_id)) {
       return res.status(403).json({ message: 'No administras este evento' });
     }

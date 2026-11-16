@@ -71,7 +71,8 @@ export async function loginUsuario(cedula: string, password: string) {
 
   // Se compara siempre contra un hash para que el tiempo de respuesta no
   // revele si la cedula existe o no.
-  const hash = usuario?.password ?? '$2b$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidiu';
+  const hash =
+    usuario?.password ?? '$2b$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidiu';
   const passwordValida = await bcrypt.compare(password, hash);
 
   if (!usuario || !passwordValida) {
@@ -85,7 +86,12 @@ export async function loginUsuario(cedula: string, password: string) {
   }
 
   return {
-    token: firmarToken({ id: usuario.id, cedula: usuario.cedula, rol: usuario.rol, tipo: 'usuario' }),
+    token: firmarToken({
+      id: usuario.id,
+      cedula: usuario.cedula,
+      rol: usuario.rol,
+      tipo: 'usuario',
+    }),
     user: toProfileDTO(usuario),
     needsPasswordChange: !usuario.password_cambiado,
   };
@@ -114,7 +120,9 @@ async function emitirVerificacion(usuario: Usuario): Promise<{ enviado: boolean 
     verificacion_expira: new Date(Date.now() + HORAS_VERIFICACION * 3600 * 1000),
   });
 
-  return enviarCorreo(correoDeVerificacion(usuario.email!, usuario.nombre, enlaceDeVerificacion(token)));
+  return enviarCorreo(
+    correoDeVerificacion(usuario.email!, usuario.nombre, enlaceDeVerificacion(token)),
+  );
 }
 
 export interface DatosRegistro {
@@ -179,7 +187,9 @@ export async function verificarCorreo(token: string) {
   });
 
   if (!usuario) {
-    throw new Error('El enlace no es valido o ya caduco. Pide uno nuevo desde la pantalla de acceso.');
+    throw new Error(
+      'El enlace no es valido o ya caduco. Pide uno nuevo desde la pantalla de acceso.',
+    );
   }
 
   // Primero el evento y despues marcar el correo: si la creacion falla,
@@ -193,7 +203,12 @@ export async function verificarCorreo(token: string) {
   });
 
   return {
-    token: firmarToken({ id: usuario.id, cedula: usuario.cedula, rol: usuario.rol, tipo: 'usuario' }),
+    token: firmarToken({
+      id: usuario.id,
+      cedula: usuario.cedula,
+      rol: usuario.rol,
+      tipo: 'usuario',
+    }),
     user: { ...toProfileDTO(usuario), es_superadmin: false, password_cambiado: true },
     evento: { id: evento.id, nombre: evento.nombre },
   };
@@ -282,7 +297,7 @@ export function refreshToken(payload: TokenPayload): { token: string } {
 export async function changePassword(
   userId: number,
   currentPassword: string | undefined,
-  newPassword: string
+  newPassword: string,
 ) {
   const usuario = await Usuario.findByPk(userId);
   if (!usuario) {
@@ -352,9 +367,14 @@ export async function solicitarResetPassword(email: string): Promise<void> {
 }
 
 /** Canjea el token por una contraseña nueva. El token es de un solo uso. */
-export async function restablecerPassword(token: string, newPassword: string): Promise<{ message: string }> {
+export async function restablecerPassword(
+  token: string,
+  newPassword: string,
+): Promise<{ message: string }> {
   if (!esPasswordRobusta(newPassword)) {
-    throw new Error('La contraseña debe tener 8+ caracteres, mayúscula, minúscula, número y símbolo');
+    throw new Error(
+      'La contraseña debe tener 8+ caracteres, mayúscula, minúscula, número y símbolo',
+    );
   }
   const usuario = await Usuario.findOne({
     where: {

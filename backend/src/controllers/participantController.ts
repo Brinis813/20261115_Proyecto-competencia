@@ -14,7 +14,9 @@ async function juezAsignadoEnEvento(juezId: number, eventoId: number | null): Pr
   const asignacion = await Asignacion.findOne({
     attributes: ['id'],
     where: { usuario_id: juezId },
-    include: [{ model: Competencia, as: 'Competencia', attributes: [], where: { evento_id: eventoId } }],
+    include: [
+      { model: Competencia, as: 'Competencia', attributes: [], where: { evento_id: eventoId } },
+    ],
   });
   return asignacion !== null;
 }
@@ -56,8 +58,14 @@ export async function getParticipantResults(req: AuthRequest, res: Response) {
 
     // BOLA/IDOR: el staff solo consulta atletas de sus eventos. Al juez sin
     // membresia (legacy/CSV) se le admite si tiene asignacion en ese evento.
-    if (req.user!.rol !== 'participante' && !perteneceAlAlcance(req.alcance, participante.evento_id)) {
-      if (req.user!.rol !== 'juez' || !(await juezAsignadoEnEvento(req.user!.id, participante.evento_id))) {
+    if (
+      req.user!.rol !== 'participante' &&
+      !perteneceAlAlcance(req.alcance, participante.evento_id)
+    ) {
+      if (
+        req.user!.rol !== 'juez' ||
+        !(await juezAsignadoEnEvento(req.user!.id, participante.evento_id))
+      ) {
         return res.status(403).json({ message: 'No tienes acceso a este participante' });
       }
     }
@@ -77,14 +85,18 @@ export async function getParticipantResults(req: AuthRequest, res: Response) {
       : [];
     const nombrePorCompetencia = new Map(competencias.map((w) => [w.id, w.nombre]));
 
-    const resultsByCompetencia: Record<number, { competencia_nombre: string; resultados: any[] }> = {};
+    const resultsByCompetencia: Record<number, { competencia_nombre: string; resultados: any[] }> =
+      {};
     for (const resultado of filas) {
       const wod = resultado.get('Wod') as { competencia_id?: number } | null;
       const competenciaId = wod?.competencia_id;
       if (!competenciaId) continue;
 
       if (!resultsByCompetencia[competenciaId]) {
-        resultsByCompetencia[competenciaId] = { competencia_nombre: nombrePorCompetencia.get(competenciaId) || '', resultados: [] };
+        resultsByCompetencia[competenciaId] = {
+          competencia_nombre: nombrePorCompetencia.get(competenciaId) || '',
+          resultados: [],
+        };
       }
       resultsByCompetencia[competenciaId].resultados.push(resultado);
     }

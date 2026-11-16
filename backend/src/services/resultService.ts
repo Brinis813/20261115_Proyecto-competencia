@@ -8,7 +8,11 @@ import { invalidateEventoLeaderboard } from './scoring/eventoLeaderboard';
 import type { DetalleMedicion, SplitRegistro } from '../types/medicion';
 
 /** Persiste splits dentro de una tx existente (reemplaza anteriores). */
-async function persistirSplits(resultadoId: number, splits: SplitRegistro[], t: Transaction): Promise<void> {
+async function persistirSplits(
+  resultadoId: number,
+  splits: SplitRegistro[],
+  t: Transaction,
+): Promise<void> {
   await ResultadoSplit.destroy({ where: { resultado_id: resultadoId }, transaction: t });
   await ResultadoSplit.bulkCreate(
     splits.map((s) => ({
@@ -18,7 +22,7 @@ async function persistirSplits(resultadoId: number, splits: SplitRegistro[], t: 
       tiempo_acumulado_ms: s.tiempo_acumulado_ms,
       tiempo_parcial_ms: s.tiempo_parcial_ms,
     })),
-    { transaction: t }
+    { transaction: t },
   );
 }
 
@@ -59,7 +63,7 @@ export async function saveResult(data: {
         es_desempate: data.es_desempate || false,
         timestamp_servidor: new Date(),
       },
-      { transaction: t }
+      { transaction: t },
     );
 
     await ResultHistory.create(
@@ -71,7 +75,7 @@ export async function saveResult(data: {
         valor_bruto: data.valor_bruto,
         accion: 'creado',
       },
-      { transaction: t }
+      { transaction: t },
     );
 
     await AuditLog.create(
@@ -80,10 +84,16 @@ export async function saveResult(data: {
         entidad: 'resultados',
         entidad_id: creado.id,
         usuario_id: data.juez_id,
-        evento_id: (await Competencia.findByPk(wod.competencia_id, { attributes: ['evento_id'], transaction: t }) as unknown as { evento_id: number | null } | null)?.evento_id ?? null,
+        evento_id:
+          (
+            (await Competencia.findByPk(wod.competencia_id, {
+              attributes: ['evento_id'],
+              transaction: t,
+            })) as unknown as { evento_id: number | null } | null
+          )?.evento_id ?? null,
         detalle: { participante_id: data.participante_id, wod_id: data.wod_id },
       },
-      { transaction: t }
+      { transaction: t },
     );
 
     // Splits en la misma tx: un fallo aquí revierte tambien el resultado
@@ -118,8 +128,15 @@ export async function resetResult(participanteId: number, wodId: number, juezId?
     if (n === 0) throw new Error('No se encontro un resultado para resetear');
 
     await ResultHistory.create(
-      { resultado_id: null, participante_id: participanteId, wod_id: wodId, juez_id: juezId ?? 0, valor_bruto: null, accion: 'reseteado' },
-      { transaction: t }
+      {
+        resultado_id: null,
+        participante_id: participanteId,
+        wod_id: wodId,
+        juez_id: juezId ?? 0,
+        valor_bruto: null,
+        accion: 'reseteado',
+      },
+      { transaction: t },
     );
     return n;
   });
@@ -136,7 +153,15 @@ export async function getResultsByParticipant(participanteId: number) {
     include: [
       {
         model: Wod,
-        attributes: ['id', 'nombre_ejercicio', 'tipo_medicion', 'unidad_distancia', 'imagen_url', 'orden', 'competencia_id'],
+        attributes: [
+          'id',
+          'nombre_ejercicio',
+          'tipo_medicion',
+          'unidad_distancia',
+          'imagen_url',
+          'orden',
+          'competencia_id',
+        ],
       },
     ],
     order: [['created_at', 'DESC']],
@@ -151,7 +176,10 @@ export async function getResultsByCompetencia(competenciaId: number) {
     where: { wod_id: wods.map((c) => c.id) },
     include: [
       { model: Participante, attributes: ['id', 'nombre', 'apellidos', 'cedula', 'categoria'] },
-      { model: Wod, attributes: ['id', 'nombre_ejercicio', 'tipo_medicion', 'unidad_distancia', 'imagen_url'] },
+      {
+        model: Wod,
+        attributes: ['id', 'nombre_ejercicio', 'tipo_medicion', 'unidad_distancia', 'imagen_url'],
+      },
     ],
   });
 }

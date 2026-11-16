@@ -37,7 +37,11 @@ export function csvTexto(filas: unknown[][]): string {
 }
 
 /** Descarga un texto como archivo. */
-export function descargarTexto(nombre: string, texto: string, mime = 'text/csv;charset=utf-8'): void {
+export function descargarTexto(
+  nombre: string,
+  texto: string,
+  mime = 'text/csv;charset=utf-8',
+): void {
   const blob = new Blob([texto], { type: mime });
   const url = URL.createObjectURL(blob);
   const enlace = document.createElement('a');
@@ -55,13 +59,14 @@ export function nombreArchivo(base: string, extension: string): string {
   const dos = (n: number) => String(n).padStart(2, '0');
   const fecha = `${ahora.getFullYear()}${dos(ahora.getMonth() + 1)}${dos(ahora.getDate())}`;
   const hora = `${dos(ahora.getHours())}${dos(ahora.getMinutes())}`;
-  const limpio = base
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9-_]+/g, '_')
-    .replace(/_+/g, '_')
-    .replace(/^_|_$/g, '')
-    .slice(0, 60) || 'informe';
+  const limpio =
+    base
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9-_]+/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '')
+      .slice(0, 60) || 'informe';
   return `${limpio}_${fecha}_${hora}.${extension}`;
 }
 
@@ -76,13 +81,13 @@ export function textoEstado(fila: Pick<ResultadoFila, 'abandono' | 'capado'>): s
 export function juezDeMedicion(
   asignaciones: Asignacion[],
   participanteId: number,
-  wodId: number
+  wodId: number,
 ): string {
   const exacta = asignaciones.find(
-    (a) => a.participante_id === participanteId && a.wod_id === wodId
+    (a) => a.participante_id === participanteId && a.wod_id === wodId,
   );
   const general = asignaciones.find(
-    (a) => a.participante_id === participanteId && a.wod_id == null
+    (a) => a.participante_id === participanteId && a.wod_id == null,
   );
   const elegida = exacta ?? general;
   if (!elegida?.Usuario) return '';
@@ -115,7 +120,7 @@ export function filasResultadosCompetencia(
   wods: LeaderboardWod[],
   filas: ResultadoFila[],
   asignaciones: Asignacion[],
-  boxPorAtleta: Map<number, string>
+  boxPorAtleta: Map<number, string>,
 ): unknown[][] {
   const wodPorId = new Map(wods.map((c) => [c.id, c]));
   const ordenadas = [...filas].sort((a, b) => {
@@ -136,7 +141,13 @@ export function filasResultadosCompetencia(
       f.cedula,
       boxPorAtleta.get(f.participante_id) ?? '',
       f.categoria ?? '',
-      formatearValor(f.valor_bruto, wod?.tipo_medicion ?? 'repeticiones', f.abandono, f.capado, unidadDeWod(wod)),
+      formatearValor(
+        f.valor_bruto,
+        wod?.tipo_medicion ?? 'repeticiones',
+        f.abandono,
+        f.capado,
+        unidadDeWod(wod),
+      ),
       f.puntos_calculados,
       textoEstado(f),
       juezDeMedicion(asignaciones, f.participante_id, f.wod_id),
@@ -151,11 +162,17 @@ export function csvResultadosCompetencia(
   wods: LeaderboardWod[],
   filas: ResultadoFila[],
   asignaciones: Asignacion[],
-  participantes: Participante[]
+  participantes: Participante[],
 ): string {
   return csvTexto([
     CABECERA_RESULTADOS,
-    ...filasResultadosCompetencia(competenciaNombre, wods, filas, asignaciones, mapaBoxAtletas(participantes)),
+    ...filasResultadosCompetencia(
+      competenciaNombre,
+      wods,
+      filas,
+      asignaciones,
+      mapaBoxAtletas(participantes),
+    ),
   ]);
 }
 
@@ -230,8 +247,8 @@ export function csvInformeEvento(datos: DatosInforme): string {
         datos.wodsPorCompetencia.get(competencia.id) ?? [],
         datos.filasPorCompetencia.get(competencia.id) ?? [],
         datos.asignacionesPorCompetencia.get(competencia.id) ?? [],
-        boxPorAtleta
-      )
+        boxPorAtleta,
+      ),
     );
   }
 
@@ -280,7 +297,7 @@ export function csvInformeEvento(datos: DatosInforme): string {
   seccion('ATLETAS');
   filas.push(['Atleta', 'Cédula', 'Box', 'Categoría']);
   const atletasOrdenados = [...datos.participantes].sort((a, b) =>
-    `${a.apellidos} ${a.nombre}`.localeCompare(`${b.apellidos} ${b.nombre}`)
+    `${a.apellidos} ${a.nombre}`.localeCompare(`${b.apellidos} ${b.nombre}`),
   );
   for (const p of atletasOrdenados) {
     filas.push([`${p.nombre} ${p.apellidos}`.trim(), p.cedula, p.box ?? '', p.categoria ?? '']);

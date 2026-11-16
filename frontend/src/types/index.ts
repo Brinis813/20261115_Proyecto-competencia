@@ -1,6 +1,7 @@
 export type Rol = 'admin' | 'juez' | 'participante';
 
-export type TipoMedicion = 'tiempo' | 'repeticiones' | 'peso' | 'distancia' | 'calorías' | 'time_trial_splits';
+export type TipoMedicion =
+  'tiempo' | 'repeticiones' | 'peso' | 'distancia' | 'calorías' | 'time_trial_splits';
 
 /**
  * Formato de la prueba: como compite el atleta en esta competencia.
@@ -129,12 +130,7 @@ export type ModoArranque = 'directo' | 'cuenta_regresiva' | 'manual_juez' | 'pro
 
 /** Ciclo de vida del heat. */
 export type EstadoArranque =
-  | 'armado'
-  | 'cuenta_regresiva'
-  | 'en_curso'
-  | 'pausado'
-  | 'finalizado'
-  | 'cancelado';
+  'armado' | 'cuenta_regresiva' | 'en_curso' | 'pausado' | 'finalizado' | 'cancelado';
 
 /**
  * Snapshot del arranque (evento `competencia:start` + GET /competencias/:id/arranque).
@@ -242,10 +238,7 @@ export const ETIQUETA_SCORING: Record<EventoScoringType, string> = {
 
 /** Desempate global: cómo se resuelven los empates en el acumulado. */
 export type EventoTieBreakPolicy =
-  | 'NONE'
-  | 'BEST_INDIVIDUAL_RANK'
-  | 'DESIGNATED_TIEBREAK_COMPETENCIA'
-  | 'LAST_COMPETENCIA_SCORE';
+  'NONE' | 'BEST_INDIVIDUAL_RANK' | 'DESIGNATED_TIEBREAK_COMPETENCIA' | 'LAST_COMPETENCIA_SCORE';
 
 export const ETIQUETA_TIEBREAK_GLOBAL: Record<EventoTieBreakPolicy, string> = {
   NONE: 'Sin desempate',
@@ -255,10 +248,7 @@ export const ETIQUETA_TIEBREAK_GLOBAL: Record<EventoTieBreakPolicy, string> = {
 };
 
 /** Desempate dentro de la competencia: coincide con lo que el juez puede registrar. */
-export type CompetenciaTieBreakPolicy =
-  | 'NONE'
-  | 'TIEBREAK_MARK'
-  | 'DESIGNATED_CIRCUIT_SPLIT';
+export type CompetenciaTieBreakPolicy = 'NONE' | 'TIEBREAK_MARK' | 'DESIGNATED_CIRCUIT_SPLIT';
 
 export const ETIQUETA_TIEBREAK_COMPETENCIA: Record<CompetenciaTieBreakPolicy, string> = {
   NONE: 'Sin desempate',
@@ -439,7 +429,16 @@ export interface Resultado {
   es_desempate: boolean;
   sincronizado: boolean;
   timestamp_servidor: string;
-  Wod?: Pick<Wod, 'id' | 'nombre_ejercicio' | 'tipo_medicion' | 'unidad_distancia' | 'imagen_url' | 'orden' | 'competencia_id'>;
+  Wod?: Pick<
+    Wod,
+    | 'id'
+    | 'nombre_ejercicio'
+    | 'tipo_medicion'
+    | 'unidad_distancia'
+    | 'imagen_url'
+    | 'orden'
+    | 'competencia_id'
+  >;
 }
 
 /* --------------------------- Clasificacion --------------------------- */
@@ -551,7 +550,10 @@ export const UNIDAD_MEDICION: Record<TipoMedicion, string> = {
  * Unidad con la que se muestra una marca según el WOD. La distancia usa la
  * unidad propia del WOD (m/km/mi); el resto usa la fija de su tipo.
  */
-export function unidadDeWod(wod: { tipo_medicion: TipoMedicion; unidad_distancia?: UnidadDistancia | null } | null | undefined): string {
+export function unidadDeWod(
+  wod:
+    { tipo_medicion: TipoMedicion; unidad_distancia?: UnidadDistancia | null } | null | undefined,
+): string {
   if (wod?.tipo_medicion === 'distancia') {
     const u = wod.unidad_distancia;
     return u === 'km' || u === 'mi' || u === 'm' ? u : 'm';
@@ -569,7 +571,7 @@ export function formatearValor(
   tipo: TipoMedicion,
   abandono = false,
   capado = false,
-  unidad?: string | null
+  unidad?: string | null,
 ): string {
   if (abandono) return 'DNF';
   if (!valor) return '--';

@@ -336,95 +336,284 @@ export const SCHEMA_STATEMENTS: string[] = [
  * Cada entrada se aplica solo si la columna/indice todavia no existe.
  */
 export const MIGRATIONS: Array<{ table: string; column: string; definition: string }> = [
-  { table: 'competencias', column: 'estado', definition: `ALTER TABLE competencias ADD COLUMN estado ENUM('borrador','activo','finalizado') NOT NULL DEFAULT 'activo'` },
-  { table: 'competencias', column: 'wod_desempate_id', definition: `ALTER TABLE competencias ADD COLUMN wod_desempate_id INT DEFAULT NULL` },
-  { table: 'participantes', column: 'categoria', definition: `ALTER TABLE participantes ADD COLUMN categoria VARCHAR(50) NULL` },
+  {
+    table: 'competencias',
+    column: 'estado',
+    definition: `ALTER TABLE competencias ADD COLUMN estado ENUM('borrador','activo','finalizado') NOT NULL DEFAULT 'activo'`,
+  },
+  {
+    table: 'competencias',
+    column: 'wod_desempate_id',
+    definition: `ALTER TABLE competencias ADD COLUMN wod_desempate_id INT DEFAULT NULL`,
+  },
+  {
+    table: 'participantes',
+    column: 'categoria',
+    definition: `ALTER TABLE participantes ADD COLUMN categoria VARCHAR(50) NULL`,
+  },
   // Tope de tiempo por WOD (0 = sin tope).
-  { table: 'wods', column: 'tiempo_cap', definition: `ALTER TABLE wods ADD COLUMN tiempo_cap INT NOT NULL DEFAULT 0 AFTER tiempo_estimado_duracion` },
+  {
+    table: 'wods',
+    column: 'tiempo_cap',
+    definition: `ALTER TABLE wods ADD COLUMN tiempo_cap INT NOT NULL DEFAULT 0 AFTER tiempo_estimado_duracion`,
+  },
   // Asignacion por wod (NULL = todos los WODs de la competencia).
-  { table: 'asignaciones', column: 'wod_id', definition: `ALTER TABLE asignaciones ADD COLUMN wod_id INT NULL AFTER competencia_id` },
+  {
+    table: 'asignaciones',
+    column: 'wod_id',
+    definition: `ALTER TABLE asignaciones ADD COLUMN wod_id INT NULL AFTER competencia_id`,
+  },
   // Marca de resultado capado (no termino antes del tope; valor_bruto = reps).
-  { table: 'resultados', column: 'capado', definition: `ALTER TABLE resultados ADD COLUMN capado BOOLEAN NOT NULL DEFAULT FALSE AFTER abandono` },
+  {
+    table: 'resultados',
+    column: 'capado',
+    definition: `ALTER TABLE resultados ADD COLUMN capado BOOLEAN NOT NULL DEFAULT FALSE AFTER abandono`,
+  },
   // Descalificacion (DSQ). Va en el CREATE TABLE, pero las bases ya creadas
   // necesitan la migracion o toda consulta de resultados falla.
-  { table: 'resultados', column: 'disqualificado', definition: `ALTER TABLE resultados ADD COLUMN disqualificado BOOLEAN NOT NULL DEFAULT FALSE AFTER capado` },
+  {
+    table: 'resultados',
+    column: 'disqualificado',
+    definition: `ALTER TABLE resultados ADD COLUMN disqualificado BOOLEAN NOT NULL DEFAULT FALSE AFTER capado`,
+  },
 
   // --- Alta de usuarios con verificacion por correo ---
   // `email_verificado` entra en TRUE: los usuarios que ya existian se crearon a
   // mano desde la administracion y no tienen correo que verificar.
-  { table: 'usuarios', column: 'email', definition: `ALTER TABLE usuarios ADD COLUMN email VARCHAR(150) NULL UNIQUE AFTER cedula` },
-  { table: 'usuarios', column: 'email_verificado', definition: `ALTER TABLE usuarios ADD COLUMN email_verificado BOOLEAN NOT NULL DEFAULT TRUE AFTER email` },
+  {
+    table: 'usuarios',
+    column: 'email',
+    definition: `ALTER TABLE usuarios ADD COLUMN email VARCHAR(150) NULL UNIQUE AFTER cedula`,
+  },
+  {
+    table: 'usuarios',
+    column: 'email_verificado',
+    definition: `ALTER TABLE usuarios ADD COLUMN email_verificado BOOLEAN NOT NULL DEFAULT TRUE AFTER email`,
+  },
   // Solo se guarda el hash del token; el valor en claro viaja en el correo.
-  { table: 'usuarios', column: 'verificacion_token', definition: `ALTER TABLE usuarios ADD COLUMN verificacion_token VARCHAR(64) NULL` },
-  { table: 'usuarios', column: 'verificacion_expira', definition: `ALTER TABLE usuarios ADD COLUMN verificacion_expira DATETIME NULL` },
+  {
+    table: 'usuarios',
+    column: 'verificacion_token',
+    definition: `ALTER TABLE usuarios ADD COLUMN verificacion_token VARCHAR(64) NULL`,
+  },
+  {
+    table: 'usuarios',
+    column: 'verificacion_expira',
+    definition: `ALTER TABLE usuarios ADD COLUMN verificacion_expira DATETIME NULL`,
+  },
   // Recuperación de contraseña: mismo patrón (hash + expira 1h). Sin estas
   // columnas el endpoint /auth/reset-* falla con "unknown column".
-  { table: 'usuarios', column: 'reset_token', definition: `ALTER TABLE usuarios ADD COLUMN reset_token VARCHAR(64) NULL` },
-  { table: 'usuarios', column: 'reset_expira', definition: `ALTER TABLE usuarios ADD COLUMN reset_expira DATETIME NULL` },
+  {
+    table: 'usuarios',
+    column: 'reset_token',
+    definition: `ALTER TABLE usuarios ADD COLUMN reset_token VARCHAR(64) NULL`,
+  },
+  {
+    table: 'usuarios',
+    column: 'reset_expira',
+    definition: `ALTER TABLE usuarios ADD COLUMN reset_expira DATETIME NULL`,
+  },
   // El admin sembrado ve todos los eventos; los usuarios que se dan de
   // alta solo la suya.
-  { table: 'usuarios', column: 'es_superadmin', definition: `ALTER TABLE usuarios ADD COLUMN es_superadmin BOOLEAN NOT NULL DEFAULT FALSE` },
+  {
+    table: 'usuarios',
+    column: 'es_superadmin',
+    definition: `ALTER TABLE usuarios ADD COLUMN es_superadmin BOOLEAN NOT NULL DEFAULT FALSE`,
+  },
 
   // --- Boxes: el administrador y el evento pertenecen a uno ---
   // NULL en `usuarios.box_id` es el superadmin: no pertenece a ninguno porque
   // los ve todos.
-  { table: 'usuarios', column: 'box_id', definition: `ALTER TABLE usuarios ADD COLUMN box_id INT NULL AFTER box` },
-  { table: 'eventos', column: 'box_id', definition: `ALTER TABLE eventos ADD COLUMN box_id INT NULL AFTER sede` },
+  {
+    table: 'usuarios',
+    column: 'box_id',
+    definition: `ALTER TABLE usuarios ADD COLUMN box_id INT NULL AFTER box`,
+  },
+  {
+    table: 'eventos',
+    column: 'box_id',
+    definition: `ALTER TABLE eventos ADD COLUMN box_id INT NULL AFTER sede`,
+  },
 
   // --- Scoring policy global del evento ---
-  { table: 'eventos', column: 'scoring_type', definition: `ALTER TABLE eventos ADD COLUMN scoring_type ENUM('POINTS_ACCUMULATION','WINNER_PER_COMPETENCIA') NOT NULL DEFAULT 'POINTS_ACCUMULATION' AFTER es_demo` },
+  {
+    table: 'eventos',
+    column: 'scoring_type',
+    definition: `ALTER TABLE eventos ADD COLUMN scoring_type ENUM('POINTS_ACCUMULATION','WINNER_PER_COMPETENCIA') NOT NULL DEFAULT 'POINTS_ACCUMULATION' AFTER es_demo`,
+  },
   // --- Tiebreak policies (desempates configurables) ---
-  { table: 'eventos', column: 'tiebreak_policy', definition: `ALTER TABLE eventos ADD COLUMN tiebreak_policy ENUM('NONE','BEST_INDIVIDUAL_RANK','DESIGNATED_TIEBREAK_COMPETENCIA','LAST_COMPETENCIA_SCORE') NOT NULL DEFAULT 'BEST_INDIVIDUAL_RANK' AFTER scoring_type` },
-  { table: 'eventos', column: 'tiebreak_competencia_id', definition: `ALTER TABLE eventos ADD COLUMN tiebreak_competencia_id INT NULL AFTER tiebreak_policy` },
+  {
+    table: 'eventos',
+    column: 'tiebreak_policy',
+    definition: `ALTER TABLE eventos ADD COLUMN tiebreak_policy ENUM('NONE','BEST_INDIVIDUAL_RANK','DESIGNATED_TIEBREAK_COMPETENCIA','LAST_COMPETENCIA_SCORE') NOT NULL DEFAULT 'BEST_INDIVIDUAL_RANK' AFTER scoring_type`,
+  },
+  {
+    table: 'eventos',
+    column: 'tiebreak_competencia_id',
+    definition: `ALTER TABLE eventos ADD COLUMN tiebreak_competencia_id INT NULL AFTER tiebreak_policy`,
+  },
   // Portada del evento (visible en la portada publica y las tarjetas).
-  { table: 'eventos', column: 'imagen_url', definition: `ALTER TABLE eventos ADD COLUMN imagen_url VARCHAR(500) DEFAULT NULL AFTER tiebreak_competencia_id` },
-  { table: 'competencias', column: 'tiebreak_policy', definition: `ALTER TABLE competencias ADD COLUMN tiebreak_policy ENUM('NONE','TIEBREAK_MARK','DESIGNATED_CIRCUIT_SPLIT') NOT NULL DEFAULT 'DESIGNATED_CIRCUIT_SPLIT' AFTER wod_desempate_id` },
+  {
+    table: 'eventos',
+    column: 'imagen_url',
+    definition: `ALTER TABLE eventos ADD COLUMN imagen_url VARCHAR(500) DEFAULT NULL AFTER tiebreak_competencia_id`,
+  },
+  {
+    table: 'competencias',
+    column: 'tiebreak_policy',
+    definition: `ALTER TABLE competencias ADD COLUMN tiebreak_policy ENUM('NONE','TIEBREAK_MARK','DESIGNATED_CIRCUIT_SPLIT') NOT NULL DEFAULT 'DESIGNATED_CIRCUIT_SPLIT' AFTER wod_desempate_id`,
+  },
 
   // --- Todo lo de un evento cuelga de ella ---
-  { table: 'competencias', column: 'evento_id', definition: `ALTER TABLE competencias ADD COLUMN evento_id INT NULL` },
-  { table: 'categorias', column: 'evento_id', definition: `ALTER TABLE categorias ADD COLUMN evento_id INT NULL` },
-  { table: 'participantes', column: 'evento_id', definition: `ALTER TABLE participantes ADD COLUMN evento_id INT NULL` },
+  {
+    table: 'competencias',
+    column: 'evento_id',
+    definition: `ALTER TABLE competencias ADD COLUMN evento_id INT NULL`,
+  },
+  {
+    table: 'categorias',
+    column: 'evento_id',
+    definition: `ALTER TABLE categorias ADD COLUMN evento_id INT NULL`,
+  },
+  {
+    table: 'participantes',
+    column: 'evento_id',
+    definition: `ALTER TABLE participantes ADD COLUMN evento_id INT NULL`,
+  },
   // Medicion guiada por esquema (For Time / AMRAP / Max Load por division).
-  { table: 'wods', column: 'unidad_distancia', definition: `ALTER TABLE wods ADD COLUMN unidad_distancia ENUM('m', 'km', 'mi') NOT NULL DEFAULT 'm' AFTER tipo_medicion` },
+  {
+    table: 'wods',
+    column: 'unidad_distancia',
+    definition: `ALTER TABLE wods ADD COLUMN unidad_distancia ENUM('m', 'km', 'mi') NOT NULL DEFAULT 'm' AFTER tipo_medicion`,
+  },
   // Foto del WOD (visible en el editor, el juez y la clasificacion).
-  { table: 'wods', column: 'imagen_url', definition: `ALTER TABLE wods ADD COLUMN imagen_url VARCHAR(500) DEFAULT NULL AFTER unidad_distancia` },
-  { table: 'competencias', column: 'divisiones', definition: `ALTER TABLE competencias ADD COLUMN divisiones JSON DEFAULT NULL` },
-  { table: 'wods', column: 'esquema', definition: `ALTER TABLE wods ADD COLUMN esquema JSON DEFAULT NULL AFTER tiempo_cap` },
-  { table: 'resultados', column: 'detalle', definition: `ALTER TABLE resultados ADD COLUMN detalle JSON DEFAULT NULL` },
-  { table: 'resultados', column: 'desempate', definition: `ALTER TABLE resultados ADD COLUMN desempate INT DEFAULT NULL` },
+  {
+    table: 'wods',
+    column: 'imagen_url',
+    definition: `ALTER TABLE wods ADD COLUMN imagen_url VARCHAR(500) DEFAULT NULL AFTER unidad_distancia`,
+  },
+  {
+    table: 'competencias',
+    column: 'divisiones',
+    definition: `ALTER TABLE competencias ADD COLUMN divisiones JSON DEFAULT NULL`,
+  },
+  {
+    table: 'wods',
+    column: 'esquema',
+    definition: `ALTER TABLE wods ADD COLUMN esquema JSON DEFAULT NULL AFTER tiempo_cap`,
+  },
+  {
+    table: 'resultados',
+    column: 'detalle',
+    definition: `ALTER TABLE resultados ADD COLUMN detalle JSON DEFAULT NULL`,
+  },
+  {
+    table: 'resultados',
+    column: 'desempate',
+    definition: `ALTER TABLE resultados ADD COLUMN desempate INT DEFAULT NULL`,
+  },
   // Email opcional y categoria_id en participantes.
-  { table: 'participantes', column: 'email', definition: `ALTER TABLE participantes ADD COLUMN email VARCHAR(150) NULL UNIQUE AFTER box` },
-  { table: 'participantes', column: 'categoria_id', definition: `ALTER TABLE participantes ADD COLUMN categoria_id INT NULL AFTER categoria` },
+  {
+    table: 'participantes',
+    column: 'email',
+    definition: `ALTER TABLE participantes ADD COLUMN email VARCHAR(150) NULL UNIQUE AFTER box`,
+  },
+  {
+    table: 'participantes',
+    column: 'categoria_id',
+    definition: `ALTER TABLE participantes ADD COLUMN categoria_id INT NULL AFTER categoria`,
+  },
   // NOTA: las columnas legacy de métricas en categorias (peso, tipo_peso,
   // distancia, tipo_distancia, repeticiones, tipo_repeticiones,
   // elementos_peso/distancia/repeticiones/calorias) se ELIMINARON de MIGRATIONS
   // a propósito: CREATE TABLE ya no las tiene y RAW_MIGRATIONS las retira.
   // Mantener aquí sus ADD reventaba el arranque (ADD ... AFTER peso con `peso`
   // ya borrado -> "Unknown column 'peso'"), porque MIGRATIONS no tolera fallos.
-  { table: 'categorias', column: 'tipo_participacion', definition: 'ALTER TABLE categorias ADD COLUMN tipo_participacion ENUM(\'Individual\', \'Escalado\', \'Duplas\', \'Equipos\', \'Relevos\') NOT NULL DEFAULT \'Individual\' AFTER genero' },
+  {
+    table: 'categorias',
+    column: 'tipo_participacion',
+    definition:
+      "ALTER TABLE categorias ADD COLUMN tipo_participacion ENUM('Individual', 'Escalado', 'Duplas', 'Equipos', 'Relevos') NOT NULL DEFAULT 'Individual' AFTER genero",
+  },
   // Formato de la prueba y duracion (time cap) a nivel de competencia.
-  { table: 'competencias', column: 'tipo_participacion', definition: `ALTER TABLE competencias ADD COLUMN tipo_participacion ENUM('Individual','Relevos','Duplas','Equipos','Escalado') NOT NULL DEFAULT 'Individual' AFTER estado` },
-  { table: 'competencias', column: 'duracion_minutos', definition: `ALTER TABLE competencias ADD COLUMN duracion_minutos INT DEFAULT NULL COMMENT 'Duracion / time cap de la competencia en minutos (NULL = sin tope)' AFTER tipo_participacion` },
-  { table: 'competencias', column: 'rondas', definition: `ALTER TABLE competencias ADD COLUMN rondas INT NOT NULL DEFAULT 1 COMMENT 'Numero de rondas que se repite cada ejercicio de la competencia' AFTER duracion_minutos` },
+  {
+    table: 'competencias',
+    column: 'tipo_participacion',
+    definition: `ALTER TABLE competencias ADD COLUMN tipo_participacion ENUM('Individual','Relevos','Duplas','Equipos','Escalado') NOT NULL DEFAULT 'Individual' AFTER estado`,
+  },
+  {
+    table: 'competencias',
+    column: 'duracion_minutos',
+    definition: `ALTER TABLE competencias ADD COLUMN duracion_minutos INT DEFAULT NULL COMMENT 'Duracion / time cap de la competencia en minutos (NULL = sin tope)' AFTER tipo_participacion`,
+  },
+  {
+    table: 'competencias',
+    column: 'rondas',
+    definition: `ALTER TABLE competencias ADD COLUMN rondas INT NOT NULL DEFAULT 1 COMMENT 'Numero de rondas que se repite cada ejercicio de la competencia' AFTER duracion_minutos`,
+  },
   // Portada de la competencia (visible en sus tarjetas y en el resumen).
-  { table: 'competencias', column: 'imagen_url', definition: `ALTER TABLE competencias ADD COLUMN imagen_url VARCHAR(500) DEFAULT NULL AFTER rondas` },
+  {
+    table: 'competencias',
+    column: 'imagen_url',
+    definition: `ALTER TABLE competencias ADD COLUMN imagen_url VARCHAR(500) DEFAULT NULL AFTER rondas`,
+  },
   // --- Tablas legacy que eran contenedores de evento (2026-09): la tabla
   // `competencias` puede ser el antiguo contenedor (con sede/fechas) y le
   // faltan las columnas de prueba. Sin ellas, /competencias/public revienta
   // con "Unknown column 'tipo_flujo'". El bucle de bootstrap tolera fallos,
   // asi que estas entradas solo actuan donde faltan.
-  { table: 'competencias', column: 'metodo_desempate', definition: `ALTER TABLE competencias ADD COLUMN metodo_desempate TEXT NULL` },
-  { table: 'competencias', column: 'tipo_flujo', definition: `ALTER TABLE competencias ADD COLUMN tipo_flujo ENUM('en_serie','estaciones_simultaneas') NOT NULL DEFAULT 'en_serie'` },
-  { table: 'competencias', column: 'tipo_publicacion', definition: `ALTER TABLE competencias ADD COLUMN tipo_publicacion ENUM('tiempo_real','al_finalizar_circuito') NOT NULL DEFAULT 'tiempo_real'` },
-  { table: 'competencias', column: 'desempate_nombre', definition: `ALTER TABLE competencias ADD COLUMN desempate_nombre VARCHAR(150) DEFAULT NULL` },
-  { table: 'competencias', column: 'desempate_tipo_medicion', definition: `ALTER TABLE competencias ADD COLUMN desempate_tipo_medicion ENUM('tiempo','repeticiones','peso','distancia','calorías') DEFAULT NULL` },
+  {
+    table: 'competencias',
+    column: 'metodo_desempate',
+    definition: `ALTER TABLE competencias ADD COLUMN metodo_desempate TEXT NULL`,
+  },
+  {
+    table: 'competencias',
+    column: 'tipo_flujo',
+    definition: `ALTER TABLE competencias ADD COLUMN tipo_flujo ENUM('en_serie','estaciones_simultaneas') NOT NULL DEFAULT 'en_serie'`,
+  },
+  {
+    table: 'competencias',
+    column: 'tipo_publicacion',
+    definition: `ALTER TABLE competencias ADD COLUMN tipo_publicacion ENUM('tiempo_real','al_finalizar_circuito') NOT NULL DEFAULT 'tiempo_real'`,
+  },
+  {
+    table: 'competencias',
+    column: 'desempate_nombre',
+    definition: `ALTER TABLE competencias ADD COLUMN desempate_nombre VARCHAR(150) DEFAULT NULL`,
+  },
+  {
+    table: 'competencias',
+    column: 'desempate_tipo_medicion',
+    definition: `ALTER TABLE competencias ADD COLUMN desempate_tipo_medicion ENUM('tiempo','repeticiones','peso','distancia','calorías') DEFAULT NULL`,
+  },
   // --- Tabla `wods` legacy que guardaba pruebas (2026-09): le faltan las
   // columnas de ejercicio para recibir las filas de `circuitos`.
-  { table: 'wods', column: 'orden', definition: `ALTER TABLE wods ADD COLUMN orden INT NOT NULL DEFAULT 1` },
-  { table: 'wods', column: 'nombre_ejercicio', definition: `ALTER TABLE wods ADD COLUMN nombre_ejercicio VARCHAR(150) NOT NULL DEFAULT ''` },
-  { table: 'wods', column: 'tipo_medicion', definition: `ALTER TABLE wods ADD COLUMN tipo_medicion ENUM('tiempo','repeticiones','peso','distancia','calorías') NOT NULL DEFAULT 'tiempo'` },
-  { table: 'wods', column: 'tiempo_estimado_duracion', definition: `ALTER TABLE wods ADD COLUMN tiempo_estimado_duracion INT NOT NULL DEFAULT 0` },
-  { table: 'wods', column: 'puntaje_maximo', definition: `ALTER TABLE wods ADD COLUMN puntaje_maximo INT NOT NULL DEFAULT 100` },
+  {
+    table: 'wods',
+    column: 'orden',
+    definition: `ALTER TABLE wods ADD COLUMN orden INT NOT NULL DEFAULT 1`,
+  },
+  {
+    table: 'wods',
+    column: 'nombre_ejercicio',
+    definition: `ALTER TABLE wods ADD COLUMN nombre_ejercicio VARCHAR(150) NOT NULL DEFAULT ''`,
+  },
+  {
+    table: 'wods',
+    column: 'tipo_medicion',
+    definition: `ALTER TABLE wods ADD COLUMN tipo_medicion ENUM('tiempo','repeticiones','peso','distancia','calorías') NOT NULL DEFAULT 'tiempo'`,
+  },
+  {
+    table: 'wods',
+    column: 'tiempo_estimado_duracion',
+    definition: `ALTER TABLE wods ADD COLUMN tiempo_estimado_duracion INT NOT NULL DEFAULT 0`,
+  },
+  {
+    table: 'wods',
+    column: 'puntaje_maximo',
+    definition: `ALTER TABLE wods ADD COLUMN puntaje_maximo INT NOT NULL DEFAULT 100`,
+  },
 ];
 
 /**

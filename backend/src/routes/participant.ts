@@ -9,7 +9,9 @@ const router = Router();
 
 const resultsSchema = z.object({
   cedula: z.string().trim().min(1, 'La cedula es obligatoria'),
-  fecha_nacimiento: z.string().regex(/^\d{4}[-/]\d{2}[-/]\d{2}$/, 'Formato esperado: AAAA/MM/DD o AAAA-MM-DD'),
+  fecha_nacimiento: z
+    .string()
+    .regex(/^\d{4}[-/]\d{2}[-/]\d{2}$/, 'Formato esperado: AAAA/MM/DD o AAAA-MM-DD'),
 });
 
 const lookupSchema = z.object({

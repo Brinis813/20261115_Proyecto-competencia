@@ -4,7 +4,12 @@ import { SCHEMA_STATEMENTS, MIGRATIONS, RAW_MIGRATIONS } from './schema';
 import { assertSafeBootstrap } from './guard';
 import { log } from '../utils/logger';
 import { renombrarEntidades } from './repairs/renombres';
-import { autoPopulateCategories, eliminarCategoriasDuplicadas, sanearDivisionesCompetencias, sanearEsquemasCompetencias } from './repairs/categorias';
+import {
+  autoPopulateCategories,
+  eliminarCategoriasDuplicadas,
+  sanearDivisionesCompetencias,
+  sanearEsquemasCompetencias,
+} from './repairs/categorias';
 import { adoptarDatosSinEvento, poblarBoxes } from './repairs/evento';
 import { migrarPruebasLegacy } from './repairs/legacy';
 import { repararAsignaciones, repararMembresiasJueces } from './repairs/asignaciones';
@@ -35,7 +40,7 @@ export async function ensureDatabase(): Promise<void> {
   const rootConn = await mysql.createConnection(baseConfig);
   try {
     await rootConn.query(
-      `CREATE DATABASE IF NOT EXISTS \`${env.DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
+      `CREATE DATABASE IF NOT EXISTS \`${env.DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
     );
   } finally {
     await rootConn.end();
@@ -57,11 +62,13 @@ export async function ensureDatabase(): Promise<void> {
         const [rows] = await conn.query<any[]>(
           `SELECT COUNT(*) AS total FROM information_schema.COLUMNS
            WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
-          [env.DB_NAME, migration.table, migration.column]
+          [env.DB_NAME, migration.table, migration.column],
         );
         existe = (rows[0]?.total ?? 0) > 0;
       } catch (err) {
-        log.warn(`no se pudo comprobar ${migration.table}.${migration.column}: ${(err as Error).message}`);
+        log.warn(
+          `no se pudo comprobar ${migration.table}.${migration.column}: ${(err as Error).message}`,
+        );
         continue;
       }
       if (!existe) {
@@ -78,14 +85,18 @@ export async function ensureDatabase(): Promise<void> {
               log.info(`migracion aplicada (sin AFTER): ${migration.table}.${migration.column}`);
               continue;
             } catch (err2: any) {
-              log.warn(`migracion omitida ${migration.table}.${migration.column}: ${(err2 as Error).message}`);
+              log.warn(
+                `migracion omitida ${migration.table}.${migration.column}: ${(err2 as Error).message}`,
+              );
               continue;
             }
           }
           // Una migracion que falla no puede tumbar el arranque: se registra
           // y se sigue con las demas (ej. box_id en eventos es critica y
           // llegaria igual aunque falle tiempo_cap en wods legacy).
-          log.warn(`migracion omitida ${migration.table}.${migration.column}: ${(err as Error).message}`);
+          log.warn(
+            `migracion omitida ${migration.table}.${migration.column}: ${(err as Error).message}`,
+          );
         }
       }
     }
@@ -109,7 +120,9 @@ export async function ensureDatabase(): Promise<void> {
           'ER_NO_SUCH_TABLE',
         ].includes(codigo);
         if (!esperado) {
-          log.warn(`migracion idempotente omitida (${codigo || 'sin codigo'}): ${statement.slice(0, 60)}...`);
+          log.warn(
+            `migracion idempotente omitida (${codigo || 'sin codigo'}): ${statement.slice(0, 60)}...`,
+          );
         }
       }
     }

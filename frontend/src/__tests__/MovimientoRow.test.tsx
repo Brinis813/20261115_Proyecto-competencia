@@ -4,9 +4,15 @@ import MovimientoRow from '../components/admin/MovimientoRow';
 import { movimientoVacio } from '../utils/competenciaFormMapper';
 
 vi.mock('../components/ui', () => ({
-  IconButton: ({ label, onClick, disabled }: { label: string; onClick?: () => void; disabled?: boolean }) => (
-    <button aria-label={label} onClick={onClick} disabled={disabled} />
-  ),
+  IconButton: ({
+    label,
+    onClick,
+    disabled,
+  }: {
+    label: string;
+    onClick?: () => void;
+    disabled?: boolean;
+  }) => <button aria-label={label} onClick={onClick} disabled={disabled} />,
   cx: (...clases: Array<string | false | null | undefined>) => clases.filter(Boolean).join(' '),
 }));
 
@@ -38,13 +44,24 @@ describe('MovimientoRow', () => {
   it('teclear el nombre llama onCambiar con el parcial', () => {
     const onCambiar = vi.fn();
     render(<MovimientoRow {...props({ onCambiar })} />);
-    fireEvent.change(screen.getByLabelText('Nombre del movimiento'), { target: { value: 'Burpees' } });
+    fireEvent.change(screen.getByLabelText('Nombre del movimiento'), {
+      target: { value: 'Burpees' },
+    });
     expect(onCambiar).toHaveBeenCalledWith({ nombre: 'Burpees' });
   });
 
   it('cambiar medición a distancia muestra unidad + distancia', () => {
     render(
-      <MovimientoRow {...props({ movimiento: { ...movimientoVacio(), nombre: 'Remo', tipo_medicion: 'distancia', distancia: 500 } })} />
+      <MovimientoRow
+        {...props({
+          movimiento: {
+            ...movimientoVacio(),
+            nombre: 'Remo',
+            tipo_medicion: 'distancia',
+            distancia: 500,
+          },
+        })}
+      />,
     );
     expect(screen.getByLabelText('Distancia')).toHaveValue(500);
   });

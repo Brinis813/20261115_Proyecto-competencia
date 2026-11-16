@@ -131,7 +131,11 @@ export default function EventoPublicoPage() {
         ) : (
           <ul className="space-y-3">
             {competencias.map((competencia, indice) => (
-              <li key={competencia.id} className="animate-fade-up" style={{ animationDelay: `${indice * 60}ms` }}>
+              <li
+                key={competencia.id}
+                className="animate-fade-up"
+                style={{ animationDelay: `${indice * 60}ms` }}
+              >
                 <Link
                   to={`/leaderboard/${competencia.id}`}
                   className="group flex items-center gap-4 p-4 sm:p-5 surface hover:border-hyrox-primary/35 hover:bg-white/[0.02] transition-all duration-200"
@@ -146,8 +150,12 @@ export default function EventoPublicoPage() {
                     </span>
                     <span className="flex items-center gap-2 mt-0.5 text-xs text-hyrox-mist">
                       <span>{competencia.wods?.length ?? 0} wods</span>
-                      {competencia.estado === 'finalizado' && <span className="badge-gray">Finalizado</span>}
-                      {competencia.estado === 'activo' && <span className="badge-green">En curso</span>}
+                      {competencia.estado === 'finalizado' && (
+                        <span className="badge-gray">Finalizado</span>
+                      )}
+                      {competencia.estado === 'activo' && (
+                        <span className="badge-green">En curso</span>
+                      )}
                     </span>
                     <span className="block mt-1 text-2xs text-hyrox-ghost truncate">
                       Categorias: {formatearCategorias(competencia.divisiones)}

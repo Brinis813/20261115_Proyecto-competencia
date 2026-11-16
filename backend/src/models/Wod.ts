@@ -83,7 +83,7 @@ Wod.init(
     tableName: 'wods',
     timestamps: true,
     underscored: true,
-  }
+  },
 );
 
 Competencia.hasMany(Wod, { foreignKey: 'competencia_id', as: 'wods' });

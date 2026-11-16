@@ -61,7 +61,8 @@ export default {
       backgroundImage: {
         'grid-faint':
           'linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px)',
-        'sheen': 'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.07) 50%, transparent 70%)',
+        sheen:
+          'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.07) 50%, transparent 70%)',
       },
       backgroundSize: {
         grid: '48px 48px',

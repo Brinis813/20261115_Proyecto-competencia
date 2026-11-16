@@ -57,7 +57,9 @@ export default function MovimientoRow({
           Único punto de arrastre: la fila ya no es draggable para no
           interferir con la edición de los campos. */}
       <div className="flex flex-col">
-        <span className="text-2xs text-hyrox-ghost mb-0.5 invisible select-none" aria-hidden="true">·</span>
+        <span className="text-2xs text-hyrox-ghost mb-0.5 invisible select-none" aria-hidden="true">
+          ·
+        </span>
         <span
           draggable
           onDragStart={(e) => onDragStart(e, indice)}
@@ -93,7 +95,9 @@ export default function MovimientoRow({
           aria-label="Tipo de medición"
         >
           {MEDICIONES.map((med) => (
-            <option key={med.valor} value={med.valor}>{med.etiqueta}</option>
+            <option key={med.valor} value={med.valor}>
+              {med.etiqueta}
+            </option>
           ))}
         </select>
       </div>
@@ -238,7 +242,9 @@ export default function MovimientoRow({
             <select
               className="input-field w-[4.2rem] shrink-0"
               value={m.unidad_peso}
-              onChange={(e) => onCambiar({ unidad_peso: e.target.value as MovimientoUI['unidad_peso'] })}
+              onChange={(e) =>
+                onCambiar({ unidad_peso: e.target.value as MovimientoUI['unidad_peso'] })
+              }
               aria-label="Unidad de peso"
             >
               <option value="kg">kg</option>

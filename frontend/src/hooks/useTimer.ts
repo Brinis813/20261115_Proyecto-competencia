@@ -6,10 +6,9 @@ export function useTimer() {
   const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
-    workerRef.current = new Worker(
-      new URL('../workers/timerWorker.ts', import.meta.url),
-      { type: 'module' }
-    );
+    workerRef.current = new Worker(new URL('../workers/timerWorker.ts', import.meta.url), {
+      type: 'module',
+    });
 
     workerRef.current.onmessage = (e) => {
       if (e.data.type === 'tick') {

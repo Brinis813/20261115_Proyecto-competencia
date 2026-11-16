@@ -36,17 +36,28 @@ vi.mock('../contexts/AuthContext', () => ({
 import ProtectedRoute from '../components/ProtectedRoute';
 
 const adminUser = {
-  id: 1, nombre: 'A', apellidos: 'B', cedula: '123',
-  box: 'Box1', rol: 'admin' as const, password_cambiado: true,
+  id: 1,
+  nombre: 'A',
+  apellidos: 'B',
+  cedula: '123',
+  box: 'Box1',
+  rol: 'admin' as const,
+  password_cambiado: true,
 };
 
 const participanteUser = {
-  id: 3, nombre: 'P', apellidos: 'X', cedula: '789',
-  box: 'Box1', rol: 'participante' as const, password_cambiado: true,
+  id: 3,
+  nombre: 'P',
+  apellidos: 'X',
+  cedula: '789',
+  box: 'Box1',
+  rol: 'participante' as const,
+  password_cambiado: true,
 };
 
 const adminNeedPassword = {
-  ...adminUser, password_cambiado: false,
+  ...adminUser,
+  password_cambiado: false,
 };
 
 describe('ProtectedRoute', () => {
@@ -58,7 +69,7 @@ describe('ProtectedRoute', () => {
         <ProtectedRoute allowedRoles={['admin']}>
           <div>Protected Content</div>
         </ProtectedRoute>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
     expect(navigateFn).not.toHaveBeenCalled();
@@ -72,7 +83,7 @@ describe('ProtectedRoute', () => {
         <ProtectedRoute>
           <div>Protected Content</div>
         </ProtectedRoute>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     expect(navigateFn).toHaveBeenCalledWith('/login', { replace: true, state: { from: '/' } });
@@ -86,7 +97,7 @@ describe('ProtectedRoute', () => {
         <ProtectedRoute allowedRoles={['admin']}>
           <div>Protected Content</div>
         </ProtectedRoute>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     expect(navigateFn).toHaveBeenCalledWith('/participante', { replace: true });
@@ -100,7 +111,7 @@ describe('ProtectedRoute', () => {
         <ProtectedRoute>
           <div>Protected Content</div>
         </ProtectedRoute>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     expect(screen.getByText('Comprobando la sesion')).toBeInTheDocument();
@@ -115,7 +126,7 @@ describe('ProtectedRoute', () => {
         <ProtectedRoute allowedRoles={['admin']}>
           <div>Protected Content</div>
         </ProtectedRoute>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     expect(navigateFn).toHaveBeenCalledWith('/cambiar-password', { replace: true });

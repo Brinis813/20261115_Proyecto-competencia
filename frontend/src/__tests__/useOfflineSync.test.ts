@@ -85,7 +85,9 @@ describe('useOfflineSync: nunca encola 400/422 (y clasifica el resto)', () => {
 
   it('409 duplicado ("ya tiene") → se descarta para no atascar la cola', async () => {
     expect(
-      await pendienteTrasSync(errorConEstado(409, 'El participante ya tiene un resultado registrado'))
+      await pendienteTrasSync(
+        errorConEstado(409, 'El participante ya tiene un resultado registrado'),
+      ),
     ).toBe(0);
   });
 

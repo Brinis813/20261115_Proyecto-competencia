@@ -1,10 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Check, ChevronLeft, ChevronRight, Minus, Play, Plus, RotateCcw, Square } from 'lucide-react';
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Minus,
+  Play,
+  Plus,
+  RotateCcw,
+  Square,
+} from 'lucide-react';
 import type { MovimientoObjetivo } from './ContadorEsquema';
 import { formatoCrono, unidadParaTipo } from '../../utils/unidadesMedicion';
 
 /** Objetivo por ronda de cada movimiento (for_time trae el total; amrap ya viene por ronda). */
-export function porRondaDe(movimientos: MovimientoObjetivo[], rondasTotal: number, esTiempo: boolean): number[] {
+export function porRondaDe(
+  movimientos: MovimientoObjetivo[],
+  rondasTotal: number,
+  esTiempo: boolean,
+): number[] {
   const rondas = Math.max(1, Math.round(rondasTotal) || 1);
   return movimientos.map((m) => {
     if (esTiempo && rondas > 1 && m.objetivo > 0) return m.objetivo / rondas;
@@ -40,7 +53,10 @@ export default function ContadorSerie({
   const totalPasos = Math.max(1, movimientos.length * rondas);
   const [paso, setPaso] = useState(0);
 
-  const porRonda = useMemo(() => porRondaDe(movimientos, rondas, esTiempo), [movimientos, rondas, esTiempo]);
+  const porRonda = useMemo(
+    () => porRondaDe(movimientos, rondas, esTiempo),
+    [movimientos, rondas, esTiempo],
+  );
 
   const pasoSeguro = Math.min(paso, totalPasos - 1);
   const rondaIdx = movimientos.length > 0 ? Math.floor(pasoSeguro / movimientos.length) : 0;
@@ -80,7 +96,7 @@ export default function ContadorSerie({
     if (!cronoOn) return;
     const id = window.setInterval(() => setCronoSeg(leerCrono()), 500);
     return () => window.clearInterval(id);
-  }, [cronoOn]);
+  }, [cronoOn, leerCrono]);
 
   // Al cambiar de ejercicio/ronda el crono vuelve a cero.
   const pasoId = `${movIdx}-${rondaIdx}`;
@@ -133,7 +149,9 @@ export default function ContadorSerie({
   // crono corre la línea verde debe moverse en directo (MM:SS, en minutos).
   const visibleSeg = esMovTiempo ? (cronoOn ? cronoSeg : hechoPaso) : hechoPaso;
   const pctTiempo =
-    esMovTiempo && objetivoPaso > 0 ? Math.min(100, Math.max(0, (visibleSeg / objetivoPaso) * 100)) : 0;
+    esMovTiempo && objetivoPaso > 0
+      ? Math.min(100, Math.max(0, (visibleSeg / objetivoPaso) * 100))
+      : 0;
 
   // Auto-registro por tiempo: al cumplirse el tiempo del ejercicio el crono
   // se detiene solo, se anota el objetivo y se avanza al siguiente tras un
@@ -183,7 +201,9 @@ export default function ContadorSerie({
   return (
     <section className="surface-raised p-4 sm:p-5">
       <div className="flex items-center justify-between gap-2 mb-1">
-        <p className="eyebrow">Ejercicio {movimientos.length > 0 ? movIdx + 1 : 0} de {movimientos.length}</p>
+        <p className="eyebrow">
+          Ejercicio {movimientos.length > 0 ? movIdx + 1 : 0} de {movimientos.length}
+        </p>
         <p
           className="shrink-0 rounded-lg border border-hyrox-primary/40 bg-hyrox-primary/12 px-3 py-1.5 font-mono text-base font-extrabold text-hyrox-primary"
           aria-live="polite"
@@ -211,15 +231,24 @@ export default function ContadorSerie({
       )}
 
       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-center">
-        <p className="text-lg font-extrabold text-hyrox-paper">{mov?.nombre || `Movimiento ${movIdx + 1}`}</p>
+        <p className="text-lg font-extrabold text-hyrox-paper">
+          {mov?.nombre || `Movimiento ${movIdx + 1}`}
+        </p>
         {mov?.peso ? (
-          <p className="font-mono text-2xs font-bold text-hyrox-primary mt-0.5">{mov.peso} {mov.unidad_peso ?? 'kg'}</p>
+          <p className="font-mono text-2xs font-bold text-hyrox-primary mt-0.5">
+            {mov.peso} {mov.unidad_peso ?? 'kg'}
+          </p>
         ) : null}
         {esMovTiempo && objetivoPaso > 0 ? (
           <>
-            <p className={`font-mono text-3xl font-extrabold mt-2 ${completo ? 'text-hyrox-accent' : 'text-hyrox-paper'}`}>
+            <p
+              className={`font-mono text-3xl font-extrabold mt-2 ${completo ? 'text-hyrox-accent' : 'text-hyrox-paper'}`}
+            >
               {formatoCrono(visibleSeg)}
-              <span className="text-base text-hyrox-ghost"> / {formatoCrono(objetivoPaso)} min</span>
+              <span className="text-base text-hyrox-ghost">
+                {' '}
+                / {formatoCrono(objetivoPaso)} min
+              </span>
             </p>
             {/* Línea verde de progreso del tiempo, en minutos (MM:SS). */}
             <div
@@ -237,9 +266,16 @@ export default function ContadorSerie({
             </div>
           </>
         ) : (
-          <p className={`font-mono text-3xl font-extrabold mt-2 ${completo ? 'text-hyrox-accent' : 'text-hyrox-paper'}`}>
+          <p
+            className={`font-mono text-3xl font-extrabold mt-2 ${completo ? 'text-hyrox-accent' : 'text-hyrox-paper'}`}
+          >
             {Number.isInteger(hechoPaso) ? hechoPaso : hechoPaso.toFixed(1)}
-            {objetivoPaso > 0 && <span className="text-base text-hyrox-ghost"> / {objetivoPaso} {unidad}</span>}
+            {objetivoPaso > 0 && (
+              <span className="text-base text-hyrox-ghost">
+                {' '}
+                / {objetivoPaso} {unidad}
+              </span>
+            )}
           </p>
         )}
         {completo && (
@@ -251,7 +287,10 @@ export default function ContadorSerie({
         <div className="flex items-center justify-center gap-3 mt-4">
           {tipo === 'tiempo' ? (
             <div className="flex flex-col items-center gap-2">
-              <span className="font-mono text-4xl font-extrabold text-hyrox-paper tabular-nums" role="timer">
+              <span
+                className="font-mono text-4xl font-extrabold text-hyrox-paper tabular-nums"
+                role="timer"
+              >
                 {formatoCrono(cronoSeg)}
               </span>
               <div className="flex items-center gap-2">
@@ -292,7 +331,10 @@ export default function ContadorSerie({
                   inputMode="numeric"
                   value={hechoPaso || ''}
                   onChange={(e) => {
-                    if (e.target.value === '') { fijar(base); return; }
+                    if (e.target.value === '') {
+                      fijar(base);
+                      return;
+                    }
                     const val = parseInt(e.target.value, 10);
                     if (!isNaN(val) && val >= 0) fijar(base + val);
                   }}
@@ -313,7 +355,10 @@ export default function ContadorSerie({
                 inputMode="decimal"
                 value={hechoPaso || ''}
                 onChange={(e) => {
-                  if (e.target.value === '') { fijar(base); return; }
+                  if (e.target.value === '') {
+                    fijar(base);
+                    return;
+                  }
                   const val = parseFloat(e.target.value);
                   if (!isNaN(val) && val >= 0) fijar(base + val);
                 }}
@@ -336,7 +381,9 @@ export default function ContadorSerie({
                 >
                   <Minus className="w-5 h-5" aria-hidden="true" />
                 </button>
-                <span className="w-16 text-center font-mono text-xl font-bold text-hyrox-paper tabular-nums">{hechoPaso.toFixed(1)}</span>
+                <span className="w-16 text-center font-mono text-xl font-bold text-hyrox-paper tabular-nums">
+                  {hechoPaso.toFixed(1)}
+                </span>
                 <button
                   type="button"
                   onClick={() => fijar(totalMov + 1.25)}
@@ -354,7 +401,10 @@ export default function ContadorSerie({
                   inputMode="decimal"
                   value={hechoPaso || ''}
                   onChange={(e) => {
-                    if (e.target.value === '') { fijar(base); return; }
+                    if (e.target.value === '') {
+                      fijar(base);
+                      return;
+                    }
                     const val = parseFloat(e.target.value);
                     if (!isNaN(val) && val >= 0) fijar(base + val);
                   }}
@@ -373,7 +423,10 @@ export default function ContadorSerie({
                 inputMode="numeric"
                 value={hechoPaso || ''}
                 onChange={(e) => {
-                  if (e.target.value === '') { fijar(base); return; }
+                  if (e.target.value === '') {
+                    fijar(base);
+                    return;
+                  }
                   const val = parseInt(e.target.value, 10);
                   if (!isNaN(val) && val >= 0) fijar(base + val);
                 }}
@@ -422,15 +475,21 @@ export default function ContadorSerie({
           type="button"
           onClick={() => setPaso((p) => Math.min(totalPasos - 1, p + 1))}
           disabled={!completo || pasoSeguro >= totalPasos - 1}
-          title={!completo ? `Completa ${esMovTiempo ? `${formatoCrono(objetivoPaso)} min` : `${objetivoPaso} ${unidad}`} para avanzar` : undefined}
+          title={
+            !completo
+              ? `Completa ${esMovTiempo ? `${formatoCrono(objetivoPaso)} min` : `${objetivoPaso} ${unidad}`} para avanzar`
+              : undefined
+          }
           className="flex-1 min-h-[3rem] inline-flex items-center justify-center gap-1 rounded-xl border-2 border-hyrox-primary bg-hyrox-primary/12 text-hyrox-primary text-sm font-bold hover:bg-hyrox-primary/20 transition disabled:opacity-30 cursor-pointer"
         >
-          {pasoSeguro >= totalPasos - 1 ? 'Último ejercicio' : 'Siguiente'} <ChevronRight className="w-4 h-4" aria-hidden="true" />
+          {pasoSeguro >= totalPasos - 1 ? 'Último ejercicio' : 'Siguiente'}{' '}
+          <ChevronRight className="w-4 h-4" aria-hidden="true" />
         </button>
       </div>
 
       <p className="mt-3 text-center text-2xs text-hyrox-ghost font-mono">
-        Total: {esMovTiempo ? `${formatoCrono(total)} min` : `${total} reps`} · Ronda {rondaIdx + 1}/{rondas}
+        Total: {esMovTiempo ? `${formatoCrono(total)} min` : `${total} reps`} · Ronda {rondaIdx + 1}
+        /{rondas}
       </p>
     </section>
   );

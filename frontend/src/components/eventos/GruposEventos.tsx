@@ -67,7 +67,10 @@ export default function GruposEventos({
             <span className="font-display text-lg font-bold">Pasadas</span>
             <span className="badge badge-gray">{pasadas.length}</span>
             <ChevronDown
-              className={cx('w-4 h-4 transition-transform duration-200', verPasadas && 'rotate-180')}
+              className={cx(
+                'w-4 h-4 transition-transform duration-200',
+                verPasadas && 'rotate-180',
+              )}
               aria-hidden="true"
             />
           </button>

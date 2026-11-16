@@ -24,8 +24,7 @@ export default function PortadaImagen({
   clase?: string;
   eager?: boolean;
 }) {
-  const fondo =
-    tono === 'oscuro' ? 'bg-black' : 'bg-white';
+  const fondo = tono === 'oscuro' ? 'bg-black' : 'bg-white';
   return (
     <div className={`relative overflow-hidden ${fondo} ${aspecto} ${clase}`}>
       {tono === 'oscuro' && (

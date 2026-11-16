@@ -184,7 +184,7 @@ export async function listarEventosPublicos(): Promise<EventoListada[]> {
       total_competencias: competenciasPor.get(c.id) ?? 0,
       total_atletas: atletasPor.get(c.id) ?? 0,
       imagen_url: c.imagen_url ?? null,
-    }))
+    })),
   );
 }
 
@@ -215,7 +215,7 @@ export async function eventoPublico(id: number) {
  */
 export async function actualizarImagen(
   eventoId: number,
-  imagenUrl: string | null
+  imagenUrl: string | null,
 ): Promise<{ id: number; imagen_url: string | null }> {
   const evento = await Evento.findByPk(eventoId);
   if (!evento) throw new Error('Evento no encontrada');
@@ -234,8 +234,13 @@ export async function actualizarScoringType(
     scoringType?: ScoringType;
     tiebreakPolicy?: EventoTieBreakPolicy;
     tiebreakCompetenciaId?: number | null;
-  }
-): Promise<{ id: number; scoring_type: ScoringType; tiebreak_policy: EventoTieBreakPolicy; tiebreak_competencia_id: number | null }> {
+  },
+): Promise<{
+  id: number;
+  scoring_type: ScoringType;
+  tiebreak_policy: EventoTieBreakPolicy;
+  tiebreak_competencia_id: number | null;
+}> {
   const evento = await Evento.findByPk(eventoId);
   if (!evento) throw new Error('Evento no encontrada');
 
@@ -248,23 +253,31 @@ export async function actualizarScoringType(
   }
   if (input.tiebreakPolicy !== undefined) {
     if (!EVENTO_TIEBREAK_POLICIES.includes(input.tiebreakPolicy)) {
-      throw new Error('tiebreakPolicy inválida: usa NONE, BEST_INDIVIDUAL_RANK, DESIGNATED_TIEBREAK_Competencia o LAST_Competencia_SCORE');
+      throw new Error(
+        'tiebreakPolicy inválida: usa NONE, BEST_INDIVIDUAL_RANK, DESIGNATED_TIEBREAK_Competencia o LAST_Competencia_SCORE',
+      );
     }
     cambios.tiebreak_policy = input.tiebreakPolicy;
   }
 
   const policyFinal: EventoTieBreakPolicy =
     (cambios.tiebreak_policy as EventoTieBreakPolicy) ??
-    ((evento as unknown as { tiebreak_policy: EventoTieBreakPolicy }).tiebreak_policy ?? 'BEST_INDIVIDUAL_RANK');
+    (evento as unknown as { tiebreak_policy: EventoTieBreakPolicy }).tiebreak_policy ??
+    'BEST_INDIVIDUAL_RANK';
 
   if (input.tiebreakCompetenciaId !== undefined) {
     if (input.tiebreakCompetenciaId === null) {
       cambios.tiebreak_competencia_id = null;
     } else {
       const designado = await Competencia.findOne({
-        where: { id: input.tiebreakCompetenciaId, evento_id: eventoId, estado: { [Op.ne]: 'borrador' } },
+        where: {
+          id: input.tiebreakCompetenciaId,
+          evento_id: eventoId,
+          estado: { [Op.ne]: 'borrador' },
+        },
       });
-      if (!designado) throw new Error('La competencia de desempate no pertenece a este evento o es borrador');
+      if (!designado)
+        throw new Error('La competencia de desempate no pertenece a este evento o es borrador');
       cambios.tiebreak_competencia_id = designado.id;
     }
   } else if (policyFinal !== 'DESIGNATED_TIEBREAK_Competencia') {
@@ -328,12 +341,12 @@ export async function crearEventoDeEjemplo(usuario: Usuario): Promise<Evento> {
         box_id: usuario.box_id ?? null,
         es_demo: true,
       },
-      { transaction: t }
+      { transaction: t },
     );
 
     await EventoUsuario.create(
       { evento_id: evento.id, usuario_id: usuario.id, rol: 'propietario' },
-      { transaction: t }
+      { transaction: t },
     );
 
     // MySQL no admite RETURNING, asi que `bulkCreate` no rellena los ids. Se
@@ -345,7 +358,7 @@ export async function crearEventoDeEjemplo(usuario: Usuario): Promise<Evento> {
         { nombre: 'Scaled', genero: 'Masculino', tipo_participacion: 'Escalado' },
         { nombre: 'Scaled', genero: 'Femenino', tipo_participacion: 'Escalado' },
       ].map((c) => ({ ...c, evento_id: evento.id })),
-      { transaction: t }
+      { transaction: t },
     );
 
     const categorias = await Categoria.findAll({
@@ -371,12 +384,12 @@ export async function crearEventoDeEjemplo(usuario: Usuario): Promise<Evento> {
         divisiones: categorias.map(etiqueta),
         evento_id: evento.id,
       },
-      { transaction: t }
+      { transaction: t },
     );
 
     await CompetenciaCategoria.bulkCreate(
       categorias.map((c) => ({ competencia_id: competencia.id, categoria_id: c.id })),
-      { transaction: t }
+      { transaction: t },
     );
 
     // Reps y peso por categoria: es justo lo que distingue Rx de Scaled.
@@ -423,16 +436,52 @@ export async function crearEventoDeEjemplo(usuario: Usuario): Promise<Evento> {
           esquema: null,
         },
       ],
-      { transaction: t }
+      { transaction: t },
     );
 
     const atletas = [
-      { nombre: 'Ana', apellidos: 'Rojas', cedula: `${evento.id}0000001`, cat: porNombre('RX', 'Femenino'), nac: '1994-03-11' },
-      { nombre: 'Lucia', apellidos: 'Mendez', cedula: `${evento.id}0000002`, cat: porNombre('RX', 'Femenino'), nac: '1997-08-02' },
-      { nombre: 'Carlos', apellidos: 'Duarte', cedula: `${evento.id}0000003`, cat: porNombre('RX', 'Masculino'), nac: '1992-01-25' },
-      { nombre: 'Mateo', apellidos: 'Silva', cedula: `${evento.id}0000004`, cat: porNombre('RX', 'Masculino'), nac: '1996-06-30' },
-      { nombre: 'Sofia', apellidos: 'Nunez', cedula: `${evento.id}0000005`, cat: porNombre('Scaled', 'Femenino'), nac: '1999-11-14' },
-      { nombre: 'Diego', apellidos: 'Paredes', cedula: `${evento.id}0000006`, cat: porNombre('Scaled', 'Masculino'), nac: '1990-05-19' },
+      {
+        nombre: 'Ana',
+        apellidos: 'Rojas',
+        cedula: `${evento.id}0000001`,
+        cat: porNombre('RX', 'Femenino'),
+        nac: '1994-03-11',
+      },
+      {
+        nombre: 'Lucia',
+        apellidos: 'Mendez',
+        cedula: `${evento.id}0000002`,
+        cat: porNombre('RX', 'Femenino'),
+        nac: '1997-08-02',
+      },
+      {
+        nombre: 'Carlos',
+        apellidos: 'Duarte',
+        cedula: `${evento.id}0000003`,
+        cat: porNombre('RX', 'Masculino'),
+        nac: '1992-01-25',
+      },
+      {
+        nombre: 'Mateo',
+        apellidos: 'Silva',
+        cedula: `${evento.id}0000004`,
+        cat: porNombre('RX', 'Masculino'),
+        nac: '1996-06-30',
+      },
+      {
+        nombre: 'Sofia',
+        apellidos: 'Nunez',
+        cedula: `${evento.id}0000005`,
+        cat: porNombre('Scaled', 'Femenino'),
+        nac: '1999-11-14',
+      },
+      {
+        nombre: 'Diego',
+        apellidos: 'Paredes',
+        cedula: `${evento.id}0000006`,
+        cat: porNombre('Scaled', 'Masculino'),
+        nac: '1990-05-19',
+      },
     ];
 
     await Participante.bulkCreate(
@@ -446,7 +495,7 @@ export async function crearEventoDeEjemplo(usuario: Usuario): Promise<Evento> {
         categoria_id: a.cat.id,
         evento_id: evento.id,
       })),
-      { transaction: t }
+      { transaction: t },
     );
 
     // Un juez de ejemplo, con contrasena temporal conocida para que el
@@ -462,12 +511,12 @@ export async function crearEventoDeEjemplo(usuario: Usuario): Promise<Evento> {
         password_cambiado: false,
         email_verificado: true,
       },
-      { transaction: t }
+      { transaction: t },
     );
 
     await EventoUsuario.create(
       { evento_id: evento.id, usuario_id: juez.id, rol: 'juez' },
-      { transaction: t }
+      { transaction: t },
     );
 
     return evento;

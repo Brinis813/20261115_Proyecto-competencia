@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import type { AuthRequest } from '../middleware/auth';
 import * as categoryService from '../services/categoryService';
 import { eventoDestino, filtroEvento } from '../middleware/evento';
@@ -40,7 +40,10 @@ export async function getCategoryById(req: AuthRequest, res: Response) {
 
 export async function createCategory(req: AuthRequest, res: Response) {
   try {
-    const categoria = await categoryService.createCategory({ ...req.body, evento_id: eventoDestino(req.alcance) });
+    const categoria = await categoryService.createCategory({
+      ...req.body,
+      evento_id: eventoDestino(req.alcance),
+    });
     res.status(201).json(categoria);
   } catch (error: any) {
     log.error('createCategory error:', error?.message);

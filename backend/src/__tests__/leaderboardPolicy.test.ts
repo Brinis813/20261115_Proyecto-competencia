@@ -11,13 +11,33 @@ import { getParticipantPosition } from '../services/scoring/leaderboard';
 import { Asignacion, Competencia, Wod, Resultado } from '../models';
 
 const DOS_IGUALES = [
-  { id: 1, participante_id: 1, wod_id: 11, valor_bruto: '50', abandono: false, capado: false, disqualificado: false, desempate: 1 },
-  { id: 2, participante_id: 2, wod_id: 11, valor_bruto: '50', abandono: false, capado: false, disqualificado: false, desempate: 2 },
+  {
+    id: 1,
+    participante_id: 1,
+    wod_id: 11,
+    valor_bruto: '50',
+    abandono: false,
+    capado: false,
+    disqualificado: false,
+    desempate: 1,
+  },
+  {
+    id: 2,
+    participante_id: 2,
+    wod_id: 11,
+    valor_bruto: '50',
+    abandono: false,
+    capado: false,
+    disqualificado: false,
+    desempate: 2,
+  },
 ];
 
 function mocks(policy: string | null) {
   (Asignacion as any).findAll.mockResolvedValue([{ competencia_id: 1 }]);
-  (Competencia as any).findAll.mockResolvedValue([{ id: 1, nombre: 'C1', tiebreak_policy: policy }]);
+  (Competencia as any).findAll.mockResolvedValue([
+    { id: 1, nombre: 'C1', tiebreak_policy: policy },
+  ]);
   (Wod as any).findAll.mockResolvedValue([
     { id: 11, competencia_id: 1, tipo_medicion: 'repeticiones', puntaje_maximo: 100 },
   ]);

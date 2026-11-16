@@ -10,7 +10,10 @@ export async function createCompetencia(req: AuthRequest, res: Response) {
   try {
     // El evento sale de la sesion, nunca del cuerpo: si no, cualquiera
     // podria crear una competencia dentro del evento de otro.
-    const competencia = await competenciaService.createCompetencia({ ...req.body, evento_id: eventoDestino(req.alcance) });
+    const competencia = await competenciaService.createCompetencia({
+      ...req.body,
+      evento_id: eventoDestino(req.alcance),
+    });
     res.status(201).json({ message: 'Competencia creado', competencia });
   } catch (error: any) {
     res.status(400).json({ message: mensajeSeguro(error) });
@@ -31,7 +34,9 @@ export async function getPublicCompetencias(req: AuthRequest, res: Response) {
   try {
     // `?evento=` acota la portada publica a un evento concreta.
     const evento = Number(req.query.evento);
-    res.json(await competenciaService.getPublicCompetencias(Number.isInteger(evento) ? evento : null));
+    res.json(
+      await competenciaService.getPublicCompetencias(Number.isInteger(evento) ? evento : null),
+    );
   } catch (error) {
     log.error('[GET /api/competencias/public]', error);
     res.status(500).json({ message: 'Error al obtener las competencias' });
@@ -124,7 +129,9 @@ export async function removeAssignment(req: AuthRequest, res: Response) {
     const asignacion = await Asignacion.findByPk(asignacionId, { attributes: ['competencia_id'] });
     if (!asignacion) return res.status(404).json({ message: 'Asignacion no encontrada' });
 
-    const competencia = await Competencia.findByPk(asignacion.competencia_id, { attributes: ['evento_id'] });
+    const competencia = await Competencia.findByPk(asignacion.competencia_id, {
+      attributes: ['evento_id'],
+    });
     if (!competencia || !perteneceAlAlcance(req.alcance, competencia.evento_id)) {
       return res.status(403).json({ message: 'No tienes acceso a esta competencia' });
     }

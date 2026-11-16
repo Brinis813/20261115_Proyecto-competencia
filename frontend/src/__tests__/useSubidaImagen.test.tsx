@@ -25,13 +25,19 @@ const jpg = (size = 100) => new File([new Uint8Array(size)], 'foto.jpg', { type:
 describe('validarArchivoImagen', () => {
   it('acepta JPG/PNG/WebP dentro del límite', () => {
     expect(validarArchivoImagen(jpg())).toBeNull();
-    expect(validarArchivoImagen(new File([new Uint8Array(10)], 'a.png', { type: 'image/png' }))).toBeNull();
-    expect(validarArchivoImagen(new File([new Uint8Array(10)], 'a.webp', { type: 'image/webp' }))).toBeNull();
+    expect(
+      validarArchivoImagen(new File([new Uint8Array(10)], 'a.png', { type: 'image/png' })),
+    ).toBeNull();
+    expect(
+      validarArchivoImagen(new File([new Uint8Array(10)], 'a.webp', { type: 'image/webp' })),
+    ).toBeNull();
   });
 
   it('rechaza tipos no admitidos', () => {
     expect(validarArchivoImagen(new File(['x'], 'a.gif', { type: 'image/gif' }))).toMatch(/JPG/i);
-    expect(validarArchivoImagen(new File(['x'], 'a.exe', { type: 'application/octet-stream' }))).toMatch(/JPG/i);
+    expect(
+      validarArchivoImagen(new File(['x'], 'a.exe', { type: 'application/octet-stream' })),
+    ).toMatch(/JPG/i);
   });
 
   it('rechaza más de 5 MB (y acepta el borde)', () => {
@@ -47,9 +53,12 @@ describe('useVistaPrevia', () => {
   });
 
   it('crea y revoca el objectURL al cambiar/limpiar', () => {
-    const { result, rerender, unmount } = renderHook(({ f }: { f: File | null }) => useVistaPrevia(f), {
-      initialProps: { f: null as File | null },
-    });
+    const { result, rerender, unmount } = renderHook(
+      ({ f }: { f: File | null }) => useVistaPrevia(f),
+      {
+        initialProps: { f: null as File | null },
+      },
+    );
     expect(result.current).toBeNull();
     const archivo = jpg();
     rerender({ f: archivo });

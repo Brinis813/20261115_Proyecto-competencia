@@ -27,23 +27,33 @@ router.get('/', async (_req: AuthRequest, res: Response) => {
   }
 });
 
-router.post('/', adminWriteRateLimiter(), validate(boxSchema), async (req: AuthRequest, res: Response) => {
-  try {
-    const box = await boxService.crearBox(req.body);
-    res.status(201).json({ message: 'Box creado', box });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-});
+router.post(
+  '/',
+  adminWriteRateLimiter(),
+  validate(boxSchema),
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const box = await boxService.crearBox(req.body);
+      res.status(201).json({ message: 'Box creado', box });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+);
 
-router.put('/:id', adminWriteRateLimiter(), validate(boxParcialSchema), async (req: AuthRequest, res: Response) => {
-  try {
-    const box = await boxService.actualizarBox(Number(req.params.id), req.body);
-    res.json({ message: 'Box actualizado', box });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-});
+router.put(
+  '/:id',
+  adminWriteRateLimiter(),
+  validate(boxParcialSchema),
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const box = await boxService.actualizarBox(Number(req.params.id), req.body);
+      res.json({ message: 'Box actualizado', box });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+);
 
 router.delete('/:id', adminWriteRateLimiter(), async (req: AuthRequest, res: Response) => {
   try {

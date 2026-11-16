@@ -4,7 +4,9 @@ const nombre = z.string().trim().min(1, 'El nombre es obligatorio').max(100);
 const apellidos = z.string().trim().min(1, 'Los apellidos son obligatorios').max(100);
 const cedula = z.string().trim().min(1, 'La cedula es obligatoria').max(20);
 const box = z.string().trim().min(1, 'El box es obligatorio').max(100);
-const fechaNacimiento = z.string().regex(/^\d{4}[-/]\d{2}[-/]\d{2}$/, 'Formato esperado: AAAA/MM/DD o AAAA-MM-DD');
+const fechaNacimiento = z
+  .string()
+  .regex(/^\d{4}[-/]\d{2}[-/]\d{2}$/, 'Formato esperado: AAAA/MM/DD o AAAA-MM-DD');
 
 export const createAdminSchema = z.object({
   nombre,
@@ -22,7 +24,13 @@ export const createParticipanteSchema = z.object({
   cedula,
   box,
   fecha_nacimiento: fechaNacimiento,
-  email: z.string().trim().email('Formato de correo electrónico inválido').max(150).nullable().optional(),
+  email: z
+    .string()
+    .trim()
+    .email('Formato de correo electrónico inválido')
+    .max(150)
+    .nullable()
+    .optional(),
   categoria: z.string().trim().max(50).nullable().optional(),
   categoria_id: z.number().int().positive().nullable().optional(),
 });
@@ -38,7 +46,13 @@ export const updateParticipanteSchema = z.object({
   apellidos: apellidos.optional(),
   box: box.optional(),
   fecha_nacimiento: fechaNacimiento.optional(),
-  email: z.string().trim().email('Formato de correo electrónico inválido').max(150).nullable().optional(),
+  email: z
+    .string()
+    .trim()
+    .email('Formato de correo electrónico inválido')
+    .max(150)
+    .nullable()
+    .optional(),
   categoria: z.string().trim().max(50).nullable().optional(),
   categoria_id: z.number().int().positive().nullable().optional(),
 });

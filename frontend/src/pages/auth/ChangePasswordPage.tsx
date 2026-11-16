@@ -114,7 +114,7 @@ export default function ChangePasswordPage() {
                       key={regla.texto}
                       className={cx(
                         'flex items-center gap-1.5 text-xs transition-colors duration-200',
-                        ok ? 'text-hyrox-accent' : 'text-hyrox-ghost'
+                        ok ? 'text-hyrox-accent' : 'text-hyrox-ghost',
                       )}
                     >
                       {ok ? (
@@ -133,7 +133,9 @@ export default function ChangePasswordPage() {
                 autoComplete="new-password"
                 value={repetida}
                 onChange={(e) => setRepetida(e.target.value)}
-                error={repetida.length > 0 && !coinciden ? 'Las contrasenas no coinciden' : undefined}
+                error={
+                  repetida.length > 0 && !coinciden ? 'Las contrasenas no coinciden' : undefined
+                }
                 required
               />
 

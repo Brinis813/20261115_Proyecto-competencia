@@ -9,7 +9,7 @@ import { resolverEvento } from '../middleware/evento';
 import { handleMulterError } from '../middleware/handleMulterError';
 import { cargarCompetenciaConAcceso } from '../controllers/helpers';
 import { UPLOADS_DIR } from '../config/env';
-import { borrarArchivoSubido, esImagenValida } from '../utils/archivos';
+import { esImagenValida } from '../utils/archivos';
 import * as competenciaService from '../services/competenciaService';
 import {
   createCompetenciaSchema,
@@ -29,7 +29,13 @@ const router = Router();
 router.get('/public', competenciaController.getPublicCompetencias);
 
 // --- Staff ---
-router.get('/judge', authMiddleware, resolverEvento, staffOnly, competenciaController.getJudgeCompetencias);
+router.get(
+  '/judge',
+  authMiddleware,
+  resolverEvento,
+  staffOnly,
+  competenciaController.getJudgeCompetencias,
+);
 
 // Lectura del arranque vigente: jueces asignados, admins y pantalla pública
 // (la cuenta atrás se proyecta). El controlador valida al juez por asignación.
@@ -63,7 +69,10 @@ const subirImagenWod = multer({
   storage: multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, WODS_DIR),
     filename: (_req, file, cb) => {
-      cb(null, `wod_${Date.now()}_${Math.random().toString(36).slice(2, 8)}${EXTENSIONES_WOD.get(file.mimetype) ?? '.jpg'}`);
+      cb(
+        null,
+        `wod_${Date.now()}_${Math.random().toString(36).slice(2, 8)}${EXTENSIONES_WOD.get(file.mimetype) ?? '.jpg'}`,
+      );
     },
   }),
   limits: { fileSize: 5 * 1024 * 1024 },
@@ -111,7 +120,10 @@ const subirPortadaCompetencia = multer({
     destination: (_req, _file, cb) => cb(null, PORTADAS_DIR),
     filename: (req, _file, cb) => {
       const id = Number(req.params.id);
-      cb(null, `competencia_${Number.isInteger(id) ? id : 'x'}_${Date.now()}${EXTENSIONES_WOD.get(_file.mimetype) ?? '.jpg'}`);
+      cb(
+        null,
+        `competencia_${Number.isInteger(id) ? id : 'x'}_${Date.now()}${EXTENSIONES_WOD.get(_file.mimetype) ?? '.jpg'}`,
+      );
     },
   }),
   limits: { fileSize: 5 * 1024 * 1024 },
@@ -120,11 +132,6 @@ const subirPortadaCompetencia = multer({
     else cb(new Error('Solo se admiten imágenes JPG, PNG o WebP'));
   },
 });
-
-/** Borra del disco una portada anterior, si vive dentro de uploads. */
-function borrarPortadaAnterior(imagenUrl: string | null): void {
-  borrarArchivoSubido(imagenUrl, '/api/uploads/');
-}
 
 /** Sube o reemplaza la portada de la competencia (JPG/PNG/WebP, max 5 MB). */
 router.put(
@@ -142,7 +149,10 @@ router.put(
     if ('error' in acceso) {
       if (req.file) await fs.promises.unlink(req.file.path).catch(() => undefined);
       res.status(acceso.error === 'no-encontrado' ? 404 : 403).json({
-        message: acceso.error === 'no-encontrado' ? 'Competencia no encontrado' : 'No tienes acceso a esta competencia',
+        message:
+          acceso.error === 'no-encontrado'
+            ? 'Competencia no encontrado'
+            : 'No tienes acceso a esta competencia',
       });
       return;
     }
@@ -163,7 +173,7 @@ router.put(
       await fs.promises.unlink(req.file.path).catch(() => undefined);
       res.status(400).json({ message: error.message ?? 'No se pudo guardar la portada' });
     }
-  }
+  },
 );
 
 /** Quita la portada de la competencia (borra el archivo). */
@@ -176,7 +186,10 @@ router.delete('/:id/imagen', adminWriteRateLimiter(), async (req: AuthRequest, r
   const acceso = await cargarCompetenciaConAcceso(req, id);
   if ('error' in acceso) {
     res.status(acceso.error === 'no-encontrado' ? 404 : 403).json({
-      message: acceso.error === 'no-encontrado' ? 'Competencia no encontrado' : 'No tienes acceso a esta competencia',
+      message:
+        acceso.error === 'no-encontrado'
+          ? 'Competencia no encontrado'
+          : 'No tienes acceso a esta competencia',
     });
     return;
   }
@@ -191,18 +204,42 @@ router.delete('/:id/imagen', adminWriteRateLimiter(), async (req: AuthRequest, r
 router.use('/:id/imagen', handleMulterError);
 
 router.get('/', competenciaController.getCompetencias);
-router.post('/', adminWriteRateLimiter(), validate(createCompetenciaSchema), competenciaController.createCompetencia);
-router.post('/assign', adminWriteRateLimiter(), validate(assignCompetenciaSchema), competenciaController.assignCompetencia);
+router.post(
+  '/',
+  adminWriteRateLimiter(),
+  validate(createCompetenciaSchema),
+  competenciaController.createCompetencia,
+);
+router.post(
+  '/assign',
+  adminWriteRateLimiter(),
+  validate(assignCompetenciaSchema),
+  competenciaController.assignCompetencia,
+);
 // Arranque sincronizado + comandos de emergencia (pausa, reanudar, fin, abortar).
-router.post('/:id/arranque', adminWriteRateLimiter(), validate(arranqueSchema), arranqueController.armarCompetencia);
+router.post(
+  '/:id/arranque',
+  adminWriteRateLimiter(),
+  validate(arranqueSchema),
+  arranqueController.armarCompetencia,
+);
 router.post('/:id/arranque/pausa', adminWriteRateLimiter(), arranqueController.pausarArranque);
 router.post('/:id/arranque/reanudar', adminWriteRateLimiter(), arranqueController.reanudarArranque);
 router.post('/:id/arranque/fin', adminWriteRateLimiter(), arranqueController.finalizarArranque);
 router.delete('/:id/arranque', adminWriteRateLimiter(), arranqueController.cancelarArranque);
 router.get('/:id', competenciaController.getCompetencia);
-router.put('/:id', adminWriteRateLimiter(), validate(updateCompetenciaSchema), competenciaController.updateCompetencia);
+router.put(
+  '/:id',
+  adminWriteRateLimiter(),
+  validate(updateCompetenciaSchema),
+  competenciaController.updateCompetencia,
+);
 router.delete('/:id', adminWriteRateLimiter(), competenciaController.deleteCompetencia);
 router.get('/:id/assignments', competenciaController.getCompetenciaAssignments);
-router.delete('/assignments/:asignacionId', adminWriteRateLimiter(), competenciaController.removeAssignment);
+router.delete(
+  '/assignments/:asignacionId',
+  adminWriteRateLimiter(),
+  competenciaController.removeAssignment,
+);
 
 export default router;

@@ -100,7 +100,7 @@ ResultadoSplit.init(
         name: 'idx_splits_segmento',
       },
     ],
-  }
+  },
 );
 
 export default ResultadoSplit;

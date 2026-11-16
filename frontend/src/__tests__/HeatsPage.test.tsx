@@ -13,21 +13,61 @@ vi.mock('../components/layout/AppShell', () => ({
 
 vi.mock('../components/ui', () => ({
   Alert: ({ children, tone }: { children: React.ReactNode; tone?: string }) => (
-    <div data-testid="alert" data-tone={tone}>{children}</div>
+    <div data-testid="alert" data-tone={tone}>
+      {children}
+    </div>
   ),
-  Button: ({ children, onClick, loading }: { children: React.ReactNode; onClick?: () => void; loading?: boolean }) => (
-    <button onClick={onClick} disabled={loading}>{children}</button>
+  Button: ({
+    children,
+    onClick,
+    loading,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    loading?: boolean;
+  }) => (
+    <button onClick={onClick} disabled={loading}>
+      {children}
+    </button>
   ),
   ConfirmDialog: () => <div data-testid="confirm-dialog" />,
   EmptyState: ({ title }: { title?: string }) => (
     <div data-testid="empty-state">{title && <span>{title}</span>}</div>
   ),
-  Field: ({ label, type, value, onChange }: { label?: string; type?: string; value?: unknown; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
-    <div><label>{label}</label><input type={type} value={value as string} onChange={onChange} /></div>
+  Field: ({
+    label,
+    type,
+    value,
+    onChange,
+  }: {
+    label?: string;
+    type?: string;
+    value?: unknown;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  }) => (
+    <div>
+      <label>{label}</label>
+      <input type={type} value={value as string} onChange={onChange} />
+    </div>
   ),
   IconButton: ({ label }: { label?: string }) => <button aria-label={label}>icon</button>,
-  Select: ({ label, children, value, onChange }: { label?: string; children: React.ReactNode; value?: string; onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void }) => (
-    <div><label>{label}</label><select value={value} onChange={onChange}>{children}</select></div>
+  Select: ({
+    label,
+    children,
+    value,
+    onChange,
+  }: {
+    label?: string;
+    children: React.ReactNode;
+    value?: string;
+    onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  }) => (
+    <div>
+      <label>{label}</label>
+      <select value={value} onChange={onChange}>
+        {children}
+      </select>
+    </div>
   ),
   SkeletonList: () => <div data-testid="skeleton-list" />,
 }));
@@ -76,7 +116,8 @@ describe('HeatsPage', () => {
 
   it('renders category and competition selectors', async () => {
     mockGet.mockImplementation((url: string) => {
-      if (url === '/categories') return Promise.resolve({ data: [{ id: 1, nombre: 'RX', genero: 'Masculino' }] });
+      if (url === '/categories')
+        return Promise.resolve({ data: [{ id: 1, nombre: 'RX', genero: 'Masculino' }] });
       if (url === '/competencias') return Promise.resolve({ data: [{ id: 1, nombre: 'WOD 1' }] });
       return Promise.resolve({ data: { heats: [], sinAsignar: [] } });
     });
@@ -89,7 +130,8 @@ describe('HeatsPage', () => {
 
   it('renders configuration section when category is selected', async () => {
     mockGet.mockImplementation((url: string) => {
-      if (url === '/categories') return Promise.resolve({ data: [{ id: 1, nombre: 'RX', genero: 'Masculino' }] });
+      if (url === '/categories')
+        return Promise.resolve({ data: [{ id: 1, nombre: 'RX', genero: 'Masculino' }] });
       if (url === '/competencias') return Promise.resolve({ data: [] });
       return Promise.resolve({ data: { heats: [], sinAsignar: [] } });
     });
@@ -103,7 +145,8 @@ describe('HeatsPage', () => {
 
   it('shows empty heats state when no series exist', async () => {
     mockGet.mockImplementation((url: string) => {
-      if (url === '/categories') return Promise.resolve({ data: [{ id: 1, nombre: 'RX', genero: 'Masculino' }] });
+      if (url === '/categories')
+        return Promise.resolve({ data: [{ id: 1, nombre: 'RX', genero: 'Masculino' }] });
       if (url === '/competencias') return Promise.resolve({ data: [] });
       return Promise.resolve({ data: { heats: [], sinAsignar: [] } });
     });

@@ -2,7 +2,11 @@ import { useRef, useState } from 'react';
 import { ImagePlus, Trash2 } from 'lucide-react';
 import { mensajeDeError } from '../../api/client';
 import { Alert, Button } from '../ui';
-import { MAX_MB_IMAGEN, subirArchivoImagen, validarArchivoImagen } from '../../hooks/useSubidaImagen';
+import {
+  MAX_MB_IMAGEN,
+  subirArchivoImagen,
+  validarArchivoImagen,
+} from '../../hooks/useSubidaImagen';
 
 /**
  * Foto de un WOD dentro del formulario de la competencia.
@@ -67,7 +71,11 @@ export default function ImagenWod({
 
       <div className="flex-1 min-w-0 space-y-2">
         <p className="label">Foto del WOD</p>
-        {error && <Alert tone="error" onDismiss={() => setError('')}>{error}</Alert>}
+        {error && (
+          <Alert tone="error" onDismiss={() => setError('')}>
+            {error}
+          </Alert>
+        )}
         <input
           ref={inputRef}
           type="file"

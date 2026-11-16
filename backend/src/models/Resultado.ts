@@ -120,7 +120,7 @@ Resultado.init(
       { fields: ['wod_id', 'participante_id'] },
       { fields: ['juez_id'] },
     ],
-  }
+  },
 );
 
 Participante.hasMany(Resultado, { foreignKey: 'participante_id', as: 'resultados' });

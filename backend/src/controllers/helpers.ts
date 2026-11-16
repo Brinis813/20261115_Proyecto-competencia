@@ -9,7 +9,7 @@ export function mensajeSeguro(error: any): string {
   const mensaje = String(error?.message ?? '');
   const filtrar =
     /sql|sequelize|select |insert |update |constraint|bigint|dup_entry|duplicate entry|unique constraint|foreign key|deadlock|lock wait timeout/i.test(
-      mensaje
+      mensaje,
     );
   return filtrar || !mensaje ? 'No se pudo completar la operacion' : mensaje;
 }
@@ -38,7 +38,7 @@ export function idDeRuta(req: AuthRequest, res: Response, param = 'id'): number 
  */
 export function perteneceAlAlcance(
   alcance: AlcanceEvento | undefined,
-  eventoId: number | null | undefined
+  eventoId: number | null | undefined,
 ): boolean {
   if (!alcance) return false;
   // Superadmin: acceso a todo
@@ -66,9 +66,11 @@ export function perteneceAlAlcance(
  */
 export async function cargarCompetenciaConAcceso(
   req: AuthRequest,
-  competenciaId: number
+  competenciaId: number,
 ): Promise<{ competencia: Competencia } | { error: 'no-encontrado' | 'sin-acceso' }> {
-  const competencia = await Competencia.findByPk(competenciaId, { attributes: ['id', 'evento_id'] });
+  const competencia = await Competencia.findByPk(competenciaId, {
+    attributes: ['id', 'evento_id'],
+  });
   if (!competencia) return { error: 'no-encontrado' };
   if (!perteneceAlAlcance(req.alcance, competencia.evento_id)) return { error: 'sin-acceso' };
   return { competencia };

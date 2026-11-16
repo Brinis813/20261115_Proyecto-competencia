@@ -91,7 +91,8 @@ describe('AdminDashboard', () => {
     mockGet.mockImplementation((url: string) => {
       if (url === '/competencias') return Promise.resolve({ data: [{ id: 1 }, { id: 2 }] });
       if (url === '/users/jueces') return Promise.resolve({ data: [{ id: 1 }] });
-      if (url === '/users/participantes') return Promise.resolve({ data: [{ id: 1 }, { id: 2 }, { id: 3 }] });
+      if (url === '/users/participantes')
+        return Promise.resolve({ data: [{ id: 1 }, { id: 2 }, { id: 3 }] });
       return Promise.resolve({ data: [] });
     });
     render(<AdminDashboard />, { wrapper });

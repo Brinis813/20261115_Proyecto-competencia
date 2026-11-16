@@ -92,7 +92,7 @@ export function useOfflineSync() {
       });
       await contar();
     },
-    [contar]
+    [contar],
   );
 
   const syncPending = useCallback(async () => {
@@ -108,7 +108,7 @@ export function useOfflineSync() {
     try {
       const db = await abrirDB();
       const items = await comoPromesa<ResultadoPendiente[]>(
-        db.transaction(STORE, 'readonly').objectStore(STORE).getAll()
+        db.transaction(STORE, 'readonly').objectStore(STORE).getAll(),
       );
 
       for (const item of items) {

@@ -16,7 +16,9 @@ export const loginSchema = z.object({
 
 export const loginParticipanteSchema = z.object({
   cedula: z.string().trim().min(1, 'La cedula es obligatoria').max(20),
-  fecha_nacimiento: z.string().regex(/^\d{4}[-/]\d{2}[-/]\d{2}$/, 'Formato esperado: AAAA/MM/DD o AAAA-MM-DD'),
+  fecha_nacimiento: z
+    .string()
+    .regex(/^\d{4}[-/]\d{2}[-/]\d{2}$/, 'Formato esperado: AAAA/MM/DD o AAAA-MM-DD'),
 });
 
 export const registroSchema = z.object({

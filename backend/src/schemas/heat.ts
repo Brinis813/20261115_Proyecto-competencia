@@ -50,7 +50,7 @@ export const horarioManualSchema = z.object({
       z.object({
         heat_id: z.number().int().positive(),
         hora_inicio: z.string().regex(horaRegex, 'Usa HH:MM de 24 h'),
-      })
+      }),
     )
     .min(1)
     .max(100),

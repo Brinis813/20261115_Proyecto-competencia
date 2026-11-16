@@ -45,7 +45,10 @@ export default function JuezCompetenciasPage() {
         ) : (
           <ul className="divide-hairline">
             {competencias.map((competencia) => (
-              <li key={competencia.id} className="group flex items-center gap-3 px-4 sm:px-5 py-4 hover:bg-white/[0.03] transition-colors duration-200">
+              <li
+                key={competencia.id}
+                className="group flex items-center gap-3 px-4 sm:px-5 py-4 hover:bg-white/[0.03] transition-colors duration-200"
+              >
                 <Link
                   to={`/juez/${competencia.id}`}
                   className="flex items-center gap-4 flex-1 min-w-0"
@@ -54,8 +57,12 @@ export default function JuezCompetenciasPage() {
                     <Dumbbell className="w-5 h-5" aria-hidden="true" />
                   </span>
                   <span className="flex-1 min-w-0">
-                    <span className="block font-semibold text-hyrox-paper truncate">{competencia.nombre}</span>
-                    <span className="block text-xs text-hyrox-mist">{competencia.wods?.length ?? 0} wods</span>
+                    <span className="block font-semibold text-hyrox-paper truncate">
+                      {competencia.nombre}
+                    </span>
+                    <span className="block text-xs text-hyrox-mist">
+                      {competencia.wods?.length ?? 0} wods
+                    </span>
                     <span className="block mt-1 text-2xs text-hyrox-ghost truncate">
                       Categorias: {formatearCategorias(competencia.divisiones)}
                     </span>

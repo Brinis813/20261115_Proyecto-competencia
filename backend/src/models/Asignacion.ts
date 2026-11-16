@@ -69,7 +69,7 @@ Asignacion.init(
         fields: ['competencia_id', 'participante_id', 'wod_id'],
       },
     ],
-  }
+  },
 );
 
 // Direct associations for Asignacion -> Usuario/Participante/Competencia/Wod (needed for includes)
@@ -78,7 +78,23 @@ Asignacion.belongsTo(Participante, { foreignKey: 'participante_id', as: 'Partici
 Asignacion.belongsTo(Competencia, { foreignKey: 'competencia_id', as: 'Competencia' });
 Asignacion.belongsTo(Wod, { foreignKey: 'wod_id', as: 'Wod' });
 
-Competencia.belongsToMany(Usuario, { through: Asignacion, foreignKey: 'competencia_id', as: 'jueces' });
-Usuario.belongsToMany(Competencia, { through: Asignacion, foreignKey: 'usuario_id', as: 'competencias' });
-Competencia.belongsToMany(Participante, { through: Asignacion, foreignKey: 'competencia_id', as: 'participantes' });
-Participante.belongsToMany(Competencia, { through: Asignacion, foreignKey: 'participante_id', as: 'competencias' });
+Competencia.belongsToMany(Usuario, {
+  through: Asignacion,
+  foreignKey: 'competencia_id',
+  as: 'jueces',
+});
+Usuario.belongsToMany(Competencia, {
+  through: Asignacion,
+  foreignKey: 'usuario_id',
+  as: 'competencias',
+});
+Competencia.belongsToMany(Participante, {
+  through: Asignacion,
+  foreignKey: 'competencia_id',
+  as: 'participantes',
+});
+Participante.belongsToMany(Competencia, {
+  through: Asignacion,
+  foreignKey: 'participante_id',
+  as: 'competencias',
+});

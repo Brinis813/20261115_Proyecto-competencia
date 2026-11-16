@@ -13,13 +13,26 @@ const router = Router();
 router.use(authMiddleware, resolverEvento);
 // Las mediciones las genera el cronómetro del juez: throttle por rol para que un
 // cliente en bucle no sature MySQL ni el broadcast de sockets.
-router.use(rateLimitByRole({ admin: 300, juez: 120, participante: 30, anonimo: 30 }, 60 * 1000, 'results'));
+router.use(
+  rateLimitByRole({ admin: 300, juez: 120, participante: 30, anonimo: 30 }, 60 * 1000, 'results'),
+);
 
 // Registrar y consultar mediciones es tarea de jueces y administradores.
 // Un participante autenticado no puede escribir resultados.
-router.post('/', staffOnly, judgeSaveRateLimiter(), validate(saveResultSchema), resultController.saveResult);
+router.post(
+  '/',
+  staffOnly,
+  judgeSaveRateLimiter(),
+  validate(saveResultSchema),
+  resultController.saveResult,
+);
 router.get('/:id/splits', staffOnly, resultController.getSplits);
-router.post('/check', staffOnly, validate(participanteWodSchema), resultController.checkParticipant);
+router.post(
+  '/check',
+  staffOnly,
+  validate(participanteWodSchema),
+  resultController.checkParticipant,
+);
 router.post('/reset', adminOnly, validate(participanteWodSchema), resultController.resetResult);
 router.get('/participant/:participantId', resultController.getResultsByParticipant);
 router.get('/competencia/:competenciaId', staffOnly, resultController.getResultsByCompetencia);

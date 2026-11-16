@@ -71,7 +71,7 @@ export default function AdministradoresPage() {
           cedula: form.cedula.trim(),
           email: form.email.trim() || null,
           box_id: Number(form.box_id),
-        }
+        },
       );
 
       setFormAbierto(false);
@@ -96,13 +96,22 @@ export default function AdministradoresPage() {
       title="Administradores"
       subtitle="Quien gestiona cada box"
       actions={
-        <Button size="sm" icon={Plus} onClick={() => setFormAbierto(true)} disabled={boxes.length === 0}>
+        <Button
+          size="sm"
+          icon={Plus}
+          onClick={() => setFormAbierto(true)}
+          disabled={boxes.length === 0}
+        >
           <span className="hidden sm:inline">Nuevo administrador</span>
         </Button>
       }
     >
       <div className="space-y-4">
-        {error && <Alert tone="error" onDismiss={() => setError('')}>{error}</Alert>}
+        {error && (
+          <Alert tone="error" onDismiss={() => setError('')}>
+            {error}
+          </Alert>
+        )}
 
         {!cargando && boxes.length === 0 && (
           <Alert tone="warning">
@@ -267,7 +276,7 @@ export default function AdministradoresPage() {
               icon={Copy}
               onClick={() =>
                 navigator.clipboard?.writeText(
-                  `Cedula: ${credenciales.cedula}\nContrasena: ${credenciales.password}`
+                  `Cedula: ${credenciales.cedula}\nContrasena: ${credenciales.password}`,
                 )
               }
             >

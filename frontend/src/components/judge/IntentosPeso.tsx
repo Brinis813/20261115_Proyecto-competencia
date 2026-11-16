@@ -82,7 +82,8 @@ export default function IntentosPeso({
 
   // Sumar 1.25 en coma flotante acumula restos (41.25000000000001) que
   // acabarian viajando tal cual en el resultado enviado.
-  const ajustar = (delta: number) => onCambiarPeso(Math.max(0, Math.round((peso + delta) * 100) / 100));
+  const ajustar = (delta: number) =>
+    onCambiarPeso(Math.max(0, Math.round((peso + delta) * 100) / 100));
 
   return (
     <>
@@ -120,7 +121,9 @@ export default function IntentosPeso({
                     : 'border-white/[0.06] bg-white/[0.02]'
                 }`}
               >
-                <span className="font-bold text-hyrox-mist text-sm w-7 shrink-0">#{indice + 1}</span>
+                <span className="font-bold text-hyrox-mist text-sm w-7 shrink-0">
+                  #{indice + 1}
+                </span>
                 <span className="min-w-0">
                   <span className="font-mono font-bold text-hyrox-paper block">
                     {intento ? `${intento.peso} ${unidad}` : esActual ? `${peso} ${unidad}` : '--'}
@@ -240,7 +243,8 @@ export default function IntentosPeso({
               className="mt-2 w-full min-h-[2.5rem] rounded-lg border border-hyrox-primary/40 bg-hyrox-primary/10 text-hyrox-primary text-xs font-bold hover:bg-hyrox-primary/20 transition disabled:opacity-30 cursor-pointer"
             >
               Usar total en la carga
-              {totalDesdeEquipo(barra, discos) !== null && ` (${totalDesdeEquipo(barra, discos)} ${unidad})`}
+              {totalDesdeEquipo(barra, discos) !== null &&
+                ` (${totalDesdeEquipo(barra, discos)} ${unidad})`}
             </button>
           </div>
 

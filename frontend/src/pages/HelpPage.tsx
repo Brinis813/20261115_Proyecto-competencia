@@ -47,7 +47,7 @@ export default function HelpPage() {
   const visibles = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
     return TUTORIALES.filter((t) => filtro === 'todo' || t.rol === filtro).filter(
-      (t) => !q || textoBuscable(t).includes(q)
+      (t) => !q || textoBuscable(t).includes(q),
     );
   }, [filtro, busqueda]);
 
@@ -78,8 +78,9 @@ export default function HelpPage() {
                   ¿En qué te ayudamos?
                 </h2>
                 <p className="text-sm text-hyrox-mist mt-1 max-w-2xl leading-relaxed">
-                  Cada tutorial recorre una tarea completa, con la captura de cada paso y una animación
-                  del flujo entero. Empiezas por los de tu rol, pero puedes ver los de cualquier otro.
+                  Cada tutorial recorre una tarea completa, con la captura de cada paso y una
+                  animación del flujo entero. Empiezas por los de tu rol, pero puedes ver los de
+                  cualquier otro.
                 </p>
               </div>
             </div>
@@ -99,7 +100,7 @@ export default function HelpPage() {
                     'px-3.5 h-9 rounded-xl text-sm font-medium transition-colors duration-200 cursor-pointer',
                     filtro === f.valor
                       ? 'bg-hyrox-primary/12 text-hyrox-primary'
-                      : 'text-hyrox-mist hover:text-hyrox-paper hover:bg-white/[0.05]'
+                      : 'text-hyrox-mist hover:text-hyrox-paper hover:bg-white/[0.05]',
                   )}
                 >
                   {f.etiqueta}
@@ -152,8 +153,12 @@ export default function HelpPage() {
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-base font-bold text-hyrox-paper leading-snug">{t.titulo}</h3>
-                        <p className="text-sm text-hyrox-mist mt-1.5 leading-relaxed">{t.resumen}</p>
+                        <h3 className="text-base font-bold text-hyrox-paper leading-snug">
+                          {t.titulo}
+                        </h3>
+                        <p className="text-sm text-hyrox-mist mt-1.5 leading-relaxed">
+                          {t.resumen}
+                        </p>
                       </div>
 
                       <span className="flex items-center gap-1.5 text-sm font-medium text-hyrox-primary">
@@ -202,7 +207,7 @@ function Desplegable({ pregunta, respuesta }: { pregunta: string; respuesta: str
         <ChevronDown
           className={cx(
             'w-4 h-4 shrink-0 text-hyrox-ghost transition-transform duration-200',
-            abierto && 'rotate-180 text-hyrox-primary'
+            abierto && 'rotate-180 text-hyrox-primary',
           )}
           aria-hidden="true"
         />

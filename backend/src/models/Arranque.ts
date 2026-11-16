@@ -18,7 +18,8 @@ export const MODOS_ARRANQUE: ModoArranque[] = [
   'programado',
 ];
 
-export type EstadoArranque = 'armado' | 'cuenta_regresiva' | 'en_curso' | 'pausado' | 'finalizado' | 'cancelado';
+export type EstadoArranque =
+  'armado' | 'cuenta_regresiva' | 'en_curso' | 'pausado' | 'finalizado' | 'cancelado';
 
 export const ESTADOS_ARRANQUE: EstadoArranque[] = [
   'armado',
@@ -125,7 +126,7 @@ Arranque.init(
     tableName: 'arranques',
     timestamps: true,
     underscored: true,
-  }
+  },
 );
 
 Competencia.hasMany(Arranque, { foreignKey: 'competencia_id', as: 'arranques' });
