@@ -33,7 +33,7 @@ jobs:
       - run: npm run format:check
       - run: npx tsc --noEmit
       - run: npm run build
-      - run: npm test
+      - run: npm run test:ci
       - name: Upload frontend coverage
         if: always()
         uses: actions/upload-artifact@v4

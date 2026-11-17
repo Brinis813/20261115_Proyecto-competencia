@@ -4,8 +4,14 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.test.ts'],
-  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/index.ts'],
-  // La cobertura no se vigila con umbrales del runner: se mide aquí y se decide fuera,
-  // contra el suelo escrito (constitución, regla 28). El umbral que había (70 %) nunca
-  // se cumplió y tumbaba el CI desde el primer commit.
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/**/*.d.ts',
+    '!src/index.ts',
+    '!src/types/**',
+    // Reparaciones de datos que se ejecutan una sola vez al arrancar (ver deuda de cobertura).
+    '!src/db/repairs/**',
+  ],
+  // La política de cobertura vive en `.coverage-floors.json` y en `scripts/coverage-gate.mjs`.
+  coverageReporters: ['text', 'json-summary'],
 };
