@@ -21,8 +21,15 @@ jobs:
     defaults:
       run:
         working-directory: frontend
+    env:
+      # La puerta de cobertura compara contra esta rama para saber qué archivos
+      # tocó el PR. Sin esto, el checkout superficial no tiene origin/main y la
+      # regla del 80% se saltaría en silencio.
+      COVERAGE_BASE: origin/main
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -47,8 +54,12 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    env:
+      COVERAGE_BASE: origin/main
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -58,8 +69,9 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npx tsc --noEmit
-      # Validación Zod + scoring + aislamiento multi-tenant.
-      - run: npm test -- --passWithNoTests
+      # Validación Zod + scoring + aislamiento multi-tenant, y la puerta de
+      # cobertura (suelo global + 80% en archivos tocados).
+      - run: npm run test:ci
       - name: Upload backend coverage
         if: always()
         uses: actions/upload-artifact@v4
