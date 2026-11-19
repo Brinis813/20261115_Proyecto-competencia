@@ -1,0 +1,22 @@
+# Normaliza los finales de línea en todo el repo: el código se guarda y se
+# trabaja con LF, para que Prettier (endOfLine: lf) dé el mismo resultado en
+# Windows, macOS y Linux. Sin esto, un `git checkout` en Windows deja CRLF y
+# `npm run format:check` falla por un motivo que no es de formato real.
+* text=auto eol=lf
+
+# Los scripts de Windows necesitan CRLF para ejecutarse bien.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binarios: git no debe tocarlos.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.pdf binary
