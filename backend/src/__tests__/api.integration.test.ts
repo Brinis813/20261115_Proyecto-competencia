@@ -596,6 +596,41 @@ describe('POST /api/users/jueces', () => {
 
 // ── COMPETENCIAS ──────────────────────────────────────────────────────
 
+describe('POST /api/users/bulk (carga CSV)', () => {
+  it('rechaza un archivo que no es CSV -> 400', async () => {
+    const res = await request(app)
+      .post('/api/users/bulk')
+      .set('Cookie', 'token=valid-admin-token')
+      .attach('archivo', Buffer.from('no soy una tabla'), {
+        filename: 'atletas.txt',
+        contentType: 'image/png',
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/CSV/);
+    expect(userService.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('acepta .csv aunque el navegador mande un tipo que no reconoce', async () => {
+    // Los navegadores no se ponen de acuerdo con el tipo de un .csv: unos
+    // mandan text/plain, otros application/octet-stream, otros algo inventado.
+    // La extensión tiene que bastar, o la carga masiva falla sin motivo.
+    (userService.parseCSV as jest.Mock).mockReturnValue([{ nombre: 'Atleta', cedula: '1' }]);
+    (userService.bulkCreate as jest.Mock).mockResolvedValue({ creados: 1, errores: [] });
+
+    const res = await request(app)
+      .post('/api/users/bulk')
+      .set('Cookie', 'token=valid-admin-token')
+      .attach('archivo', Buffer.from('nombre,cedula\nAtleta,1'), {
+        filename: 'atletas.csv',
+        contentType: 'text/x-desconocido',
+      });
+
+    expect(res.status).toBe(200);
+    expect(userService.bulkCreate).toHaveBeenCalled();
+  });
+});
+
 describe('POST /api/competencias', () => {
   it('datos validos + admin -> 201', async () => {
     (competenciaService.createCompetencia as jest.Mock).mockResolvedValue(mockCompetencia);

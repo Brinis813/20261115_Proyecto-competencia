@@ -168,6 +168,54 @@ const mockLeaderboard = {
 /* Test suite                                                          */
 /* ------------------------------------------------------------------ */
 
+/* Presupuesto de espera de una condición. En el CI (2 núcleos, cobertura
+   midiendo cada línea) un `setTimeout(50)` no garantiza nada: llega antes de
+   que el servidor conteste y la prueba falla sola. Esperamos a que pase lo que
+   tiene que pasar, con un techo que falla claro si de verdad no pasa. */
+const PRESUPUESTO_MS = 5000;
+
+async function esperarA(
+  condicion: () => boolean | Promise<boolean>,
+  descripcion: string,
+  ms: number = PRESUPUESTO_MS,
+): Promise<void> {
+  const limite = Date.now() + ms;
+  while (Date.now() < limite) {
+    if (await condicion()) return;
+    await new Promise((r) => setTimeout(r, 10));
+  }
+  throw new Error(`No se cumplió en ${ms} ms: ${descripcion}`);
+}
+
+/* Pausa corta para las comprobaciones de "esto NO debe pasar": ahí no hay nada
+   que esperar, solo dar tiempo a que ocurriera si fuera a ocurrir. */
+function pausa(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/* Pregunta el estado de un bloqueo desde otro cliente. Devuelve la respuesta
+   del servidor, para poder esperarla con `esperarA` en vez de con un reloj. */
+function consultarBloqueo(
+  client: ClientSocket,
+  participanteId: number,
+  wodId: number,
+): Promise<any> {
+  return new Promise((resolve) => {
+    client.emit(
+      'check-participant-lock',
+      { participante_id: participanteId, wod_id: wodId },
+      (data: any) => resolve(data),
+    );
+  });
+}
+
+/* Todo servidor y cliente que abre una prueba queda registrado aquí, y el
+   `afterEach` los cierra pase lo que pase. Un servidor olvidado deja un puerto
+   escuchando: el proceso no termina y Jest se queda esperando al trabajador
+   (o lo mata, que es el aviso "worker process has failed to exit"). */
+const servidoresAbiertos: Array<{ server: http.Server; sio: Server }> = [];
+const clientesAbiertos: ClientSocket[] = [];
+
 function createServerAndConnect(
   auth?: Record<string, any> | null,
 ): Promise<{ client: ClientSocket; port: number }> {
@@ -175,6 +223,7 @@ function createServerAndConnect(
     const server = http.createServer();
     const sio = new Server(server, { cors: { origin: '*' } });
     setupSocketHandlers(sio);
+    servidoresAbiertos.push({ server, sio });
 
     server.listen(0, () => {
       const addr = server.address();
@@ -188,13 +237,22 @@ function createServerAndConnect(
       }
 
       const client = ioClient(`http://localhost:${port}`, clientOpts);
+      clientesAbiertos.push(client);
+
+      // Sin esto, un cliente que nunca conecta deja la prueba colgada hasta
+      // que Jest la mata por tiempo: fallo sin nombre y sin causa.
+      const plazo = setTimeout(() => {
+        client.close();
+        reject(new Error(`El cliente no conectó en ${PRESUPUESTO_MS} ms`));
+      }, PRESUPUESTO_MS);
+      plazo.unref?.();
 
       client.on('connect', () => {
+        clearTimeout(plazo);
         resolve({ client, port });
       });
       client.on('connect_error', (err) => {
-        server.close();
-        sio.close();
+        clearTimeout(plazo);
         reject(err);
       });
 
@@ -211,9 +269,42 @@ function closeServer(client: ClientSocket): Promise<void> {
     const sio: Server | undefined = (client as any)._testIO;
     client.disconnect();
     if (sio) sio.close();
-    if (server) server.close(() => resolve());
-    else resolve();
+    if (!server) return resolve();
+    // Si quedara una conexión viva, `close()` no llama nunca al callback y la
+    // prueba se cuelga. Se cortan las conexiones antes de cerrar.
+    (server as any).closeAllConnections?.();
+    server.close(() => resolve());
   });
+}
+
+/* Cierre de seguridad: repite lo que la prueba ya hizo, sin importar en qué
+   punto se quedó. Es idempotente, así que no estorba a las que cierran bien. */
+async function cerrarTodo(): Promise<void> {
+  for (const cliente of clientesAbiertos) {
+    try {
+      cliente.removeAllListeners();
+      cliente.disconnect();
+      cliente.close();
+    } catch {
+      // ya estaba cerrado
+    }
+  }
+  clientesAbiertos.length = 0;
+
+  await Promise.all(
+    servidoresAbiertos.map(
+      ({ server, sio }) =>
+        new Promise<void>((resolve) => {
+          sio.close();
+          (server as any).closeAllConnections?.();
+          server.close(() => resolve());
+          // Red de seguridad: si el cierre no llama al callback, no bloqueamos.
+          const plazo = setTimeout(resolve, 1000);
+          plazo.unref?.();
+        }),
+    ),
+  );
+  servidoresAbiertos.length = 0;
 }
 
 /* ------------------------------------------------------------------ */
@@ -225,6 +316,10 @@ beforeEach(() => {
   (scoringEngine.getLeaderboard as jest.Mock).mockResolvedValue(mockLeaderboard);
   (arranqueService.obtenerSnapshot as jest.Mock).mockResolvedValue(null);
   (rateLimiter.throttleSocket as jest.Mock).mockReturnValue(true);
+});
+
+afterEach(async () => {
+  await cerrarTodo();
 });
 
 describe('Socket.IO connection', () => {
@@ -321,14 +416,14 @@ describe('join-competencia', () => {
 
     // Join first competencia
     client.emit('join-competencia', 1);
-    await new Promise((r) => setTimeout(r, 50));
-    expect(updates.length).toBeGreaterThanOrEqual(1);
+    await esperarA(() => updates.length >= 1, 'la clasificación al entrar a la sala 1');
 
     // Join second competencia — should leave first room
     client.emit('join-competencia', 2);
-    await new Promise((r) => setTimeout(r, 50));
-
-    expect(scoringEngine.getLeaderboard).toHaveBeenCalledWith(2);
+    await esperarA(
+      () => (scoringEngine.getLeaderboard as jest.Mock).mock.calls.some((c) => c[0] === 2),
+      'la clasificación pedida para la competencia 2',
+    );
 
     client.disconnect();
     await closeServer(client);
@@ -366,16 +461,39 @@ describe('join-competencia', () => {
 describe('leave-competencia', () => {
   it('leaves the room and stops receiving updates', async () => {
     const { client } = await createServerAndConnect();
+    const sio = (client as any)._testIO as Server;
+
+    const recibidas: any[] = [];
+    client.on('leaderboard-update', (d) => recibidas.push(d));
 
     client.emit('join-competencia', 1);
-    await new Promise((r) => setTimeout(r, 50));
+    await esperarA(() => recibidas.length >= 1, 'la clasificación al entrar a la sala');
 
     client.emit('leave-competencia', 1);
-    await new Promise((r) => setTimeout(r, 50));
+    // Se espera al estado del servidor (la sala vacía), no a un reloj: así
+    // la prueba no depende de que la máquina sea rápida.
+    await esperarA(
+      () => !sio.sockets.adapter.rooms.get('competencia-1')?.has(client.id as string),
+      'que el cliente salga de la sala',
+    );
 
-    // The client should no longer be in the room
-    const rooms = (client as any).rooms || new Set();
-    expect(rooms.has('competencia-1')).toBe(false);
+    const antes = recibidas.length;
+    // Puntaje distinto al ya difundido: `broadcastLeaderboard` no reenvía si la
+    // firma no cambió, y aquí hace falta que el envío ocurra de verdad.
+    (scoringEngine.getLeaderboard as jest.Mock).mockResolvedValue({
+      ...mockLeaderboard,
+      competencia: { id: 1, nombre: 'Comp leave' },
+      leaderboard: [
+        { participante_id: 10, nombre: 'Atleta 1', puntaje_total: 61, puesto: 1, puntos_total: 61 },
+      ],
+    });
+    await broadcastLeaderboard(1);
+
+    // Aserción negativa: solo se puede comprobar dejando pasar un rato. Si la
+    // máquina va lenta, el fallo posible es que la prueba pase de más, nunca
+    // que falle sin motivo.
+    await pausa(300);
+    expect(recibidas.length).toBe(antes);
 
     client.disconnect();
     await closeServer(client);
@@ -558,27 +676,25 @@ describe('lock-participant / unlock-participant', () => {
     (Wod.findByPk as unknown as jest.Mock).mockResolvedValue({ id: 1, competencia_id: 1 });
     (Asignacion.findOne as unknown as jest.Mock).mockResolvedValue({ id: 1 });
 
-    // Lock
-    client.emit('lock-participant', {
-      participante_id: 10,
-      wod_id: 1,
-      judgeName: 'Juez Perez',
-    });
-    await new Promise((r) => setTimeout(r, 50));
-
-    // Check from another judge — should be locked
-    const { client: client2 } = await createServerAndConnect({ id: 6, rol: 'juez' });
-
-    const checkResult = await new Promise<any>((res) => {
-      client2.emit(
-        'check-participant-lock',
+    // Lock con ACK: confirma que el servidor ya lo registró. Antes se esperaba
+    // 50 ms a ciegas y en el CI no siempre bastaban.
+    const ackLock = await new Promise<any>((res) => {
+      client.emit(
+        'lock-participant',
         {
           participante_id: 10,
           wod_id: 1,
+          judgeName: 'Juez Perez',
         },
         (data: any) => res(data),
       );
     });
+    expect(ackLock).toEqual({ ok: true });
+
+    // Check from another judge — should be locked
+    const { client: client2 } = await createServerAndConnect({ id: 6, rol: 'juez' });
+
+    const checkResult = await consultarBloqueo(client2, 10, 1);
 
     expect(checkResult.locked).toBe(true);
     expect(checkResult.message).toContain('Juez Perez');
@@ -588,21 +704,13 @@ describe('lock-participant / unlock-participant', () => {
       participante_id: 10,
       wod_id: 1,
     });
-    await new Promise((r) => setTimeout(r, 50));
 
-    // Check again — should be unlocked
-    const checkResult2 = await new Promise<any>((res) => {
-      client2.emit(
-        'check-participant-lock',
-        {
-          participante_id: 10,
-          wod_id: 1,
-        },
-        (data: any) => res(data),
-      );
-    });
-
-    expect(checkResult2.locked).toBe(false);
+    // Check again — should be unlocked. Se espera a que el otro juez lo vea,
+    // no a que pase un tiempo fijo.
+    await esperarA(
+      async () => (await consultarBloqueo(client2, 10, 1)).locked === false,
+      'que el desbloqueo se vea desde el otro juez',
+    );
 
     client.disconnect();
     client2.disconnect();
@@ -616,24 +724,21 @@ describe('lock-participant / unlock-participant', () => {
     (Wod.findByPk as unknown as jest.Mock).mockResolvedValue({ id: 1, competencia_id: 1 });
     (Asignacion.findOne as unknown as jest.Mock).mockResolvedValue(null);
 
-    client.emit('lock-participant', {
-      participante_id: 11,
-      wod_id: 1,
-      judgeName: 'Juez Ajeno',
-    });
-    await new Promise((r) => setTimeout(r, 50));
-
-    const { client: client2 } = await createServerAndConnect({ id: 8, rol: 'juez' });
-    const checkResult = await new Promise<any>((res) => {
-      client2.emit(
-        'check-participant-lock',
+    const ack = await new Promise<any>((res) => {
+      client.emit(
+        'lock-participant',
         {
           participante_id: 11,
           wod_id: 1,
+          judgeName: 'Juez Ajeno',
         },
         (data: any) => res(data),
       );
     });
+    expect(ack).toEqual({ ok: false });
+
+    const { client: client2 } = await createServerAndConnect({ id: 8, rol: 'juez' });
+    const checkResult = await consultarBloqueo(client2, 11, 1);
 
     expect(checkResult.locked).toBe(false);
 
@@ -646,26 +751,23 @@ describe('lock-participant / unlock-participant', () => {
   it('participant cannot lock', async () => {
     const { client } = await createServerAndConnect({ id: 10, rol: 'participante' });
 
-    client.emit('lock-participant', {
-      participante_id: 10,
-      wod_id: 1,
-      judgeName: 'Test',
-    });
-    await new Promise((r) => setTimeout(r, 50));
-
-    // A judge checks — should be unlocked (lock was ignored)
-    const { client: client2 } = await createServerAndConnect({ id: 5, rol: 'juez' });
-
-    const checkResult = await new Promise<any>((res) => {
-      client2.emit(
-        'check-participant-lock',
+    const ack = await new Promise<any>((res) => {
+      client.emit(
+        'lock-participant',
         {
           participante_id: 10,
           wod_id: 1,
+          judgeName: 'Test',
         },
         (data: any) => res(data),
       );
     });
+    expect(ack).toEqual({ ok: false });
+
+    // A judge checks — should be unlocked (lock was ignored)
+    const { client: client2 } = await createServerAndConnect({ id: 5, rol: 'juez' });
+
+    const checkResult = await consultarBloqueo(client2, 10, 1);
 
     expect(checkResult.locked).toBe(false);
 
@@ -678,24 +780,21 @@ describe('lock-participant / unlock-participant', () => {
   it('ignores invalid lock payload (negative ids)', async () => {
     const { client } = await createServerAndConnect({ id: 5, rol: 'juez' });
 
-    client.emit('lock-participant', {
-      participante_id: -1,
-      wod_id: 1,
-      judgeName: 'Test',
-    });
-    await new Promise((r) => setTimeout(r, 50));
-
-    // Check should still be unlocked
-    const checkResult = await new Promise<any>((res) => {
+    const ack = await new Promise<any>((res) => {
       client.emit(
-        'check-participant-lock',
+        'lock-participant',
         {
-          participante_id: 10,
+          participante_id: -1,
           wod_id: 1,
+          judgeName: 'Test',
         },
         (data: any) => res(data),
       );
     });
+    expect(ack).toEqual({ ok: false });
+
+    // Check should still be unlocked
+    const checkResult = await consultarBloqueo(client, 10, 1);
 
     expect(checkResult.locked).toBe(false);
 
@@ -768,12 +867,16 @@ describe('lock-participant / unlock-participant', () => {
     });
     expect(ack1).toEqual({ ok: true });
 
-    // Caída: el disconnect libera el bloqueo del juez.
+    // Caída: el disconnect libera el bloqueo del juez. Se espera a verlo
+    // liberado desde la reconexión, no a que pase un tiempo fijo.
     client.disconnect();
-    await new Promise((r) => setTimeout(r, 50));
+    const { client: recon } = await createServerAndConnect({ id: 5, rol: 'juez' });
+    await esperarA(
+      async () => (await consultarBloqueo(recon, 22, 1)).locked === false,
+      'que el bloqueo se libere al caer el juez',
+    );
 
     // Reconexión: el re-lock con ACK confirma que quedó registrado.
-    const { client: recon } = await createServerAndConnect({ id: 5, rol: 'juez' });
     const ack2 = await new Promise<any>((res) => {
       recon.emit(
         'lock-participant',
@@ -796,6 +899,7 @@ describe('lock-participant / unlock-participant', () => {
     const server = http.createServer();
     const sio = new Server(server, { cors: { origin: '*' } });
     setupSocketHandlers(sio);
+    servidoresAbiertos.push({ server, sio });
     await new Promise<void>((resolve) => server.listen(0, resolve));
     const addr = server.address();
     const port = typeof addr === 'object' && addr ? addr.port : 0;
@@ -807,6 +911,7 @@ describe('lock-participant / unlock-participant', () => {
       transports: ['websocket'],
       extraHeaders: { cookie: `token=${makeToken({ id: 9, rol: 'juez' })}` },
     });
+    clientesAbiertos.push(soloCookie);
     await new Promise<void>((resolve) => soloCookie.on('connect', () => resolve()));
 
     const ack = await new Promise<any>((res) => {
@@ -866,7 +971,7 @@ describe('time:sync', () => {
 
     // Should not throw
     client.emit('time:sync', { t1: 1000 });
-    await new Promise((r) => setTimeout(r, 100));
+    await pausa(100);
 
     expect(true).toBe(true);
 
@@ -928,32 +1033,29 @@ describe('disconnect cleanup', () => {
   it('releases all locks held by the disconnecting judge', async () => {
     const { client } = await createServerAndConnect({ id: 5, rol: 'juez' });
 
-    client.emit('lock-participant', {
-      participante_id: 10,
-      wod_id: 1,
-      judgeName: 'Juez Cleanup',
-    });
-    await new Promise((r) => setTimeout(r, 50));
-
-    // Disconnect the judge
-    client.disconnect();
-    await new Promise((r) => setTimeout(r, 100));
-
-    // Another judge should see the lock released
-    const { client: client2 } = await createServerAndConnect({ id: 6, rol: 'juez' });
-
-    const checkResult = await new Promise<any>((res) => {
-      client2.emit(
-        'check-participant-lock',
+    const ack = await new Promise<any>((res) => {
+      client.emit(
+        'lock-participant',
         {
           participante_id: 10,
           wod_id: 1,
+          judgeName: 'Juez Cleanup',
         },
         (data: any) => res(data),
       );
     });
+    expect(ack).toEqual({ ok: true });
 
-    expect(checkResult.locked).toBe(false);
+    // Disconnect the judge
+    client.disconnect();
+
+    // Another judge should see the lock released (se espera a verlo, sin reloj)
+    const { client: client2 } = await createServerAndConnect({ id: 6, rol: 'juez' });
+
+    await esperarA(
+      async () => (await consultarBloqueo(client2, 10, 1)).locked === false,
+      'que el bloqueo se libere al desconectarse el juez',
+    );
 
     client2.disconnect();
     await closeServer(client2);
@@ -964,7 +1066,7 @@ describe('disconnect cleanup', () => {
 
     expect(client.connected).toBe(true);
     client.disconnect();
-    await new Promise((r) => setTimeout(r, 100));
+    await esperarA(() => client.connected === false, 'que el cliente anónimo se desconecte');
 
     expect(client.connected).toBe(false);
   });
@@ -982,6 +1084,7 @@ describe('room isolation', () => {
       auth: { token: makeToken({ id: 2, rol: 'juez' }) },
       transports: ['websocket'],
     });
+    clientesAbiertos.push(c2);
     await new Promise<void>((res) => c2.on('connect', () => res()));
 
     const received1: any[] = [];
@@ -990,9 +1093,15 @@ describe('room isolation', () => {
     c1.on('leaderboard-update', (d) => received1.push(d));
     c2.on('leaderboard-update', (d) => received2.push(d));
 
+    const sio = (c1 as any)._testIO as Server;
     c1.emit('join-competencia', 1);
     c2.emit('join-competencia', 2);
-    await new Promise((r) => setTimeout(r, 200));
+    await esperarA(
+      () =>
+        sio.sockets.adapter.rooms.get('competencia-1')?.has(c1.id as string) === true &&
+        sio.sockets.adapter.rooms.get('competencia-2')?.has(c2.id as string) === true,
+      'que cada cliente esté en su sala',
+    );
 
     const count1Before = received1.length;
     const count2Before = received2.length;
@@ -1008,7 +1117,11 @@ describe('room isolation', () => {
       ],
     });
     await broadcastLeaderboard(1);
-    await new Promise((r) => setTimeout(r, 200));
+    await esperarA(
+      () => received1.length === count1Before + 1,
+      'que el cliente de la sala 1 reciba la difusión',
+    );
+    await pausa(200);
 
     // c1 should have received an additional update, c2 should not
     expect(received1.length).toBe(count1Before + 1);
@@ -1034,7 +1147,7 @@ describe('reconnect', () => {
 
     // Caída: el cliente se desconecta (la sala muere con la conexión).
     client.disconnect();
-    await new Promise((r) => setTimeout(r, 100));
+    await esperarA(() => client.connected === false, 'que el cliente se desconecte');
     expect(client.connected).toBe(false);
 
     // Reconexión con el MISMO socket: debe poder entrar de nuevo a la sala

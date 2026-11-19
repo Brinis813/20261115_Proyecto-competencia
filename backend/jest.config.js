@@ -14,4 +14,8 @@ module.exports = {
   ],
   // La política de cobertura vive en `.coverage-floors.json` y en `scripts/coverage-gate.mjs`.
   coverageReporters: ['text', 'json-summary'],
+  // Por encima de los 5 s que esperan las pruebas de socket a que ocurra algo:
+  // así, si algo no ocurre, falla con el mensaje que dice qué se esperaba y no
+  // con un "Exceeded timeout" genérico.
+  testTimeout: 15000,
 };
