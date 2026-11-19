@@ -55,21 +55,28 @@ export interface ErrorContext {
 }
 
 /** Extrae contexto útil de la petición para acompañar al error. */
-export function contextoDeRequest(req: Partial<Request> & { user?: { id?: number; rol?: string } }): ErrorContext {
+export function contextoDeRequest(
+  req: Partial<Request> & { user?: { id?: number; rol?: string } },
+): ErrorContext {
   const q = (req.query ?? {}) as Record<string, unknown>;
   const b = (req.body ?? {}) as Record<string, unknown>;
   const competitionId =
-    Number(req.headers?.['x-evento-id']) ||
-    Number(q.evento) ||
-    Number(b.evento_id) ||
+    Number(req.headers?.['x-evento-id']) || Number(q.evento) || Number(b.evento_id) || null;
+  const workoutId =
+    Number((req.params as Record<string, unknown> | undefined)?.competenciaId) ||
+    Number(b.competencia_id) ||
     null;
-  const workoutId = Number((req.params as Record<string, unknown> | undefined)?.competenciaId) || Number(b.competencia_id) || null;
   return {
-    endpoint: `${req.method ?? ''} ${(req as Request).originalUrl ?? (req as Request).url ?? ''}`.trim(),
-    competitionId: Number.isFinite(competitionId) && (competitionId as number) > 0 ? (competitionId as number) : null,
+    endpoint:
+      `${req.method ?? ''} ${(req as Request).originalUrl ?? (req as Request).url ?? ''}`.trim(),
+    competitionId:
+      Number.isFinite(competitionId) && (competitionId as number) > 0
+        ? (competitionId as number)
+        : null,
     userId: req.user?.id ?? null,
     rol: req.user?.rol ?? null,
-    workoutId: Number.isFinite(workoutId) && (workoutId as number) > 0 ? (workoutId as number) : null,
+    workoutId:
+      Number.isFinite(workoutId) && (workoutId as number) > 0 ? (workoutId as number) : null,
     stack: undefined,
   };
 }
@@ -90,7 +97,7 @@ export function reportError(err: unknown, ctx: ErrorContext = {}): void {
       ...ctx,
       stack: isProduction ? undefined : stack,
       ts: new Date().toISOString(),
-    })
+    }),
   );
 }
 
@@ -132,7 +139,7 @@ export function socketHealth(roomCount: number): {
         mensaje: `sin broadcasts desde hace ${Math.round((hace as number) / 1000)}s`,
         rooms: roomCount,
         ts: new Date().toISOString(),
-      })
+      }),
     );
     try {
       sentry?.captureException(new Error('socket-stale: sin broadcasts'), { rooms: roomCount });

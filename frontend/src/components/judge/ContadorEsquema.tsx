@@ -71,7 +71,9 @@ export default function ContadorEsquema({
       <div className="flex items-end justify-between mb-4">
         <p className="eyebrow">Conteo por movimiento</p>
         <p className="text-right">
-          <span className="block font-mono text-3xl font-extrabold text-hyrox-paper leading-none">{total}</span>
+          <span className="block font-mono text-3xl font-extrabold text-hyrox-paper leading-none">
+            {total}
+          </span>
           {objetivoTotal > 0 && (
             <span className="text-2xs text-hyrox-ghost">
               {permitirExceder ? `${objetivoTotal} reps / ronda` : `de ${objetivoTotal} reps`}
@@ -104,7 +106,9 @@ export default function ContadorEsquema({
                   ) : null}
                 </span>
                 {mov.objetivo > 0 && (
-                  <span className={`text-2xs ${completo ? 'text-hyrox-accent' : 'text-hyrox-ghost'}`}>
+                  <span
+                    className={`text-2xs ${completo ? 'text-hyrox-accent' : 'text-hyrox-ghost'}`}
+                  >
                     {tipo === 'tiempo'
                       ? `${formatoCrono(hecho)} / ${formatoCrono(mov.objetivo)} min`
                       : `${hecho} / ${mov.objetivo} ${unidad}`}
@@ -181,7 +185,9 @@ export default function ContadorEsquema({
                     className="w-16 h-11 text-center font-mono text-lg font-bold text-hyrox-paper bg-white/[0.03] border border-white/10 rounded-lg focus:outline-none focus:border-hyrox-primary disabled:opacity-30"
                     aria-label={`${mov.nombre} - duración en segundos`}
                   />
-                  <span className="text-2xs text-hyrox-ghost">seg{hecho > 0 ? ` · ${formatoCrono(hecho)}` : ''}</span>
+                  <span className="text-2xs text-hyrox-ghost">
+                    seg{hecho > 0 ? ` · ${formatoCrono(hecho)}` : ''}
+                  </span>
                 </div>
               ) : tipo === 'calorías' ? (
                 /* Calorías: registro manual del total quemado (lo que marca la máquina) */
@@ -217,7 +223,9 @@ export default function ContadorEsquema({
                   >
                     <Minus className="w-5 h-5" aria-hidden="true" />
                   </button>
-                  <span className="w-10 text-center font-mono text-xl font-bold text-hyrox-paper tabular-nums">{hecho}</span>
+                  <span className="w-10 text-center font-mono text-xl font-bold text-hyrox-paper tabular-nums">
+                    {hecho}
+                  </span>
                   <button
                     type="button"
                     onClick={() => ajustar(i, 1)}

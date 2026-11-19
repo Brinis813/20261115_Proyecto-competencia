@@ -30,7 +30,11 @@ function getStore(namespace: string): Map<string, RateLimitEntry> {
   return stores.get(namespace)!;
 }
 
-export function rateLimiter(maxRequests: number = 200, windowMs: number = 60 * 1000, namespace: string = 'global') {
+export function rateLimiter(
+  maxRequests: number = 200,
+  windowMs: number = 60 * 1000,
+  namespace: string = 'global',
+) {
   return (req: Request, res: Response, next: NextFunction): void => {
     const store = getStore(namespace);
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
@@ -87,7 +91,7 @@ export function publicLeaderboardRateLimiter() {
 export function rateLimitByRole(
   limites: Partial<Record<'admin' | 'juez' | 'participante' | 'anonimo', number>> = {},
   windowMs: number = 60 * 1000,
-  namespace = 'por-rol'
+  namespace = 'por-rol',
 ) {
   const porDefecto = { admin: 300, juez: 180, participante: 120, anonimo: 60 };
   const final = { ...porDefecto, ...limites };
@@ -126,7 +130,12 @@ const socketCleanup = setInterval(() => {
 socketCleanup.unref?.();
 
 /** Devuelve true si el evento puede procesarse, false si debe descartarse. */
-export function throttleSocket(socketId: string, evento: string, max = 30, windowMs: number = 10 * 1000): boolean {
+export function throttleSocket(
+  socketId: string,
+  evento: string,
+  max = 30,
+  windowMs: number = 10 * 1000,
+): boolean {
   const clave = `${socketId}:${evento}`;
   const now = Date.now();
   const entry = ventanasSocket.get(clave);

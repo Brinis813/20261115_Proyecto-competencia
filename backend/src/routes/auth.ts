@@ -28,14 +28,14 @@ router.post(
   '/reenviar-verificacion',
   loginRateLimit,
   validate(reenviarVerificacionSchema),
-  authController.reenviarVerificacion
+  authController.reenviarVerificacion,
 );
 
 router.post(
   '/login-participante',
   loginRateLimit,
   validate(loginParticipanteSchema),
-  authController.loginParticipante
+  authController.loginParticipante,
 );
 
 // Solo admin y juez tienen contrasena; los participantes entran con su fecha
@@ -45,7 +45,7 @@ router.post(
   authMiddleware,
   requireRoles('admin', 'juez'),
   validate(changePasswordSchema),
-  authController.changePassword
+  authController.changePassword,
 );
 
 router.get('/me', authMiddleware, authController.getMe);
@@ -53,7 +53,17 @@ router.post('/refresh', authMiddleware, authController.refresh);
 router.post('/logout', authController.logout);
 
 // Recuperación de contraseña: mismo rate-limit estricto que el login.
-router.post('/reset-request', loginRateLimit, validate(resetRequestSchema), authController.solicitarReset);
-router.post('/reset-confirm', loginRateLimit, validate(resetConfirmSchema), authController.confirmarReset);
+router.post(
+  '/reset-request',
+  loginRateLimit,
+  validate(resetRequestSchema),
+  authController.solicitarReset,
+);
+router.post(
+  '/reset-confirm',
+  loginRateLimit,
+  validate(resetConfirmSchema),
+  authController.confirmarReset,
+);
 
 export default router;

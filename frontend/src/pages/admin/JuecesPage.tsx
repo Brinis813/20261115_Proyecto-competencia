@@ -2,7 +2,16 @@ import { useEffect, useState } from 'react';
 import { Copy, KeyRound, Plus, Trash2, UserCheck, UserX } from 'lucide-react';
 import api, { mensajeDeError } from '../../api/client';
 import AppShell from '../../components/layout/AppShell';
-import { Alert, Button, ConfirmDialog, EmptyState, Field, IconButton, Modal, SkeletonList } from '../../components/ui';
+import {
+  Alert,
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  Field,
+  IconButton,
+  Modal,
+  SkeletonList,
+} from '../../components/ui';
 import type { Juez } from '../../types';
 
 const FORM_VACIO = { nombre: '', apellidos: '', cedula: '', box: '' };
@@ -17,7 +26,11 @@ export default function JuecesPage() {
   const [guardando, setGuardando] = useState(false);
 
   /** Contrasena temporal recien generada; solo se muestra una vez. */
-  const [credencial, setCredencial] = useState<{ nombre: string; cedula: string; password: string } | null>(null);
+  const [credencial, setCredencial] = useState<{
+    nombre: string;
+    cedula: string;
+    password: string;
+  } | null>(null);
   const [copiado, setCopiado] = useState(false);
 
   const [aEliminar, setAEliminar] = useState<Juez | null>(null);
@@ -99,7 +112,7 @@ export default function JuecesPage() {
     if (!credencial) return;
     try {
       await navigator.clipboard.writeText(
-        `Cedula: ${credencial.cedula}\nContrasena temporal: ${credencial.password}`
+        `Cedula: ${credencial.cedula}\nContrasena temporal: ${credencial.password}`,
       );
       setCopiado(true);
       setTimeout(() => setCopiado(false), 2000);
@@ -261,11 +274,18 @@ export default function JuecesPage() {
             </div>
             <div>
               <p className="eyebrow mb-1">Contrasena temporal</p>
-              <p className="font-mono text-lg font-bold text-hyrox-primary break-all">{credencial?.password}</p>
+              <p className="font-mono text-lg font-bold text-hyrox-primary break-all">
+                {credencial?.password}
+              </p>
             </div>
           </div>
 
-          <Button variant="secondary" icon={copiado ? KeyRound : Copy} onClick={copiarCredencial} fullWidth>
+          <Button
+            variant="secondary"
+            icon={copiado ? KeyRound : Copy}
+            onClick={copiarCredencial}
+            fullWidth
+          >
             {copiado ? 'Copiado' : 'Copiar credenciales'}
           </Button>
         </div>

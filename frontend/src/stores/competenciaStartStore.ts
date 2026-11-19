@@ -15,7 +15,8 @@ import type { CompetenciaStartPayload } from '../types';
  * - El tick no acumula: deriva de t0 en cada pasada (inmune a throttling).
  */
 
-export type FaseReloj = 'espera' | 'armado' | 'cuenta_regresiva' | 'en_curso' | 'pausado' | 'capado' | 'finalizado';
+export type FaseReloj =
+  'espera' | 'armado' | 'cuenta_regresiva' | 'en_curso' | 'pausado' | 'capado' | 'finalizado';
 
 export interface InicioManual {
   t0LocalMs: number;
@@ -49,7 +50,8 @@ const UMBRAL_DERIVA_MS = 800;
 // Version del ultimo snapshot aplicado, POR competencia: el global se pisaba
 // al cambiar de competencia (o en StrictMode/tests con dos stores vivos).
 const versionesVistas = new Map<number, number>();
-const versionVistaDe = (competenciaId: number | null) => versionesVistas.get(competenciaId ?? -1) ?? -1;
+const versionVistaDe = (competenciaId: number | null) =>
+  versionesVistas.get(competenciaId ?? -1) ?? -1;
 const fijarVersionVista = (competenciaId: number | null, v: number) => {
   versionesVistas.set(competenciaId ?? -1, v);
 };
@@ -150,11 +152,12 @@ export const useCompetenciaStartStore = create<CompetenciaStartState>((set, get)
         for (let i = 0; i < 8; i++) {
           try {
             const t1 = Date.now();
-            const res = (await socket
-              .timeout(3000)
-              .emitWithAck('time:sync', { t1 })) as { t2: number; t3: number };
+            const res = (await socket.timeout(3000).emitWithAck('time:sync', { t1 })) as {
+              t2: number;
+              t3: number;
+            };
             const t4 = Date.now();
-            muestras.push({ rtt: t4 - t1, off: ((res.t2 - t1) + (res.t3 - t4)) / 2 });
+            muestras.push({ rtt: t4 - t1, off: (res.t2 - t1 + (res.t3 - t4)) / 2 });
           } catch {
             /* muestra perdida: se sigue con las demás */
           }
@@ -164,7 +167,9 @@ export const useCompetenciaStartStore = create<CompetenciaStartState>((set, get)
       // Sin socket (o sin muestras): una muestra REST contra el snapshot.
       if (muestras.length === 0 && get().competenciaId != null) {
         try {
-          const { data } = await api.get<CompetenciaStartPayload>(`/competencias/${get().competenciaId}/arranque`);
+          const { data } = await api.get<CompetenciaStartPayload>(
+            `/competencias/${get().competenciaId}/arranque`,
+          );
           if (data && Number.isFinite(data.serverNow)) {
             muestras.push({ rtt: 0, off: data.serverNow - Date.now() });
           }
@@ -195,12 +200,15 @@ export const useCompetenciaStartStore = create<CompetenciaStartState>((set, get)
         let snap: CompetenciaStartPayload | null = null;
         try {
           snap = socket?.connected
-            ? ((await socket.timeout(4000).emitWithAck('competencia:resync', { competenciaId })) as CompetenciaStartPayload)
+            ? ((await socket
+                .timeout(4000)
+                .emitWithAck('competencia:resync', { competenciaId })) as CompetenciaStartPayload)
             : null;
         } catch {
           snap = null;
         }
-        snap ??= (await api.get<CompetenciaStartPayload>(`/competencias/${competenciaId}/arranque`)).data;
+        snap ??= (await api.get<CompetenciaStartPayload>(`/competencias/${competenciaId}/arranque`))
+          .data;
         if (!snap) return;
         // Todo pasa por aplicarSnapshot SIN inflar la version: su guard
         // (`s.version <= vista` → descartar) protege de que un REST viejo
@@ -255,7 +263,10 @@ export const useCompetenciaStartStore = create<CompetenciaStartState>((set, get)
       const alConectar = () => {
         unirse();
         const { snapshot, fase } = get();
-        if (snapshot?.startTimeServer != null && (fase === 'en_curso' || fase === 'cuenta_regresiva' || fase === 'pausado')) {
+        if (
+          snapshot?.startTimeServer != null &&
+          (fase === 'en_curso' || fase === 'cuenta_regresiva' || fase === 'pausado')
+        ) {
           void get().forzarSincronizacion(socket, competenciaId);
         }
       };

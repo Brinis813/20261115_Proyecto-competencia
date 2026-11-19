@@ -1,4 +1,9 @@
-import { DIVISION_GENERAL, type DetalleMedicion, type MovimientoEsquema, type SplitRegistro } from '../types';
+import {
+  DIVISION_GENERAL,
+  type DetalleMedicion,
+  type MovimientoEsquema,
+  type SplitRegistro,
+} from '../types';
 import type { MovimientoObjetivo } from '../components/judge/ContadorEsquema';
 
 /** Segundos que suma cada repeticion invalidada en una prueba de tiempo. */
@@ -24,14 +29,16 @@ export function tiempoAms(t: string | null): number | null {
   if (!t) return null;
   const [mmss, cs = ''] = t.trim().split('.');
   const [mm, ss] = mmss.split(':').map((n) => parseInt(n, 10));
-  const ms = ((mm || 0) * 60 + (ss || 0)) * 1000 + (cs ? parseInt(cs.padEnd(2, '0').slice(0, 2), 10) * 10 : 0);
+  const ms =
+    ((mm || 0) * 60 + (ss || 0)) * 1000 +
+    (cs ? parseInt(cs.padEnd(2, '0').slice(0, 2), 10) * 10 : 0);
   return Number.isFinite(ms) ? ms : null;
 }
 
 /** Elige la division del atleta (por su categoria) dentro de las de la competencia. */
 export function resolverDivision(
   categoria: string | null | undefined,
-  divisiones: string[] | null | undefined
+  divisiones: string[] | null | undefined,
 ): string {
   const divs = divisiones ?? [];
   if (divs.length === 0) return DIVISION_GENERAL;
@@ -45,7 +52,7 @@ export function resolverDivision(
  */
 export function rondasEfectivasMedicion(
   rondasCompetencia: number | null | undefined,
-  rondasEsquema: number | null | undefined
+  rondasEsquema: number | null | undefined,
 ): number {
   const directa = Number(rondasCompetencia);
   if (Number.isFinite(directa) && directa >= 1) return Math.min(100, Math.round(directa));
@@ -68,7 +75,7 @@ export function construirMovObjetivo(
   movimientos: MovimientoEsquema[],
   division: string,
   esTiempo: boolean,
-  rondas: number
+  rondas: number,
 ): MovimientoObjetivo[] {
   return movimientos.map((m) => ({
     nombre: m.nombre,
@@ -172,7 +179,12 @@ export interface EntradaDetalle {
 export function construirDetalle(e: EntradaDetalle): DetalleMedicion | undefined {
   const marcaManual = e.marcaManual ?? {};
   if (!e.abandono && e.esPeso && e.intentos.length > 0) {
-    return { modalidad: 'max_load', intentos: e.intentos, mejor: e.mejorPeso, ...marcaManual } as DetalleMedicion;
+    return {
+      modalidad: 'max_load',
+      intentos: e.intentos,
+      mejor: e.mejorPeso,
+      ...marcaManual,
+    } as DetalleMedicion;
   }
   if (!e.abandono && e.esSplits) {
     return { modalidad: 'time_trial_splits', splits: e.splits, ...marcaManual } as DetalleMedicion;
@@ -181,10 +193,15 @@ export function construirDetalle(e: EntradaDetalle): DetalleMedicion | undefined
     return {
       modalidad: e.esTiempo ? 'for_time' : 'amrap',
       division: e.division,
-      movimientos: e.movObjetivo.map((m, i) => ({ nombre: m.nombre, reps: e.conteoEsquema[i] || 0 })),
+      movimientos: e.movObjetivo.map((m, i) => ({
+        nombre: m.nombre,
+        reps: e.conteoEsquema[i] || 0,
+      })),
       total_reps: e.totalEsquema,
       rondas_completas:
-        e.objetivoEsquema > 0 ? Math.floor(e.totalEsquema / (e.objetivoEsquema / e.rondasEsquema)) : undefined,
+        e.objetivoEsquema > 0
+          ? Math.floor(e.totalEsquema / (e.objetivoEsquema / e.rondasEsquema))
+          : undefined,
       finalizado: e.esTiempo ? !e.capado : undefined,
       ...marcaManual,
     } as DetalleMedicion;

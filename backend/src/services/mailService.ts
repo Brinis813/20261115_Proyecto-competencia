@@ -40,7 +40,7 @@ export async function enviarCorreo(correo: Correo): Promise<{ enviado: boolean }
 
   if (!t) {
     log.warn(
-      `sin SMTP configurado; correo no enviado a ${correo.para}\n  asunto: ${correo.asunto}\n  ${correo.texto.replace(/\n/g, '\n  ')}`
+      `sin SMTP configurado; correo no enviado a ${correo.para}\n  asunto: ${correo.asunto}\n  ${correo.texto.replace(/\n/g, '\n  ')}`,
     );
     return { enviado: false };
   }

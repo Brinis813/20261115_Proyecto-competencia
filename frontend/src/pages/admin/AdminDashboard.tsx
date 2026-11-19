@@ -17,7 +17,14 @@ import api, { getEventoActiva } from '../../api/client';
 import AppShell from '../../components/layout/AppShell';
 import PortadaEditor from '../../components/eventos/PortadaEditor';
 import { Button, cx } from '../../components/ui';
-import type { Evento, EventoScoringType, EventoTieBreakPolicy, Juez, Participante, Competencia } from '../../types';
+import type {
+  Evento,
+  EventoScoringType,
+  EventoTieBreakPolicy,
+  Juez,
+  Participante,
+  Competencia,
+} from '../../types';
 import { ETIQUETA_SCORING, ETIQUETA_TIEBREAK_GLOBAL } from '../../types';
 import { formatearCategorias } from '../../utils/formato';
 
@@ -48,8 +55,11 @@ export default function AdminDashboard() {
         });
         setUltimosCompetencias(listaCompetencias.slice(0, 4));
       })
-      .catch(() => setResumen({ competencias: 0, competenciasActivos: 0, jueces: 0, participantes: 0 }));
-  }, []);  return (
+      .catch(() =>
+        setResumen({ competencias: 0, competenciasActivos: 0, jueces: 0, participantes: 0 }),
+      );
+  }, []);
+  return (
     <AppShell
       title="Resumen"
       subtitle="Estado general del evento"
@@ -93,14 +103,19 @@ export default function AdminDashboard() {
         <section className="surface overflow-hidden">
           <header className="panel-header">
             <h2 className="eyebrow">Competencias recientes</h2>
-            <Link to="/admin/competencias" className="text-2xs font-semibold text-hyrox-primary hover:text-hyrox-ember">
+            <Link
+              to="/admin/competencias"
+              className="text-2xs font-semibold text-hyrox-primary hover:text-hyrox-ember"
+            >
               Ver todos
             </Link>
           </header>
 
           {ultimosCompetencias.length === 0 ? (
             <div className="px-5 py-10 text-center">
-              <p className="text-sm text-hyrox-mist mb-4">Todavia no has creado ninguna competencia.</p>
+              <p className="text-sm text-hyrox-mist mb-4">
+                Todavia no has creado ninguna competencia.
+              </p>
               <Link to="/admin/competencias/nuevo" className="inline-block">
                 <Button size="sm" icon={Plus}>
                   Crear el primero
@@ -119,8 +134,12 @@ export default function AdminDashboard() {
                       <Dumbbell className="w-4 h-4" aria-hidden="true" />
                     </span>
                     <span className="flex-1 min-w-0">
-                      <span className="block text-sm font-semibold text-hyrox-paper truncate">{competencia.nombre}</span>
-                      <span className="block text-2xs text-hyrox-mist">{competencia.wods?.length ?? 0} wods</span>
+                      <span className="block text-sm font-semibold text-hyrox-paper truncate">
+                        {competencia.nombre}
+                      </span>
+                      <span className="block text-2xs text-hyrox-mist">
+                        {competencia.wods?.length ?? 0} wods
+                      </span>
                       <span className="block text-2xs text-hyrox-ghost truncate">
                         Categorias: {formatearCategorias(competencia.divisiones)}
                       </span>
@@ -139,10 +158,30 @@ export default function AdminDashboard() {
             <h2 className="eyebrow">Accesos rapidos</h2>
           </header>
           <ul className="divide-hairline">
-            <AccesoRapido to="/admin/competencias" icon={Plus} titulo="Crear WOD" descripcion="Agregar wods a una competencia" />
-            <AccesoRapido to="/admin/jueces" icon={UserCheck} titulo="Jueces" descripcion="Alta y contrasenas temporales" />
-            <AccesoRapido to="/admin/participantes" icon={Users} titulo="Atletas" descripcion="Inscribir participantes" />
-            <AccesoRapido to="/admin/carga-masiva" icon={Upload} titulo="Carga masiva" descripcion="Importar atletas y jueces desde CSV" />
+            <AccesoRapido
+              to="/admin/competencias"
+              icon={Plus}
+              titulo="Crear WOD"
+              descripcion="Agregar wods a una competencia"
+            />
+            <AccesoRapido
+              to="/admin/jueces"
+              icon={UserCheck}
+              titulo="Jueces"
+              descripcion="Alta y contrasenas temporales"
+            />
+            <AccesoRapido
+              to="/admin/participantes"
+              icon={Users}
+              titulo="Atletas"
+              descripcion="Inscribir participantes"
+            />
+            <AccesoRapido
+              to="/admin/carga-masiva"
+              icon={Upload}
+              titulo="Carga masiva"
+              descripcion="Importar atletas y jueces desde CSV"
+            />
             <AccesoRapido
               to="/admin/asignaciones"
               icon={ClipboardList}
@@ -167,7 +206,12 @@ export default function AdminDashboard() {
               titulo="Informe final"
               descripcion="Exportar CSV y PDF del evento"
             />
-            <AccesoRapido to="/inicio" icon={Trophy} titulo="Clasificacion" descripcion="Pantalla del evento" />
+            <AccesoRapido
+              to="/inicio"
+              icon={Trophy}
+              titulo="Clasificacion"
+              descripcion="Pantalla del evento"
+            />
           </ul>
         </section>
       </div>
@@ -229,7 +273,10 @@ function AccesoRapido({
 }) {
   return (
     <li>
-      <Link to={to} className="flex items-center gap-3 px-4 sm:px-5 py-3 hover:bg-white/[0.03] transition-colors group">
+      <Link
+        to={to}
+        className="flex items-center gap-3 px-4 sm:px-5 py-3 hover:bg-white/[0.03] transition-colors group"
+      >
         <span className="grid place-items-center w-8 h-8 rounded-lg bg-white/[0.05] text-hyrox-mist group-hover:text-hyrox-primary group-hover:bg-hyrox-primary/12 transition-colors shrink-0">
           <Icon className="w-4 h-4" aria-hidden="true" />
         </span>
@@ -319,8 +366,8 @@ function ScoringPolicyCard() {
     <section className="surface p-4 sm:p-5 mb-6">
       <h2 className="eyebrow mb-1">Criterio de ganador del evento</h2>
       <p className="text-2xs text-hyrox-ghost mb-3">
-        Acumulado suma todos las competencias en un ranking general. Por Competencia premia un ganador
-        independiente en cada etapa, sin total global.
+        Acumulado suma todos las competencias en un ranking general. Por Competencia premia un
+        ganador independiente en cada etapa, sin total global.
       </p>
       <div className="flex flex-col sm:flex-row gap-2">
         {(Object.keys(ETIQUETA_SCORING) as EventoScoringType[]).map((tipo) => (
@@ -334,10 +381,12 @@ function ScoringPolicyCard() {
               'flex-1 text-left rounded-xl border p-3 transition-colors cursor-pointer disabled:opacity-50',
               scoring === tipo
                 ? 'border-hyrox-primary bg-hyrox-primary/10'
-                : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04]'
+                : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04]',
             )}
           >
-            <span className="block text-sm font-semibold text-hyrox-paper">{ETIQUETA_SCORING[tipo]}</span>
+            <span className="block text-sm font-semibold text-hyrox-paper">
+              {ETIQUETA_SCORING[tipo]}
+            </span>
             <span className="block text-2xs text-hyrox-ghost mt-0.5">
               {tipo === 'POINTS_ACCUMULATION'
                 ? 'Un campeón global por categoría con la suma de puntos'
@@ -384,7 +433,9 @@ function ScoringPolicyCard() {
           </select>
         )}
       </div>
-      {mensaje && <p className="mt-2 text-2xs text-hyrox-mist">{guardando ? 'Guardando…' : mensaje}</p>}
+      {mensaje && (
+        <p className="mt-2 text-2xs text-hyrox-mist">{guardando ? 'Guardando…' : mensaje}</p>
+      )}
     </section>
   );
 }

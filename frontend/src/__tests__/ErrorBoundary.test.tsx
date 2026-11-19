@@ -19,7 +19,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <ThrowingChild shouldThrow={false} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     expect(screen.getByText('All good')).toBeInTheDocument();
   });
@@ -28,7 +28,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <ThrowingChild shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     expect(screen.getByText('Algo salió mal')).toBeInTheDocument();
     expect(screen.queryByText('All good')).not.toBeInTheDocument();
@@ -38,7 +38,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <ThrowingChild shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
     expect(screen.getByText('Detalles del error')).toBeInTheDocument();
   });
@@ -51,7 +51,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <ThrowingChild shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     await user.click(screen.getByText('Recargar página'));

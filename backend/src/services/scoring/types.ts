@@ -1,7 +1,8 @@
 import type { CompetenciaTieBreakPolicy } from '../../models';
 import type { DetalleMedicion } from '../../types/medicion';
 
-export type TipoMedicion = 'tiempo' | 'repeticiones' | 'peso' | 'distancia' | 'calorías' | 'time_trial_splits';
+export type TipoMedicion =
+  'tiempo' | 'repeticiones' | 'peso' | 'distancia' | 'calorías' | 'time_trial_splits';
 
 export interface ResultadoWod {
   resultado_id: number;
@@ -30,9 +31,25 @@ export interface EntradaLeaderboard {
 }
 
 export interface LeaderboardResult {
-  competencia: { id: number; nombre: string; descripcion?: string | null; divisiones: string[] | null; tiebreakPolicy: CompetenciaTieBreakPolicy } | null;
+  competencia: {
+    id: number;
+    nombre: string;
+    descripcion?: string | null;
+    divisiones: string[] | null;
+    tiebreakPolicy: CompetenciaTieBreakPolicy;
+  } | null;
   leaderboard: Array<EntradaLeaderboard & { comparte_puesto: boolean }>;
-  wods: Array<{ id: number; orden: number; nombre_ejercicio: string; tipo_medicion: TipoMedicion; unidad_distancia: string; imagen_url: string | null; tiempo_cap: number | null; esquema: unknown; puntaje_maximo: number }>;
+  wods: Array<{
+    id: number;
+    orden: number;
+    nombre_ejercicio: string;
+    tipo_medicion: TipoMedicion;
+    unidad_distancia: string;
+    imagen_url: string | null;
+    tiempo_cap: number | null;
+    esquema: unknown;
+    puntaje_maximo: number;
+  }>;
   actualizado: string;
 }
 

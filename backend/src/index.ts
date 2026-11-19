@@ -24,7 +24,6 @@ import boxRoutes from './routes/boxes';
 import erroresRoutes from './routes/errores';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
-import { authMiddleware, requireRoles } from './middleware/auth';
 import { UPLOADS_DIR } from './config/env';
 import { initMonitoring, requestContext, socketHealth } from './utils/monitoring';
 import { setupSocketHandlers } from './sockets/handlers';
@@ -59,33 +58,39 @@ if (isNaN(trustProxyValue) || trustProxyValue < 0 || trustProxyValue > 4) {
 }
 app.set('trust proxy', trustProxyValue);
 
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'same-site' },
-  contentSecurityPolicy: isProduction ? {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'"],
-      styleSrc: ["'self'", 'https://fonts.googleapis.com'],
-      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-      imgSrc: ["'self'", 'data:', '/api/uploads'],
-      connectSrc: ["'self'"],
-      objectSrc: ["'none'"],
-      frameSrc: ["'none'"],
-      baseUri: ["'self'"],
-      formAction: ["'self'"],
-    },
-  } : false,
-  hsts: isProduction ? {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true,
-  } : false,
-  xssFilter: true,
-  crossOriginEmbedderPolicy: false,
-  noSniff: true,
-  frameguard: { action: 'deny' },
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-}));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'same-site' },
+    contentSecurityPolicy: isProduction
+      ? {
+          directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'"],
+            styleSrc: ["'self'", 'https://fonts.googleapis.com'],
+            fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+            imgSrc: ["'self'", 'data:', '/api/uploads'],
+            connectSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            frameSrc: ["'none'"],
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+          },
+        }
+      : false,
+    hsts: isProduction
+      ? {
+          maxAge: 31536000,
+          includeSubDomains: true,
+          preload: true,
+        }
+      : false,
+    xssFilter: true,
+    crossOriginEmbedderPolicy: false,
+    noSniff: true,
+    frameguard: { action: 'deny' },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  }),
+);
 app.use((_req, res, next) => {
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   next();
@@ -167,7 +172,7 @@ async function start() {
     if (error.code === 'ECONNREFUSED' || error.code === 'ER_ACCESS_DENIED_ERROR') {
       log.error(
         `Revisa que MySQL este activo en ${env.DB_HOST}:${env.DB_PORT} y que ` +
-          'DB_USER/DB_PASSWORD en backend/.env sean correctos.'
+          'DB_USER/DB_PASSWORD en backend/.env sean correctos.',
       );
     }
     process.exit(1);

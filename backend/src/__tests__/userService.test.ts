@@ -20,8 +20,14 @@ jest.mock('../models', () => ({
   Resultado: { count: mockResultadoCount },
 }));
 
-import { createJuez, deleteUsuario, deleteParticipante, bulkCreate, resetPasswordJuez } from '../services/userService';
-import { Usuario, Participante, EventoUsuario, Box, Evento } from '../models';
+import {
+  createJuez,
+  deleteUsuario,
+  deleteParticipante,
+  bulkCreate,
+  resetPasswordJuez,
+} from '../services/userService';
+import { Usuario, Participante, EventoUsuario, Evento } from '../models';
 
 const mockUsuario = Usuario as jest.Mocked<typeof Usuario>;
 const mockParticipante = Participante as jest.Mocked<typeof Participante>;
@@ -37,8 +43,13 @@ describe('createJuez', () => {
 
     const instanceMock = {
       toJSON: () => ({
-        id: 1, nombre: 'Juan', apellidos: 'Perez', cedula: '12345',
-        rol: 'juez', box_id: 2, email_verificado: true,
+        id: 1,
+        nombre: 'Juan',
+        apellidos: 'Perez',
+        cedula: '12345',
+        rol: 'juez',
+        box_id: 2,
+        email_verificado: true,
       }),
       id: 1,
     };
@@ -46,8 +57,11 @@ describe('createJuez', () => {
     mockEventoUsuario.create.mockResolvedValue({} as any);
 
     const result = await createJuez({
-      nombre: 'Juan', apellidos: 'Perez', cedula: '12345',
-      box: 'CrossFit', evento_id: 5,
+      nombre: 'Juan',
+      apellidos: 'Perez',
+      cedula: '12345',
+      box: 'CrossFit',
+      evento_id: 5,
     });
 
     expect(result.tempPassword).toBeDefined();
@@ -72,15 +86,22 @@ describe('createJuez', () => {
     mockUsuario.findOne.mockResolvedValue(null);
     const instanceMock = {
       toJSON: () => ({
-        id: 2, nombre: 'Ana', apellidos: 'Lopez', cedula: '67890',
-        rol: 'juez', box_id: null,
+        id: 2,
+        nombre: 'Ana',
+        apellidos: 'Lopez',
+        cedula: '67890',
+        rol: 'juez',
+        box_id: null,
       }),
       id: 2,
     };
     mockUsuario.create.mockResolvedValue(instanceMock as any);
 
     const result = await createJuez({
-      nombre: 'Ana', apellidos: 'Lopez', cedula: '67890', box: 'Box',
+      nombre: 'Ana',
+      apellidos: 'Lopez',
+      cedula: '67890',
+      box: 'Box',
     });
 
     expect(mockUsuario.create).toHaveBeenCalledWith(
@@ -93,15 +114,22 @@ describe('createJuez', () => {
     mockUsuario.findOne.mockResolvedValue(null);
     const instanceMock = {
       toJSON: () => ({
-        id: 3, nombre: 'Test', apellidos: 'User', cedula: '11111',
-        rol: 'juez', box_id: null,
+        id: 3,
+        nombre: 'Test',
+        apellidos: 'User',
+        cedula: '11111',
+        rol: 'juez',
+        box_id: null,
       }),
       id: 3,
     };
     mockUsuario.create.mockResolvedValue(instanceMock as any);
 
     await createJuez({
-      nombre: 'Test', apellidos: 'User', cedula: '11111', box: 'B',
+      nombre: 'Test',
+      apellidos: 'User',
+      cedula: '11111',
+      box: 'B',
     });
 
     expect(mockEventoUsuario.create).not.toHaveBeenCalled();
@@ -119,7 +147,14 @@ describe('bulkCreate con evento (bug prod: CSV dejaba jueces sin alcance)', () =
 
     const filas = [
       { tipo: 'juez', nombre: 'J', apellidos: 'U', cedula: 'J1', box: 'B' },
-      { tipo: 'atleta', nombre: 'A', apellidos: 'P', cedula: 'A1', box: 'B', fecha_nacimiento: '2000-01-01' },
+      {
+        tipo: 'atleta',
+        nombre: 'A',
+        apellidos: 'P',
+        cedula: 'A1',
+        box: 'B',
+        fecha_nacimiento: '2000-01-01',
+      },
     ];
     const res = await bulkCreate(filas as any, 5);
 
@@ -137,12 +172,21 @@ describe('bulkCreate con evento (bug prod: CSV dejaba jueces sin alcance)', () =
     mockParticipante.create.mockResolvedValue({ id: 21 } as any);
 
     const filas = [
-      { tipo: 'atleta', nombre: 'A', apellidos: 'P', cedula: 'A2', box: 'B', fecha_nacimiento: '2000-01-01' },
+      {
+        tipo: 'atleta',
+        nombre: 'A',
+        apellidos: 'P',
+        cedula: 'A2',
+        box: 'B',
+        fecha_nacimiento: '2000-01-01',
+      },
     ];
     const res = await bulkCreate(filas as any);
 
     expect(res.exitosos).toBe(1);
-    expect(mockParticipante.create).toHaveBeenCalledWith(expect.objectContaining({ evento_id: null }));
+    expect(mockParticipante.create).toHaveBeenCalledWith(
+      expect.objectContaining({ evento_id: null }),
+    );
     expect(mockEventoUsuario.findOrCreate as jest.Mock).not.toHaveBeenCalled();
   });
 });
@@ -166,7 +210,9 @@ describe('deleteUsuario', () => {
   it('permite borrar admin si hay mas de uno', async () => {
     const destroyMock = jest.fn();
     mockUsuario.findByPk.mockResolvedValue({
-      id: 1, rol: 'admin', destroy: destroyMock,
+      id: 1,
+      rol: 'admin',
+      destroy: destroyMock,
     } as any);
     mockUsuario.count.mockResolvedValue(2);
     mockAsignacionCount.mockResolvedValue(0);
@@ -178,7 +224,9 @@ describe('deleteUsuario', () => {
 
   it('lanza error si el usuario tiene asignaciones', async () => {
     mockUsuario.findByPk.mockResolvedValue({
-      id: 2, rol: 'juez', destroy: jest.fn(),
+      id: 2,
+      rol: 'juez',
+      destroy: jest.fn(),
     } as any);
     mockUsuario.count.mockResolvedValue(5);
     mockAsignacionCount.mockResolvedValue(3);
@@ -189,7 +237,9 @@ describe('deleteUsuario', () => {
 
   it('lanza error si el usuario tiene resultados como juez', async () => {
     mockUsuario.findByPk.mockResolvedValue({
-      id: 3, rol: 'juez', destroy: jest.fn(),
+      id: 3,
+      rol: 'juez',
+      destroy: jest.fn(),
     } as any);
     mockUsuario.count.mockResolvedValue(5);
     mockAsignacionCount.mockResolvedValue(0);
@@ -208,7 +258,8 @@ describe('deleteParticipante', () => {
 
   it('lanza error si el participante tiene resultados', async () => {
     mockParticipante.findByPk.mockResolvedValue({
-      id: 10, destroy: jest.fn(),
+      id: 10,
+      destroy: jest.fn(),
     } as any);
     mockAsignacionCount.mockResolvedValue(0);
     mockResultadoCount.mockResolvedValue(5);
@@ -218,7 +269,8 @@ describe('deleteParticipante', () => {
 
   it('lanza error si el participante tiene asignaciones', async () => {
     mockParticipante.findByPk.mockResolvedValue({
-      id: 11, destroy: jest.fn(),
+      id: 11,
+      destroy: jest.fn(),
     } as any);
     mockAsignacionCount.mockResolvedValue(2);
     mockResultadoCount.mockResolvedValue(0);
@@ -229,7 +281,8 @@ describe('deleteParticipante', () => {
   it('elimina participante si no tiene dependencias', async () => {
     const destroyMock = jest.fn();
     mockParticipante.findByPk.mockResolvedValue({
-      id: 12, destroy: destroyMock,
+      id: 12,
+      destroy: destroyMock,
     } as any);
     mockAsignacionCount.mockResolvedValue(0);
     mockResultadoCount.mockResolvedValue(0);
@@ -243,16 +296,18 @@ describe('resetPasswordJuez', () => {
   it('genera temporal nueva y obliga a cambiarla', async () => {
     const updateMock = jest.fn();
     mockUsuario.findByPk.mockResolvedValue({
-      id: 7, rol: 'juez', nombre: 'Juan', apellidos: 'Perez', cedula: '12345',
+      id: 7,
+      rol: 'juez',
+      nombre: 'Juan',
+      apellidos: 'Perez',
+      cedula: '12345',
       update: updateMock,
     } as any);
 
     const result = await resetPasswordJuez(7);
 
     expect(result.tempPassword).toBeDefined();
-    expect(updateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ password_cambiado: false }),
-    );
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ password_cambiado: false }));
   });
 
   it('lanza error si no existe', async () => {

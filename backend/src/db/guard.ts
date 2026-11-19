@@ -17,7 +17,9 @@ export function assertSafeBootstrap(): void {
 /** Verifica que no se pida un sync destructivo. Llamar antes de cualquier sync. */
 export function assertSafeSync(opciones: { alter?: boolean; force?: boolean } = {}): void {
   if (isProduction && (opciones.alter || opciones.force)) {
-    throw new Error('sync({ alter/force: true }) prohibido en producción: usa migraciones en schema.ts');
+    throw new Error(
+      'sync({ alter/force: true }) prohibido en producción: usa migraciones en schema.ts',
+    );
   }
   if (!isProduction && (opciones.alter || opciones.force) && process.env.ALLOW_DB_SYNC !== 'true') {
     throw new Error('sync({ alter/force: true }) requiere ALLOW_DB_SYNC=true incluso en dev');

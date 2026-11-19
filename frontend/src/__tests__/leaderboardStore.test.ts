@@ -2,10 +2,20 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { useLeaderboardStore } from '../stores/leaderboardStore';
 import type { LeaderboardData } from '../types';
 
-function datos(entradas: Array<{ participante_id: number; puesto: number; puntos_total: number }>): LeaderboardData {
+function datos(
+  entradas: Array<{ participante_id: number; puesto: number; puntos_total: number }>,
+): LeaderboardData {
   return {
     competencia: { id: 1, nombre: 'Evento', divisiones: ['RX'], tiebreakPolicy: 'NONE' },
-    wods: [{ id: 10, nombre_ejercicio: 'Fran', tipo_medicion: 'tiempo', orden: 1, puntaje_maximo: 100 } as never],
+    wods: [
+      {
+        id: 10,
+        nombre_ejercicio: 'Fran',
+        tipo_medicion: 'tiempo',
+        orden: 1,
+        puntaje_maximo: 100,
+      } as never,
+    ],
     leaderboard: entradas.map((e) => ({
       participante_id: e.participante_id,
       nombre: 'A',
@@ -33,7 +43,9 @@ describe('leaderboardStore', () => {
     expect(useLeaderboardStore.getState().cargando).toBe(false);
 
     // Cambiar de competencia descarta entradas previas
-    useLeaderboardStore.getState().aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 100 }]));
+    useLeaderboardStore
+      .getState()
+      .aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 100 }]));
     expect(useLeaderboardStore.getState().entradas).toHaveLength(1);
     useLeaderboardStore.getState().iniciar(9);
     expect(useLeaderboardStore.getState().entradas).toHaveLength(0);
@@ -42,7 +54,9 @@ describe('leaderboardStore', () => {
 
   it('marca entradas nuevas como "nuevo"', () => {
     useLeaderboardStore.getState().iniciar(1);
-    useLeaderboardStore.getState().aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 100 }]));
+    useLeaderboardStore
+      .getState()
+      .aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 100 }]));
     const e = useLeaderboardStore.getState().entradas[0];
     expect(e.movimiento).toBe('nuevo');
     expect(e.delta).toBe(0);
@@ -54,15 +68,17 @@ describe('leaderboardStore', () => {
       datos([
         { participante_id: 1, puesto: 2, puntos_total: 90 },
         { participante_id: 2, puesto: 1, puntos_total: 100 },
-      ])
+      ]),
     );
     useLeaderboardStore.getState().aplicarDatos(
       datos([
         { participante_id: 1, puesto: 1, puntos_total: 100 },
         { participante_id: 2, puesto: 2, puntos_total: 90 },
-      ])
+      ]),
     );
-    const porId = new Map(useLeaderboardStore.getState().entradas.map((e) => [e.participante_id, e]));
+    const porId = new Map(
+      useLeaderboardStore.getState().entradas.map((e) => [e.participante_id, e]),
+    );
     expect(porId.get(1)?.movimiento).toBe('sube');
     expect(porId.get(1)?.delta).toBe(1);
     expect(porId.get(2)?.movimiento).toBe('baja');
@@ -73,23 +89,33 @@ describe('leaderboardStore', () => {
 
   it('marca "igual" sin resaltar si nada cambia', () => {
     useLeaderboardStore.getState().iniciar(1);
-    useLeaderboardStore.getState().aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 50 }]));
-    useLeaderboardStore.getState().aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 50 }]));
+    useLeaderboardStore
+      .getState()
+      .aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 50 }]));
+    useLeaderboardStore
+      .getState()
+      .aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 50 }]));
     expect(useLeaderboardStore.getState().entradas[0].movimiento).toBe('igual');
     expect(useLeaderboardStore.getState().resaltados.size).toBe(0);
   });
 
   it('resalta cuando suben puntos sin cambiar de puesto', () => {
     useLeaderboardStore.getState().iniciar(1);
-    useLeaderboardStore.getState().aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 50 }]));
-    useLeaderboardStore.getState().aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 80 }]));
+    useLeaderboardStore
+      .getState()
+      .aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 50 }]));
+    useLeaderboardStore
+      .getState()
+      .aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 80 }]));
     expect(useLeaderboardStore.getState().entradas[0].movimiento).toBe('igual');
     expect(useLeaderboardStore.getState().resaltados.has(1)).toBe(true);
   });
 
   it('guarda wods, nombre, divisiones, tiebreak y timestamp', () => {
     useLeaderboardStore.getState().iniciar(1);
-    useLeaderboardStore.getState().aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 10 }]));
+    useLeaderboardStore
+      .getState()
+      .aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 10 }]));
     const s = useLeaderboardStore.getState();
     expect(s.wods).toHaveLength(1);
     expect(s.competenciaNombre).toBe('Evento');
@@ -116,8 +142,12 @@ describe('leaderboardStore', () => {
     expect(useLeaderboardStore.getState().cargando).toBe(false);
 
     useLeaderboardStore.getState().iniciar(1);
-    useLeaderboardStore.getState().aplicarDatos(datos([{ participante_id: 1, puesto: 2, puntos_total: 10 }]));
-    useLeaderboardStore.getState().aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 20 }]));
+    useLeaderboardStore
+      .getState()
+      .aplicarDatos(datos([{ participante_id: 1, puesto: 2, puntos_total: 10 }]));
+    useLeaderboardStore
+      .getState()
+      .aplicarDatos(datos([{ participante_id: 1, puesto: 1, puntos_total: 20 }]));
     expect(useLeaderboardStore.getState().resaltados.size).toBe(1);
     useLeaderboardStore.getState().limpiarResaltados();
     expect(useLeaderboardStore.getState().resaltados.size).toBe(0);

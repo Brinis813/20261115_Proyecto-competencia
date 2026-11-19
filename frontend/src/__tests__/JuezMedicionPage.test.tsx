@@ -74,7 +74,11 @@ vi.mock('../hooks/useWakeLock', () => ({
 const mockSavePending = vi.fn();
 const mockSyncPending = vi.fn();
 vi.mock('../hooks/useOfflineSync', () => ({
-  useOfflineSync: () => ({ pendingCount: 0, savePending: mockSavePending, syncPending: mockSyncPending }),
+  useOfflineSync: () => ({
+    pendingCount: 0,
+    savePending: mockSavePending,
+    syncPending: mockSyncPending,
+  }),
 }));
 
 vi.mock('../components/layout/ConnectionBadge', () => ({
@@ -110,12 +114,15 @@ vi.mock('../components/judge/IntentosPeso', () => ({
 }));
 vi.mock('../components/judge/TemporizadorIntervalos', () => ({
   default: () => <div data-testid="temporizador-intervalos" />,
-  PRESETS: { emom: { etiqueta: 'EMOM 10', config: { segundosTrabajo: 60, segundosDescanso: 0, rondas: 10 } } },
+  PRESETS: {
+    emom: { etiqueta: 'EMOM 10', config: { segundosTrabajo: 60, segundosDescanso: 0, rondas: 10 } },
+  },
 }));
 
 vi.mock('../stores/competenciaStartStore', () => ({
-  useCompetenciaStartStore: (sel: (s: { snapshot: null; fase: string; inicioManual: null }) => unknown) =>
-    sel({ snapshot: null, fase: 'idle', inicioManual: null }),
+  useCompetenciaStartStore: (
+    sel: (s: { snapshot: null; fase: string; inicioManual: null }) => unknown,
+  ) => sel({ snapshot: null, fase: 'idle', inicioManual: null }),
 }));
 
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -161,7 +168,13 @@ const wodTiempo = {
   esquema: null,
   imagen_url: null,
 };
-const competenciaBase = { id: 1, nombre: 'Evento', divisiones: ['RX'], rondas: 1, wods: [wodTiempo] };
+const competenciaBase = {
+  id: 1,
+  nombre: 'Evento',
+  divisiones: ['RX'],
+  rondas: 1,
+  wods: [wodTiempo],
+};
 
 describe('JuezMedicionPage', () => {
   beforeEach(() => {
@@ -200,7 +213,9 @@ describe('JuezMedicionPage', () => {
     mockGet.mockResolvedValue({ data: [competenciaBase] });
     mockPost.mockImplementation((url: string) => {
       if (url === '/participant/lookup') {
-        return Promise.resolve({ data: { id: 7, nombre: 'Ana', apellidos: 'Ruiz', cedula: '123', categoria: 'RX' } });
+        return Promise.resolve({
+          data: { id: 7, nombre: 'Ana', apellidos: 'Ruiz', cedula: '123', categoria: 'RX' },
+        });
       }
       return Promise.resolve({ data: { exists: false } });
     });
@@ -222,7 +237,9 @@ describe('JuezMedicionPage', () => {
     mockGet.mockResolvedValue({ data: [competenciaBase] });
     mockPost.mockImplementation((url: string) => {
       if (url === '/participant/lookup') {
-        return Promise.resolve({ data: { id: 7, nombre: 'Ana', apellidos: 'Ruiz', cedula: '123' } });
+        return Promise.resolve({
+          data: { id: 7, nombre: 'Ana', apellidos: 'Ruiz', cedula: '123' },
+        });
       }
       return Promise.resolve({ data: { exists: true, message: 'Ya tiene marca' } });
     });

@@ -43,34 +43,65 @@ jest.mock('../config/database', () => {
 // Mock the Sequelize library itself so Model.init(), .belongsTo(), etc. are safe.
 jest.mock('sequelize', () => {
   class MockModel {
-    static init(_attrs: any, _opts: any) { return this; }
-    static findAll() { return []; }
-    static findOne() { return null; }
-    static findByPk() { return null; }
-    static create() { return {}; }
-    static update() { return [0]; }
-    static destroy() { return 0; }
-    static findAndCountAll() { return { rows: [], count: 0 }; }
-    static count() { return 0; }
-    static belongsTo() { return this as any; }
-    static hasMany() { return this as any; }
-    static belongsToMany() { return this as any; }
-    static addScope() { return this as any; }
-    static scope() { return this as any; }
+    static init(_attrs: any, _opts: any) {
+      return this;
+    }
+    static findAll() {
+      return [];
+    }
+    static findOne() {
+      return null;
+    }
+    static findByPk() {
+      return null;
+    }
+    static create() {
+      return {};
+    }
+    static update() {
+      return [0];
+    }
+    static destroy() {
+      return 0;
+    }
+    static findAndCountAll() {
+      return { rows: [], count: 0 };
+    }
+    static count() {
+      return 0;
+    }
+    static belongsTo() {
+      return this as any;
+    }
+    static hasMany() {
+      return this as any;
+    }
+    static belongsToMany() {
+      return this as any;
+    }
+    static addScope() {
+      return this as any;
+    }
+    static scope() {
+      return this as any;
+    }
   }
 
   return {
-    DataTypes: new Proxy({}, {
-      get(_target, prop) {
-        if (prop === 'ENUM') {
-          return (..._vals: any[]) => ({ type: 'ENUM' });
-        }
-        if (prop === 'STRING') {
-          return (_len?: number) => ({ type: 'STRING' });
-        }
-        return { type: String(prop) };
+    DataTypes: new Proxy(
+      {},
+      {
+        get(_target, prop) {
+          if (prop === 'ENUM') {
+            return (..._vals: any[]) => ({ type: 'ENUM' });
+          }
+          if (prop === 'STRING') {
+            return (_len?: number) => ({ type: 'STRING' });
+          }
+          return { type: String(prop) };
+        },
       },
-    }),
+    ),
     Model: MockModel,
     Op: {
       in: Symbol('Op.in'),
@@ -159,13 +190,15 @@ jest.mock('../middleware/auth', () => ({
     }
     next();
   },
-  requireRoles: (...roles: string[]) => (req: any, res: any, next: any) => {
-    if (!req.user || !roles.includes(req.user.rol)) {
-      res.status(403).json({ message: 'No tienes permisos para esta accion' });
-      return;
-    }
-    next();
-  },
+  requireRoles:
+    (...roles: string[]) =>
+    (req: any, res: any, next: any) => {
+      if (!req.user || !roles.includes(req.user.rol)) {
+        res.status(403).json({ message: 'No tienes permisos para esta accion' });
+        return;
+      }
+      next();
+    },
   staffOnly: (req: any, res: any, next: any) => {
     if (!req.user || (req.user.rol !== 'admin' && req.user.rol !== 'juez')) {
       res.status(403).json({ message: 'No tienes permisos para esta accion' });
@@ -420,7 +453,7 @@ describe('POST /api/auth/login', () => {
 
   it('credenciales invalidas -> 401', async () => {
     (authService.loginUsuario as jest.Mock).mockRejectedValue(
-      new Error('Cedula o contrasena incorrectos')
+      new Error('Cedula o contrasena incorrectos'),
     );
 
     const res = await request(app)
@@ -432,9 +465,7 @@ describe('POST /api/auth/login', () => {
   });
 
   it('campos faltantes -> 400 (validacion Zod)', async () => {
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({});
+    const res = await request(app).post('/api/auth/login').send({});
 
     expect(res.status).toBe(400);
     expect(res.body.message).toBe('Datos invalidos');
@@ -446,9 +477,7 @@ describe('GET /api/auth/me', () => {
   it('token valido -> 200 + perfil', async () => {
     (authService.getPerfil as jest.Mock).mockResolvedValue(mockAdmin);
 
-    const res = await request(app)
-      .get('/api/auth/me')
-      .set('Cookie', 'token=valid-admin-token');
+    const res = await request(app).get('/api/auth/me').set('Cookie', 'token=valid-admin-token');
 
     expect(res.status).toBe(200);
     expect(res.body.user).toBeDefined();
@@ -491,16 +520,14 @@ describe('POST /api/auth/refresh', () => {
 
 describe('POST /api/auth/registro', () => {
   it('email invalido -> 400 (validacion Zod)', async () => {
-    const res = await request(app)
-      .post('/api/auth/registro')
-      .send({
-        nombre: 'Test',
-        apellidos: 'User',
-        cedula: '99999',
-        box: 'BoxTest',
-        email: 'no-es-email',
-        password: 'Admin123!',
-      });
+    const res = await request(app).post('/api/auth/registro').send({
+      nombre: 'Test',
+      apellidos: 'User',
+      cedula: '99999',
+      box: 'BoxTest',
+      email: 'no-es-email',
+      password: 'Admin123!',
+    });
 
     expect(res.status).toBe(400);
     expect(res.body.message).toBe('Datos invalidos');
@@ -508,9 +535,7 @@ describe('POST /api/auth/registro', () => {
   });
 
   it('campos requeridos faltantes -> 400', async () => {
-    const res = await request(app)
-      .post('/api/auth/registro')
-      .send({ email: 'test@test.com' });
+    const res = await request(app).post('/api/auth/registro').send({ email: 'test@test.com' });
 
     expect(res.status).toBe(400);
     expect(res.body.errors).toBeDefined();
@@ -558,14 +583,12 @@ describe('POST /api/users/jueces', () => {
   });
 
   it('sin token -> 401', async () => {
-    const res = await request(app)
-      .post('/api/users/jueces')
-      .send({
-        nombre: 'Juez',
-        apellidos: 'Test',
-        cedula: '67890',
-        box: 'BoxTest',
-      });
+    const res = await request(app).post('/api/users/jueces').send({
+      nombre: 'Juez',
+      apellidos: 'Test',
+      cedula: '67890',
+      box: 'BoxTest',
+    });
 
     expect(res.status).toBe(401);
   });
@@ -573,11 +596,44 @@ describe('POST /api/users/jueces', () => {
 
 // ── COMPETENCIAS ──────────────────────────────────────────────────────
 
+describe('POST /api/users/bulk (carga CSV)', () => {
+  it('rechaza un archivo que no es CSV -> 400', async () => {
+    const res = await request(app)
+      .post('/api/users/bulk')
+      .set('Cookie', 'token=valid-admin-token')
+      .attach('archivo', Buffer.from('no soy una tabla'), {
+        filename: 'atletas.txt',
+        contentType: 'image/png',
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/CSV/);
+    expect(userService.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('acepta .csv aunque el navegador mande un tipo que no reconoce', async () => {
+    // Los navegadores no se ponen de acuerdo con el tipo de un .csv: unos
+    // mandan text/plain, otros application/octet-stream, otros algo inventado.
+    // La extensión tiene que bastar, o la carga masiva falla sin motivo.
+    (userService.parseCSV as jest.Mock).mockReturnValue([{ nombre: 'Atleta', cedula: '1' }]);
+    (userService.bulkCreate as jest.Mock).mockResolvedValue({ creados: 1, errores: [] });
+
+    const res = await request(app)
+      .post('/api/users/bulk')
+      .set('Cookie', 'token=valid-admin-token')
+      .attach('archivo', Buffer.from('nombre,cedula\nAtleta,1'), {
+        filename: 'atletas.csv',
+        contentType: 'text/x-desconocido',
+      });
+
+    expect(res.status).toBe(200);
+    expect(userService.bulkCreate).toHaveBeenCalled();
+  });
+});
+
 describe('POST /api/competencias', () => {
   it('datos validos + admin -> 201', async () => {
-    (competenciaService.createCompetencia as jest.Mock).mockResolvedValue(
-      mockCompetencia
-    );
+    (competenciaService.createCompetencia as jest.Mock).mockResolvedValue(mockCompetencia);
 
     const res = await request(app)
       .post('/api/competencias')
@@ -689,7 +745,14 @@ describe('POST /api/results', () => {
     const mockParticipante = { id: 10 };
     const mockResultado = { id: 2, participante_id: 10, wod_id: 1, valor_bruto: '15:00' };
 
-    const { Wod, Participante, Resultado, Asignacion, Competencia, Arranque } = require('../models');
+    const {
+      Wod,
+      Participante,
+      Resultado,
+      Asignacion,
+      Competencia,
+      Arranque,
+    } = require('../models');
     Wod.findByPk.mockResolvedValue(mockWod);
     Participante.findByPk.mockResolvedValue(mockParticipante);
     Resultado.findOne.mockResolvedValue(null);
@@ -712,7 +775,14 @@ describe('POST /api/results', () => {
   });
 
   it('heat en pausa -> 409 (ni jueces ni admin registran)', async () => {
-    const { Wod, Participante, Resultado, Asignacion, Competencia, Arranque } = require('../models');
+    const {
+      Wod,
+      Participante,
+      Resultado,
+      Asignacion,
+      Competencia,
+      Arranque,
+    } = require('../models');
     Wod.findByPk.mockResolvedValue({ id: 1, competencia_id: 1 });
     Participante.findByPk.mockResolvedValue({ id: 10 });
     Resultado.findOne.mockResolvedValue(null);
@@ -747,13 +817,11 @@ describe('POST /api/results', () => {
   });
 
   it('no auth -> 401', async () => {
-    const res = await request(app)
-      .post('/api/results')
-      .send({
-        participante_id: 10,
-        wod_id: 1,
-        valor_bruto: '12:34',
-      });
+    const res = await request(app).post('/api/results').send({
+      participante_id: 10,
+      wod_id: 1,
+      valor_bruto: '12:34',
+    });
 
     expect(res.status).toBe(401);
   });
@@ -765,9 +833,7 @@ describe('GET /api/leaderboard/:competenciaId', () => {
   it('returns leaderboard data', async () => {
     const mockLeaderboard = {
       competencia: { id: 1, nombre: 'Open 2024' },
-      clasificacion: [
-        { participante_id: 10, nombre: 'Atleta 1', puntaje_total: 100 },
-      ],
+      clasificacion: [{ participante_id: 10, nombre: 'Atleta 1', puntaje_total: 100 }],
     };
     const { Competencia } = require('../models');
     Competencia.findByPk.mockResolvedValue({ evento_id: 1 });
@@ -803,9 +869,7 @@ describe('GET /api/eventos/publicas', () => {
 
 describe('POST /api/heats/generar', () => {
   it('admin generates heats -> 201', async () => {
-    const mockHeats = [
-      { id: 1, categoria_id: 1, capacidad_maxima: 10, heat_numero: 1 },
-    ];
+    const mockHeats = [{ id: 1, categoria_id: 1, capacidad_maxima: 10, heat_numero: 1 }];
     (heatService.generarHeats as jest.Mock).mockResolvedValue(mockHeats);
 
     const res = await request(app)
@@ -828,7 +892,10 @@ describe('PUT /api/competencias/:id', () => {
   it('admin updates competencia -> 200', async () => {
     const updatedCompetencia = { ...mockCompetencia, nombre: 'Open 2025' };
     // El controlador verifica existencia+alcance antes de actualizar.
-    (competenciaService.getCompetenciaById as jest.Mock).mockResolvedValue({ ...mockCompetencia, evento_id: 1 });
+    (competenciaService.getCompetenciaById as jest.Mock).mockResolvedValue({
+      ...mockCompetencia,
+      evento_id: 1,
+    });
     (competenciaService.updateCompetencia as jest.Mock).mockResolvedValue(updatedCompetencia);
 
     const res = await request(app)
@@ -844,9 +911,14 @@ describe('PUT /api/competencias/:id', () => {
 describe('DELETE /api/competencias/:id', () => {
   it('delete with results -> 404 (dependency check)', async () => {
     // El controlador verifica existencia+alcance antes de eliminar.
-    (competenciaService.getCompetenciaById as jest.Mock).mockResolvedValue({ ...mockCompetencia, evento_id: 1 });
+    (competenciaService.getCompetenciaById as jest.Mock).mockResolvedValue({
+      ...mockCompetencia,
+      evento_id: 1,
+    });
     (competenciaService.deleteCompetencia as jest.Mock).mockRejectedValue(
-      new Error('No se puede eliminar: la competencia tiene 5 resultado(s) registrado(s). Finalizala primero.')
+      new Error(
+        'No se puede eliminar: la competencia tiene 5 resultado(s) registrado(s). Finalizala primero.',
+      ),
     );
 
     const res = await request(app)

@@ -21,8 +21,18 @@ const RENOMBRES_TABLAS: Array<[string, string]> = [
   ['heat_wods', 'heat_horarios'],
 ];
 
-const RENOMBRES_COLUMNAS: Array<{ tabla: string; vieja: string; nueva: string; definicion: string }> = [
-  { tabla: 'evento_usuarios', vieja: 'competencia_id', nueva: 'evento_id', definicion: 'INT NOT NULL' },
+const RENOMBRES_COLUMNAS: Array<{
+  tabla: string;
+  vieja: string;
+  nueva: string;
+  definicion: string;
+}> = [
+  {
+    tabla: 'evento_usuarios',
+    vieja: 'competencia_id',
+    nueva: 'evento_id',
+    definicion: 'INT NOT NULL',
+  },
   { tabla: 'categorias', vieja: 'competencia_id', nueva: 'evento_id', definicion: 'INT NULL' },
   { tabla: 'participantes', vieja: 'competencia_id', nueva: 'evento_id', definicion: 'INT NULL' },
   { tabla: 'competencias', vieja: 'competencia_id', nueva: 'evento_id', definicion: 'INT NULL' },
@@ -32,12 +42,27 @@ const RENOMBRES_COLUMNAS: Array<{ tabla: string; vieja: string; nueva: string; d
   { tabla: 'asignaciones', vieja: 'wod_id', nueva: 'competencia_id', definicion: 'INT NOT NULL' },
   { tabla: 'arranques', vieja: 'wod_id', nueva: 'competencia_id', definicion: 'INT NOT NULL' },
   { tabla: 'heat_horarios', vieja: 'wod_id', nueva: 'competencia_id', definicion: 'INT NOT NULL' },
-  { tabla: 'competencia_categorias', vieja: 'wod_id', nueva: 'competencia_id', definicion: 'INT NOT NULL' },
+  {
+    tabla: 'competencia_categorias',
+    vieja: 'wod_id',
+    nueva: 'competencia_id',
+    definicion: 'INT NOT NULL',
+  },
   { tabla: 'asignaciones', vieja: 'circuito_id', nueva: 'wod_id', definicion: 'INT NULL' },
   { tabla: 'resultados', vieja: 'circuito_id', nueva: 'wod_id', definicion: 'INT NULL' },
   { tabla: 'result_history', vieja: 'circuito_id', nueva: 'wod_id', definicion: 'INT NOT NULL' },
-  { tabla: 'competencias', vieja: 'circuito_desempate_id', nueva: 'wod_desempate_id', definicion: 'INT DEFAULT NULL' },
-  { tabla: 'eventos', vieja: 'tiebreak_wod_id', nueva: 'tiebreak_competencia_id', definicion: 'INT NULL' },
+  {
+    tabla: 'competencias',
+    vieja: 'circuito_desempate_id',
+    nueva: 'wod_desempate_id',
+    definicion: 'INT DEFAULT NULL',
+  },
+  {
+    tabla: 'eventos',
+    vieja: 'tiebreak_wod_id',
+    nueva: 'tiebreak_competencia_id',
+    definicion: 'INT NULL',
+  },
 ];
 
 /** Valores de enum renombrados junto con el resto (incluye variantes intermedias). */
@@ -63,8 +88,13 @@ export async function renombrarEntidades(conn: mysql.Connection): Promise<void> 
     }
     for (const c of RENOMBRES_COLUMNAS) {
       try {
-        if ((await existeColumna(conn, c.tabla, c.vieja)) && !(await existeColumna(conn, c.tabla, c.nueva))) {
-          await conn.query(`ALTER TABLE \`${c.tabla}\` CHANGE COLUMN \`${c.vieja}\` \`${c.nueva}\` ${c.definicion}`);
+        if (
+          (await existeColumna(conn, c.tabla, c.vieja)) &&
+          !(await existeColumna(conn, c.tabla, c.nueva))
+        ) {
+          await conn.query(
+            `ALTER TABLE \`${c.tabla}\` CHANGE COLUMN \`${c.vieja}\` \`${c.nueva}\` ${c.definicion}`,
+          );
           log.info(`columna renombrada: ${c.tabla}.${c.vieja} -> ${c.nueva}`);
         }
       } catch (err) {

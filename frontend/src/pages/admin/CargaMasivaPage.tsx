@@ -49,7 +49,10 @@ export default function CargaMasivaPage() {
     }
   }
 
-  async function copiarCredenciales(juez: { nombre: string; cedula: string; password: string }, idx: number) {
+  async function copiarCredenciales(
+    juez: { nombre: string; cedula: string; password: string },
+    idx: number,
+  ) {
     const texto = `Nombre: ${juez.nombre}\nCédula: ${juez.cedula}\nContraseña temporal: ${juez.password}`;
     try {
       await navigator.clipboard.writeText(texto);
@@ -84,10 +87,7 @@ export default function CargaMasivaPage() {
   }
 
   return (
-    <AppShell
-      title="Carga Masiva"
-      subtitle="Importar atletas y jueces desde un archivo CSV"
-    >
+    <AppShell title="Carga Masiva" subtitle="Importar atletas y jueces desde un archivo CSV">
       {/* Instrucciones */}
       <section className="surface p-5 mb-6">
         <h2 className="text-sm font-bold text-hyrox-paper mb-3 flex items-center gap-2">
@@ -98,16 +98,21 @@ export default function CargaMasivaPage() {
           <li>Descarga una plantilla CSV o prepara tu archivo con los encabezados correctos.</li>
           <li>
             <strong className="text-hyrox-paper">Columnas para atletas:</strong>{' '}
-            <code className="text-xs bg-white/[0.06] px-1.5 py-0.5 rounded">tipo, nombre, apellidos, cedula, box, fecha_nacimiento, email, categoria</code>
+            <code className="text-xs bg-white/[0.06] px-1.5 py-0.5 rounded">
+              tipo, nombre, apellidos, cedula, box, fecha_nacimiento, email, categoria
+            </code>
           </li>
           <li>
             <strong className="text-hyrox-paper">Columnas para jueces:</strong>{' '}
-            <code className="text-xs bg-white/[0.06] px-1.5 py-0.5 rounded">tipo, nombre, apellidos, cedula, box</code>
+            <code className="text-xs bg-white/[0.06] px-1.5 py-0.5 rounded">
+              tipo, nombre, apellidos, cedula, box
+            </code>
           </li>
           <li>
-            La columna <code className="text-xs bg-white/[0.06] px-1.5 py-0.5 rounded">tipo</code> debe ser{' '}
-            <code className="text-xs bg-white/[0.06] px-1.5 py-0.5 rounded">atleta</code> o{' '}
-            <code className="text-xs bg-white/[0.06] px-1.5 py-0.5 rounded">juez</code>. Si se omite, se asume atleta.
+            La columna <code className="text-xs bg-white/[0.06] px-1.5 py-0.5 rounded">tipo</code>{' '}
+            debe ser <code className="text-xs bg-white/[0.06] px-1.5 py-0.5 rounded">atleta</code> o{' '}
+            <code className="text-xs bg-white/[0.06] px-1.5 py-0.5 rounded">juez</code>. Si se
+            omite, se asume atleta.
           </li>
           <li>Los jueces se crean con una contraseña temporal que deberán cambiar al ingresar.</li>
           <li>Las cédulas duplicadas se omiten con error (no se sobreescriben).</li>
@@ -148,13 +153,17 @@ export default function CargaMasivaPage() {
 
         {archivo && (
           <p className="mt-2 text-xs text-hyrox-mist">
-            Archivo: <span className="text-hyrox-paper font-medium">{archivo.name}</span>{' '}
-            ({(archivo.size / 1024).toFixed(1)} KB)
+            Archivo: <span className="text-hyrox-paper font-medium">{archivo.name}</span> (
+            {(archivo.size / 1024).toFixed(1)} KB)
           </p>
         )}
       </section>
 
-      {error && <Alert tone="error" className="mb-6">{error}</Alert>}
+      {error && (
+        <Alert tone="error" className="mb-6">
+          {error}
+        </Alert>
+      )}
 
       {/* Resultado */}
       {resultado && (
@@ -185,13 +194,18 @@ export default function CargaMasivaPage() {
               </h3>
               <div className="space-y-2">
                 {resultado.juecesCreados.map((j, idx) => (
-                  <div key={idx} className="flex items-center justify-between bg-white/[0.04] rounded-lg px-3 py-2">
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between bg-white/[0.04] rounded-lg px-3 py-2"
+                  >
                     <div className="text-sm">
                       <span className="font-semibold text-hyrox-paper">{j.nombre}</span>
                       <span className="text-hyrox-mist mx-2">·</span>
                       <span className="text-hyrox-mist">CI: {j.cedula}</span>
                       <span className="text-hyrox-mist mx-2">·</span>
-                      <code className="text-xs bg-white/[0.06] px-1.5 py-0.5 rounded font-mono">{j.password}</code>
+                      <code className="text-xs bg-white/[0.06] px-1.5 py-0.5 rounded font-mono">
+                        {j.password}
+                      </code>
                     </div>
                     <button
                       type="button"
@@ -215,8 +229,8 @@ export default function CargaMasivaPage() {
               <div className="max-h-60 overflow-y-auto space-y-1">
                 {resultado.errores.map((err, idx) => (
                   <p key={idx} className="text-xs text-red-300">
-                    <span className="font-mono text-red-400">Fila {err.fila}</span>{' '}
-                    (CI: {err.cedula}): {err.mensaje}
+                    <span className="font-mono text-red-400">Fila {err.fila}</span> (CI:{' '}
+                    {err.cedula}): {err.mensaje}
                   </p>
                 ))}
               </div>

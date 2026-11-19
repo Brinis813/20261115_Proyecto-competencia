@@ -29,7 +29,7 @@ export function invalidateLeaderboardCache(competenciaId?: number) {
  */
 export async function calcularPuntuaciones(
   competenciaId: number,
-  precargado?: { policy?: CompetenciaTieBreakPolicy; wods?: Wod[] }
+  precargado?: { policy?: CompetenciaTieBreakPolicy; wods?: Wod[] },
 ): Promise<Map<number, FilaPuntuada[]>> {
   const [policy, wods] =
     precargado?.policy !== undefined && precargado?.wods !== undefined
@@ -37,8 +37,8 @@ export async function calcularPuntuaciones(
       : await Promise.all([
           Competencia.findByPk(competenciaId, { attributes: ['id', 'tiebreak_policy'] }).then(
             (c) =>
-              (c as unknown as { tiebreak_policy?: CompetenciaTieBreakPolicy } | null)?.tiebreak_policy ??
-              'DESIGNATED_CIRCUIT_SPLIT'
+              (c as unknown as { tiebreak_policy?: CompetenciaTieBreakPolicy } | null)
+                ?.tiebreak_policy ?? 'DESIGNATED_CIRCUIT_SPLIT',
           ),
           Wod.findAll({
             where: { competencia_id: competenciaId },
@@ -52,7 +52,17 @@ export async function calcularPuntuaciones(
 
   const resultados = await Resultado.findAll({
     where: { wod_id: wods.map((c) => c.id) },
-    attributes: ['id', 'participante_id', 'wod_id', 'valor_bruto', 'abandono', 'capado', 'disqualificado', 'desempate', 'puntos_calculados'],
+    attributes: [
+      'id',
+      'participante_id',
+      'wod_id',
+      'valor_bruto',
+      'abandono',
+      'capado',
+      'disqualificado',
+      'desempate',
+      'puntos_calculados',
+    ],
   });
 
   const cambios: Array<{ id: number; puntos_calculados: number }> = [];
@@ -71,7 +81,7 @@ export async function calcularPuntuaciones(
       })),
       wod.tipo_medicion,
       wod.puntaje_maximo,
-      policy
+      policy,
     );
     porWod.set(wod.id, filas);
 
@@ -106,12 +116,29 @@ export async function getLeaderboard(competenciaId: number): Promise<Leaderboard
 
   const [competencia, wods, asignaciones] = await Promise.all([
     Competencia.findByPk(competenciaId, {
-      attributes: ['id', 'nombre', 'descripcion', 'divisiones', 'tiebreak_policy', 'wod_desempate_id'],
+      attributes: [
+        'id',
+        'nombre',
+        'descripcion',
+        'divisiones',
+        'tiebreak_policy',
+        'wod_desempate_id',
+      ],
     }),
     // Solo las columnas que salen en el JSON (el `esquema` pesa; el resto ni se lee).
     Wod.findAll({
       where: { competencia_id: competenciaId },
-      attributes: ['id', 'orden', 'nombre_ejercicio', 'tipo_medicion', 'unidad_distancia', 'imagen_url', 'tiempo_cap', 'esquema', 'puntaje_maximo'],
+      attributes: [
+        'id',
+        'orden',
+        'nombre_ejercicio',
+        'tipo_medicion',
+        'unidad_distancia',
+        'imagen_url',
+        'tiempo_cap',
+        'esquema',
+        'puntaje_maximo',
+      ],
       order: [['orden', 'ASC']],
     }),
     Asignacion.findAll({
@@ -189,7 +216,10 @@ export async function getLeaderboard(competenciaId: number): Promise<Leaderboard
 
   // Desempate 2 (reutilizable): mejor posicion individual conseguida.
   const mejor = (e: EntradaLeaderboard) =>
-    Math.min(Number.MAX_SAFE_INTEGER, ...e.resultados.map((r) => r.posicion ?? Number.MAX_SAFE_INTEGER));
+    Math.min(
+      Number.MAX_SAFE_INTEGER,
+      ...e.resultados.map((r) => r.posicion ?? Number.MAX_SAFE_INTEGER),
+    );
 
   const clasificacion = Array.from(entradas.values()).sort((a, b) => {
     if (b.puntos_total !== a.puntos_total) return b.puntos_total - a.puntos_total;
@@ -201,8 +231,10 @@ export async function getLeaderboard(competenciaId: number): Promise<Leaderboard
 
     // Desempate 1: wod designado por la competencia (DESIGNATED_CIRCUIT_SPLIT).
     if (desempateId) {
-      const pa = a.resultados.find((r) => r.wod_id === desempateId)?.posicion ?? Number.MAX_SAFE_INTEGER;
-      const pb = b.resultados.find((r) => r.wod_id === desempateId)?.posicion ?? Number.MAX_SAFE_INTEGER;
+      const pa =
+        a.resultados.find((r) => r.wod_id === desempateId)?.posicion ?? Number.MAX_SAFE_INTEGER;
+      const pb =
+        b.resultados.find((r) => r.wod_id === desempateId)?.posicion ?? Number.MAX_SAFE_INTEGER;
       if (pa !== pb) return pa - pb;
     }
 
@@ -288,7 +320,7 @@ export async function getParticipantPosition(participanteId: number) {
       w.id,
       ((w as unknown as { tiebreak_policy?: CompetenciaTieBreakPolicy }).tiebreak_policy ??
         'DESIGNATED_CIRCUIT_SPLIT') as CompetenciaTieBreakPolicy,
-    ])
+    ]),
   );
 
   // H8: Batch query — cargar todos los WODs y resultados de una sola vez
@@ -316,7 +348,10 @@ export async function getParticipantPosition(participanteId: number) {
     const resultadosDeCompetencia = resultadosPorCompetencia.get(competenciaId) ?? [];
 
     // Puntuar cada WOD y acumular puntos por participante.
-    const puntosPorParticipante = new Map<number, { puntos: number; puesto: number; total: number }>();
+    const puntosPorParticipante = new Map<
+      number,
+      { puntos: number; puesto: number; total: number }
+    >();
 
     for (const wod of wodsDeCompetencia) {
       const delWod = resultadosDeCompetencia.filter((r) => r.wod_id === wod.id);
@@ -332,11 +367,15 @@ export async function getParticipantPosition(participanteId: number) {
         })),
         wod.tipo_medicion,
         wod.puntaje_maximo,
-        policyPorCompetencia.get(competenciaId) ?? 'DESIGNATED_CIRCUIT_SPLIT'
+        policyPorCompetencia.get(competenciaId) ?? 'DESIGNATED_CIRCUIT_SPLIT',
       );
 
       for (const fila of filas) {
-        const actual = puntosPorParticipante.get(fila.participante_id) ?? { puntos: 0, puesto: Number.MAX_SAFE_INTEGER, total: 0 };
+        const actual = puntosPorParticipante.get(fila.participante_id) ?? {
+          puntos: 0,
+          puesto: Number.MAX_SAFE_INTEGER,
+          total: 0,
+        };
         actual.puntos += fila.puntos;
         actual.total += 1;
         if (fila.posicion < actual.puesto) actual.puesto = fila.posicion;

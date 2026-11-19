@@ -66,7 +66,9 @@ export default function ChecklistPrevio({
                 >
                   <Check className="w-4 h-4" strokeWidth={3} />
                 </span>
-                <span className={`text-sm ${marcado ? 'text-hyrox-accent' : 'text-hyrox-paper'}`}>{punto}</span>
+                <span className={`text-sm ${marcado ? 'text-hyrox-accent' : 'text-hyrox-paper'}`}>
+                  {punto}
+                </span>
               </label>
             </li>
           );

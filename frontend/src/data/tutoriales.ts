@@ -97,7 +97,8 @@ export const TUTORIALES: Tutorial[] = [
   conMedia({
     slug: 'entrar-y-cambiar-password',
     titulo: 'Entrar y cambiar la contraseña temporal',
-    resumen: 'El primer ingreso de administradores y jueces obliga a definir una contraseña propia.',
+    resumen:
+      'El primer ingreso de administradores y jueces obliga a definir una contraseña propia.',
     rol: 'admin',
     icono: LogIn,
     ruta: '/login',
@@ -194,8 +195,7 @@ export const TUTORIALES: Tutorial[] = [
       },
       {
         titulo: 'Guarda la competencia',
-        detalle:
-          'Puedes editarlo más tarde y añadir o quitar wods mientras no tengan mediciones.',
+        detalle: 'Puedes editarlo más tarde y añadir o quitar wods mientras no tengan mediciones.',
         aviso:
           'No se puede borrar un WOD que ya tenga mediciones. Antes hay que resetearlas desde «Resultados».',
       },
@@ -212,7 +212,8 @@ export const TUTORIALES: Tutorial[] = [
     pasos: [
       {
         titulo: 'Entra en Jueces y haz clic en «Nuevo juez»',
-        detalle: 'La lista muestra los jueces ya registrados y permite buscarlos por nombre o cédula.',
+        detalle:
+          'La lista muestra los jueces ya registrados y permite buscarlos por nombre o cédula.',
       },
       {
         titulo: 'Completa sus datos',
@@ -249,7 +250,8 @@ export const TUTORIALES: Tutorial[] = [
       },
       {
         titulo: 'Guarda y revisa la lista',
-        detalle: 'El atleta ya existe, pero todavía no compite: hace falta asignarlo a una competencia.',
+        detalle:
+          'El atleta ya existe, pero todavía no compite: hace falta asignarlo a una competencia.',
       },
     ],
   }),
@@ -257,7 +259,8 @@ export const TUTORIALES: Tutorial[] = [
   conMedia({
     slug: 'carga-masiva',
     titulo: 'Cargar atletas y jueces en bloque',
-    resumen: 'Un CSV para inscribir a muchas personas de una sola vez, sin escribirlas una por una.',
+    resumen:
+      'Un CSV para inscribir a muchas personas de una sola vez, sin escribirlas una por una.',
     rol: 'admin',
     icono: Upload,
     ruta: '/admin/carga-masiva',
@@ -271,7 +274,8 @@ export const TUTORIALES: Tutorial[] = [
         titulo: 'Prepara el archivo y selecciónalo',
         detalle:
           'Una fila por persona. La columna tipo dice si es «atleta» o «juez»; si se omite, se asume atleta. Al elegir el archivo, la pantalla muestra su nombre y su tamaño antes de importar nada.',
-        aviso: 'Las cédulas duplicadas se omiten con error: no se sobrescribe a nadie que ya exista.',
+        aviso:
+          'Las cédulas duplicadas se omiten con error: no se sobrescribe a nadie que ya exista.',
       },
       {
         titulo: 'Importa y revisa el resultado',
@@ -330,7 +334,8 @@ export const TUTORIALES: Tutorial[] = [
     pasos: [
       {
         titulo: 'Entra en Resultados y elige la competencia',
-        detalle: 'Verás los WODs de la competencia con las mediciones registradas hasta el momento.',
+        detalle:
+          'Verás los WODs de la competencia con las mediciones registradas hasta el momento.',
       },
       {
         titulo: 'Despliega el WOD',
@@ -372,8 +377,7 @@ export const TUTORIALES: Tutorial[] = [
       },
       {
         titulo: 'Sigue la clasificación',
-        detalle:
-          'Se actualiza cada vez que un juez guarda una medición: no hay que recargar nada.',
+        detalle: 'Se actualiza cada vez que un juez guarda una medición: no hay que recargar nada.',
       },
       {
         titulo: 'Lee los dos paneles',
@@ -558,7 +562,8 @@ export interface PreguntaFrecuente {
 export const PREGUNTAS_FRECUENTES: PreguntaFrecuente[] = [
   {
     pregunta: 'Un atleta no aparece en la clasificación.',
-    respuesta: 'No está asignado a esa competencia. Ve a «Asignaciones», elige la competencia y añádelo.',
+    respuesta:
+      'No está asignado a esa competencia. Ve a «Asignaciones», elige la competencia y añádelo.',
   },
   {
     pregunta: 'Un juez no ve ningún Competencia.',

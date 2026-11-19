@@ -14,12 +14,21 @@ vi.mock('../hooks/useTimer', () => ({
     start: mockStart,
     stop: mockStop,
     reset: mockReset,
-    formatTime: (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, '0')}`,
+    formatTime: (ms: number) =>
+      `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, '0')}`,
   }),
 }));
 
 vi.mock('../components/ui', () => ({
-  Button: ({ children, onClick, disabled }: { children?: React.ReactNode; onClick?: () => void; disabled?: boolean }) => (
+  Button: ({
+    children,
+    onClick,
+    disabled,
+  }: {
+    children?: React.ReactNode;
+    onClick?: () => void;
+    disabled?: boolean;
+  }) => (
     <button onClick={onClick} disabled={disabled}>
       {children}
     </button>

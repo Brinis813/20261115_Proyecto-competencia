@@ -25,7 +25,11 @@ import { formatearCategorias } from '../../utils/formato';
  */
 export default function AsignacionesPage() {
   const { competenciaId } = useParams();
-  return competenciaId ? <PanelAsignacion competenciaId={Number(competenciaId)} /> : <SelectorCompetencia />;
+  return competenciaId ? (
+    <PanelAsignacion competenciaId={Number(competenciaId)} />
+  ) : (
+    <SelectorCompetencia />
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -57,7 +61,11 @@ function SelectorCompetencia() {
             icon={ClipboardList}
             title="No hay Competencias"
             description="Crea una competencia antes de asignar jueces y atletas."
-            action={<Button onClick={() => navigate('/admin/competencias/nuevo')}>Crear Competencia</Button>}
+            action={
+              <Button onClick={() => navigate('/admin/competencias/nuevo')}>
+                Crear Competencia
+              </Button>
+            }
           />
         ) : (
           <ul className="divide-hairline">
@@ -72,8 +80,12 @@ function SelectorCompetencia() {
                     <ClipboardList className="w-4.5 h-4.5" aria-hidden="true" />
                   </span>
                   <span className="flex-1 min-w-0">
-                    <span className="block font-semibold text-hyrox-paper truncate">{competencia.nombre}</span>
-                    <span className="block text-xs text-hyrox-mist">{competencia.wods?.length ?? 0} wods</span>
+                    <span className="block font-semibold text-hyrox-paper truncate">
+                      {competencia.nombre}
+                    </span>
+                    <span className="block text-xs text-hyrox-mist">
+                      {competencia.wods?.length ?? 0} wods
+                    </span>
                     <span className="block text-2xs text-hyrox-ghost truncate">
                       Categorias: {formatearCategorias(competencia.divisiones)}
                     </span>
@@ -108,7 +120,7 @@ const TODOS = 'todos';
 function calcularPares(
   jueces: number[],
   atletas: number[],
-  permitirUnJuez: boolean
+  permitirUnJuez: boolean,
 ): Array<{ usuario_id: number; participante_id: number }> | null {
   if (jueces.length === 0 || atletas.length === 0) return [];
   if (permitirUnJuez && jueces.length === 1)
@@ -143,7 +155,7 @@ function PanelAsignacion({ competenciaId }: { competenciaId: number }) {
 
   const wods: Wod[] = useMemo(
     () => [...(competencia?.wods ?? [])].sort((a, b) => a.orden - b.orden),
-    [competencia]
+    [competencia],
   );
 
   const cargar = useCallback(async () => {
@@ -174,7 +186,7 @@ function PanelAsignacion({ competenciaId }: { competenciaId: number }) {
     const termino = busqueda.trim().toLowerCase();
     if (!termino) return participantes;
     return participantes.filter((p) =>
-      `${p.nombre} ${p.apellidos} ${p.cedula} ${p.box}`.toLowerCase().includes(termino)
+      `${p.nombre} ${p.apellidos} ${p.cedula} ${p.box}`.toLowerCase().includes(termino),
     );
   }, [participantes, busqueda]);
 
@@ -200,7 +212,7 @@ function PanelAsignacion({ competenciaId }: { competenciaId: number }) {
 
   const pares = useMemo(
     () => calcularPares(juecesSel, atletasSel, esTodos),
-    [juecesSel, atletasSel, esTodos]
+    [juecesSel, atletasSel, esTodos],
   );
 
   function alternarOrdenado(lista: number[], setter: (l: number[]) => void, id: number) {
@@ -222,9 +234,7 @@ function PanelAsignacion({ competenciaId }: { competenciaId: number }) {
       const clave = a.wod_id == null ? TODOS : String(a.wod_id);
       if (!porScope.has(clave)) {
         porScope.set(clave, {
-          titulo: a.Wod
-            ? `WOD ${a.Wod.orden} · ${a.Wod.nombre_ejercicio}`
-            : 'Todos los WODs',
+          titulo: a.Wod ? `WOD ${a.Wod.orden} · ${a.Wod.nombre_ejercicio}` : 'Todos los WODs',
           orden: a.Wod ? a.Wod.orden : 999,
           filas: [],
         });
@@ -234,8 +244,8 @@ function PanelAsignacion({ competenciaId }: { competenciaId: number }) {
     for (const g of porScope.values()) {
       g.filas.sort((x, y) =>
         `${x.Participante?.apellidos} ${x.Participante?.nombre}`.localeCompare(
-          `${y.Participante?.apellidos} ${y.Participante?.nombre}`
-        )
+          `${y.Participante?.apellidos} ${y.Participante?.nombre}`,
+        ),
       );
     }
     return [...porScope.values()].sort((x, y) => x.orden - y.orden);
@@ -254,7 +264,9 @@ function PanelAsignacion({ competenciaId }: { competenciaId: number }) {
       });
       setJuecesSel([]);
       setAtletasSel([]);
-      setExito(`${data?.total ?? pares.length} asignaciones guardadas. La clasificacion ya se actualizo.`);
+      setExito(
+        `${data?.total ?? pares.length} asignaciones guardadas. La clasificacion ya se actualizo.`,
+      );
       await cargar();
     } catch (err) {
       setError(mensajeDeError(err, 'No se pudieron guardar las asignaciones'));
@@ -294,19 +306,34 @@ function PanelAsignacion({ competenciaId }: { competenciaId: number }) {
       title={competencia?.nombre ?? 'Asignaciones'}
       subtitle="Empareja un juez con cada atleta, estacion por estacion"
       actions={
-        <Button variant="ghost" size="sm" icon={ArrowLeft} onClick={() => navigate('/admin/asignaciones')}>
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={ArrowLeft}
+          onClick={() => navigate('/admin/asignaciones')}
+        >
           <span className="hidden sm:inline">Competencias</span>
         </Button>
       }
     >
       <div className="max-w-6xl space-y-4">
-        {error && <Alert tone="error" onDismiss={() => setError('')}>{error}</Alert>}
-        {exito && <Alert tone="success" onDismiss={() => setExito('')}>{exito}</Alert>}
+        {error && (
+          <Alert tone="error" onDismiss={() => setError('')}>
+            {error}
+          </Alert>
+        )}
+        {exito && (
+          <Alert tone="success" onDismiss={() => setExito('')}>
+            {exito}
+          </Alert>
+        )}
 
         {/* --------------------------- Wod --------------------------- */}
         <section className="surface p-4 sm:p-5">
           <Select label="WOD a asignar" value={wodSel} onChange={(e) => cambiarWod(e.target.value)}>
-            <option value={TODOS}>Todos los WODs (Competencia seguido: un juez cubre todas las estaciones)</option>
+            <option value={TODOS}>
+              Todos los WODs (Competencia seguido: un juez cubre todas las estaciones)
+            </option>
             {wods.map((c) => (
               <option key={c.id} value={String(c.id)}>
                 Wod {c.orden} · {c.nombre_ejercicio}
@@ -339,7 +366,9 @@ function PanelAsignacion({ competenciaId }: { competenciaId: number }) {
                       seleccionado={juecesSel.includes(juez.id)}
                       orden={juecesSel.indexOf(juez.id) + 1 || undefined}
                       disabled={bloqueado}
-                      onToggle={() => !bloqueado && alternarOrdenado(juecesSel, setJuecesSel, juez.id)}
+                      onToggle={() =>
+                        !bloqueado && alternarOrdenado(juecesSel, setJuecesSel, juez.id)
+                      }
                       titulo={`${juez.nombre} ${juez.apellidos}`}
                       subtitulo={`C.I. ${juez.cedula} · ${juez.box}`}
                       etiqueta={bloqueado ? 'Ya en este WOD' : undefined}
@@ -371,7 +400,11 @@ function PanelAsignacion({ competenciaId }: { competenciaId: number }) {
             </header>
 
             {atletasFiltrados.length === 0 ? (
-              <EmptyState icon={Users} title="Sin atletas" description="No hay atletas que coincidan." />
+              <EmptyState
+                icon={Users}
+                title="Sin atletas"
+                description="No hay atletas que coincidan."
+              />
             ) : (
               <ul className="divide-hairline max-h-80 overflow-y-auto">
                 {atletasFiltrados.map((atleta) => (
@@ -410,9 +443,13 @@ function PanelAsignacion({ competenciaId }: { competenciaId: number }) {
                       key={`${p.usuario_id}-${p.participante_id}`}
                       className="flex items-center gap-2 text-sm text-hyrox-paper bg-white/[0.03] rounded-lg px-3 py-2"
                     >
-                      <span className="font-mono text-2xs text-hyrox-ghost w-5 shrink-0">{i + 1}</span>
+                      <span className="font-mono text-2xs text-hyrox-ghost w-5 shrink-0">
+                        {i + 1}
+                      </span>
                       <span className="truncate">
-                        <span className="text-hyrox-mist">{j ? `${j.nombre} ${j.apellidos}` : 'Juez'}</span>
+                        <span className="text-hyrox-mist">
+                          {j ? `${j.nombre} ${j.apellidos}` : 'Juez'}
+                        </span>
                         <span className="text-hyrox-primary mx-1.5" aria-hidden="true">
                           &harr;
                         </span>
@@ -424,7 +461,9 @@ function PanelAsignacion({ competenciaId }: { competenciaId: number }) {
               </ul>
             </>
           ) : (
-            <p className="text-xs text-hyrox-mist">Selecciona jueces y atletas para formar las parejas.</p>
+            <p className="text-xs text-hyrox-mist">
+              Selecciona jueces y atletas para formar las parejas.
+            </p>
           )}
 
           <div className="flex justify-end pt-1">
@@ -467,7 +506,10 @@ function PanelAsignacion({ competenciaId }: { competenciaId: number }) {
                         </span>
                       </span>
                       <span className="flex items-center gap-1.5 text-sm text-hyrox-mist min-w-0">
-                        <UserCheck className="w-3.5 h-3.5 text-hyrox-primary shrink-0" aria-hidden="true" />
+                        <UserCheck
+                          className="w-3.5 h-3.5 text-hyrox-primary shrink-0"
+                          aria-hidden="true"
+                        />
                         <span className="truncate">
                           {asignacion.Usuario?.nombre} {asignacion.Usuario?.apellidos}
                         </span>
@@ -526,7 +568,10 @@ function FilaSeleccion({
           'flex items-center gap-3 px-4 sm:px-5 py-3 transition-colors',
           disabled
             ? 'opacity-45 cursor-not-allowed'
-            : cx('cursor-pointer', seleccionado ? 'bg-hyrox-primary/[0.08]' : 'hover:bg-white/[0.03]')
+            : cx(
+                'cursor-pointer',
+                seleccionado ? 'bg-hyrox-primary/[0.08]' : 'hover:bg-white/[0.03]',
+              ),
         )}
       >
         <input

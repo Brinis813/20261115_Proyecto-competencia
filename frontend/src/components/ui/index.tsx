@@ -1,5 +1,14 @@
 import { ReactNode, forwardRef, useState } from 'react';
-import { AlertCircle, CheckCircle2, Eye, EyeOff, Info, Loader2, X, type LucideIcon } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Info,
+  Loader2,
+  X,
+  type LucideIcon,
+} from 'lucide-react';
 
 /** Une clases condicionales sin depender de librerias externas. */
 export function cx(...clases: Array<string | false | null | undefined>): string {
@@ -74,13 +83,28 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'primary', size = 'md', loading, icon: Icon, fullWidth, children, className, disabled, ...props },
-  ref
+  {
+    variant = 'primary',
+    size = 'md',
+    loading,
+    icon: Icon,
+    fullWidth,
+    children,
+    className,
+    disabled,
+    ...props
+  },
+  ref,
 ) {
   return (
     <button
       ref={ref}
-      className={cx(VARIANTES[variant], size === 'sm' && 'btn-sm', fullWidth && 'w-full', className)}
+      className={cx(
+        VARIANTES[variant],
+        size === 'sm' && 'btn-sm',
+        fullWidth && 'w-full',
+        className,
+      )}
       disabled={disabled || loading}
       // Comunica el estado de carga a los lectores de pantalla.
       aria-busy={loading || undefined}
@@ -118,7 +142,7 @@ export function IconButton({
         'icon-btn',
         size === 'sm' && 'w-8 h-8',
         variant === 'danger' && 'hover:text-hyrox-danger hover:bg-hyrox-danger/10',
-        className
+        className,
       )}
       aria-label={label}
       // Un title propio del llamador (p.ej. explicar por que esta deshabilitado)
@@ -143,7 +167,7 @@ interface FieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
   { label, error, hint, id, className, ...props },
-  ref
+  ref,
 ) {
   const inputId = id || `campo-${label.toLowerCase().replace(/\s+/g, '-')}`;
   const hintId = hint ? `${inputId}-hint` : undefined;
@@ -184,7 +208,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
  */
 export const PasswordField = forwardRef<HTMLInputElement, FieldProps>(function PasswordField(
   { label, error, hint, id, className, autoComplete = 'current-password', ...props },
-  ref
+  ref,
 ) {
   const [visible, setVisible] = useState(false);
   const inputId = id || `campo-${label.toLowerCase().replace(/\s+/g, '-')}`;
@@ -269,9 +293,18 @@ export function Select({
 /* ------------------------------------------------------------------ */
 
 const ESTILOS_AVISO = {
-  error: { clase: 'bg-hyrox-danger/10 border-hyrox-danger/25 text-hyrox-danger', icono: AlertCircle },
-  success: { clase: 'bg-hyrox-accent/10 border-hyrox-accent/25 text-hyrox-accent', icono: CheckCircle2 },
-  warning: { clase: 'bg-hyrox-warning/10 border-hyrox-warning/25 text-hyrox-warning', icono: AlertCircle },
+  error: {
+    clase: 'bg-hyrox-danger/10 border-hyrox-danger/25 text-hyrox-danger',
+    icono: AlertCircle,
+  },
+  success: {
+    clase: 'bg-hyrox-accent/10 border-hyrox-accent/25 text-hyrox-accent',
+    icono: CheckCircle2,
+  },
+  warning: {
+    clase: 'bg-hyrox-warning/10 border-hyrox-warning/25 text-hyrox-warning',
+    icono: AlertCircle,
+  },
   info: { clase: 'bg-hyrox-info/10 border-hyrox-info/25 text-hyrox-info', icono: Info },
 } as const;
 
@@ -289,7 +322,11 @@ export function Alert({
   const { clase, icono: Icono } = ESTILOS_AVISO[tone];
   return (
     <div
-      className={cx('flex items-start gap-3 px-4 py-3 rounded-xl border text-sm animate-fade-in', clase, className)}
+      className={cx(
+        'flex items-start gap-3 px-4 py-3 rounded-xl border text-sm animate-fade-in',
+        clase,
+        className,
+      )}
       // Los errores interrumpen; el resto se anuncia sin cortar la lectura.
       role={tone === 'error' ? 'alert' : 'status'}
     >
@@ -330,7 +367,9 @@ export function EmptyState({
         <Icon className="w-6 h-6" aria-hidden="true" />
       </span>
       <p className="font-display text-lg font-bold text-hyrox-paper">{title}</p>
-      {description && <p className="mt-1 text-sm text-hyrox-mist max-w-sm mx-auto text-balance">{description}</p>}
+      {description && (
+        <p className="mt-1 text-sm text-hyrox-mist max-w-sm mx-auto text-balance">{description}</p>
+      )}
       {action && <div className="mt-5 flex justify-center">{action}</div>}
     </div>
   );
@@ -397,7 +436,7 @@ export function Modal({
           // en escritorio queda centrado.
           'relative w-full surface-raised animate-scale-in flex flex-col',
           'rounded-t-3xl sm:rounded-2xl max-h-[92vh] sm:max-h-[85vh]',
-          anchos[size]
+          anchos[size],
         )}
       >
         <header className="panel-header">

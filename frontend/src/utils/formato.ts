@@ -14,7 +14,7 @@
  * además de colapsar ids repetidos. Ordena por id para estabilidad.
  */
 export function dedupCategorias<T extends { id: number; nombre: string; genero: string }>(
-  categorias: T[]
+  categorias: T[],
 ): T[] {
   const porId = new Map<number, T>();
   for (const c of categorias) {

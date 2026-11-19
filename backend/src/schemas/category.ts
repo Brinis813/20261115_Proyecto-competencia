@@ -1,9 +1,17 @@
 import { z } from 'zod';
 
-const nombre = z.string().trim().min(1, 'El nombre de la categoría es obligatorio').max(100, 'El nombre no puede superar 100 caracteres');
-const genero = z.enum(['Masculino', 'Femenino', 'Mixto'], { errorMap: () => ({ message: 'El género debe ser Masculino, Femenino o Mixto' }) });
+const nombre = z
+  .string()
+  .trim()
+  .min(1, 'El nombre de la categoría es obligatorio')
+  .max(100, 'El nombre no puede superar 100 caracteres');
+const genero = z.enum(['Masculino', 'Femenino', 'Mixto'], {
+  errorMap: () => ({ message: 'El género debe ser Masculino, Femenino o Mixto' }),
+});
 const tipo_participacion = z.enum(['Individual', 'Escalado', 'Duplas', 'Equipos', 'Relevos'], {
-  errorMap: () => ({ message: 'El tipo de participación debe ser Individual, Escalado, Duplas, Equipos o Relevos' }),
+  errorMap: () => ({
+    message: 'El tipo de participación debe ser Individual, Escalado, Duplas, Equipos o Relevos',
+  }),
 });
 
 export const createCategorySchema = z.object({

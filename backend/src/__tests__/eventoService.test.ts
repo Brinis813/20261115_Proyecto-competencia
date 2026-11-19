@@ -66,18 +66,18 @@ describe('listarEventos', () => {
   });
 
   it('retorna eventos con conteos de competencias y atletas', async () => {
-    mockEventoUsuario.findAll.mockResolvedValue([
-      { evento_id: 1, rol: 'admin' },
-    ] as any);
+    mockEventoUsuario.findAll.mockResolvedValue([{ evento_id: 1, rol: 'admin' }] as any);
     mockEvento.findAll.mockResolvedValue([
-      { id: 1, nombre: 'Evento Test', fecha_inicio: '2026-01-01', fecha_fin: '2026-01-02', box_id: null },
+      {
+        id: 1,
+        nombre: 'Evento Test',
+        fecha_inicio: '2026-01-01',
+        fecha_fin: '2026-01-02',
+        box_id: null,
+      },
     ] as any);
-    mockCompetencia.findAll.mockResolvedValue([
-      { evento_id: 1, total: 3 },
-    ] as any);
-    mockParticipante.findAll.mockResolvedValue([
-      { evento_id: 1, total: 12 },
-    ] as any);
+    mockCompetencia.findAll.mockResolvedValue([{ evento_id: 1, total: 3 }] as any);
+    mockParticipante.findAll.mockResolvedValue([{ evento_id: 1, total: 12 }] as any);
     mockBox.findAll.mockResolvedValue([]);
 
     const result = await listarEventos({ id: 1 });
@@ -105,7 +105,13 @@ describe('listarEventos', () => {
 
   it('admin ve eventos de su box', async () => {
     mockEvento.findAll.mockResolvedValue([
-      { id: 1, nombre: 'Box Event', fecha_inicio: '2026-01-01', fecha_fin: '2026-01-02', box_id: 5 },
+      {
+        id: 1,
+        nombre: 'Box Event',
+        fecha_inicio: '2026-01-01',
+        fecha_fin: '2026-01-02',
+        box_id: 5,
+      },
     ] as any);
     mockEventoUsuario.findAll.mockResolvedValue([]);
     mockCompetencia.findAll.mockResolvedValue([]);
@@ -159,7 +165,7 @@ describe('actualizarScoringType', () => {
     mockEvento.findByPk.mockResolvedValue(null);
 
     await expect(
-      actualizarScoringType(999, { scoringType: 'POINTS_ACCUMULATION' })
+      actualizarScoringType(999, { scoringType: 'POINTS_ACCUMULATION' }),
     ).rejects.toThrow('Evento no encontrada');
   });
 
@@ -184,7 +190,7 @@ describe('actualizarScoringType', () => {
     });
 
     expect(updateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ scoring_type: 'WINNER_PER_Competencia' })
+      expect.objectContaining({ scoring_type: 'WINNER_PER_Competencia' }),
     );
     expect(result.scoring_type).toBe('WINNER_PER_Competencia');
   });
@@ -196,9 +202,9 @@ describe('actualizarScoringType', () => {
       tiebreak_policy: 'BEST_INDIVIDUAL_RANK',
     } as any);
 
-    await expect(
-      actualizarScoringType(1, { scoringType: 'INVALID' as any })
-    ).rejects.toThrow('scoringType inválido');
+    await expect(actualizarScoringType(1, { scoringType: 'INVALID' as any })).rejects.toThrow(
+      'scoringType inválido',
+    );
   });
 
   it('actualiza tiebreak_policy correctamente', async () => {
@@ -221,9 +227,7 @@ describe('actualizarScoringType', () => {
       tiebreakPolicy: 'NONE',
     });
 
-    expect(updateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ tiebreak_policy: 'NONE' })
-    );
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ tiebreak_policy: 'NONE' }));
     expect(result.tiebreak_policy).toBe('NONE');
   });
 
@@ -234,9 +238,9 @@ describe('actualizarScoringType', () => {
       tiebreak_policy: 'BEST_INDIVIDUAL_RANK',
     } as any);
 
-    await expect(
-      actualizarScoringType(1, { tiebreakPolicy: 'BOGUS' as any })
-    ).rejects.toThrow('tiebreakPolicy inválida');
+    await expect(actualizarScoringType(1, { tiebreakPolicy: 'BOGUS' as any })).rejects.toThrow(
+      'tiebreakPolicy inválida',
+    );
   });
 
   it('limpia tiebreak_competencia_id cuando el policy no es DESIGNATED', async () => {
@@ -261,7 +265,7 @@ describe('actualizarScoringType', () => {
     });
 
     expect(updateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ tiebreak_competencia_id: null })
+      expect.objectContaining({ tiebreak_competencia_id: null }),
     );
     expect(result.tiebreak_competencia_id).toBeNull();
   });

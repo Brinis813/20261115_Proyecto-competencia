@@ -70,14 +70,40 @@ describe('programarArranque serializado', () => {
     expect(txMock).toHaveBeenCalledTimes(1);
     expect((Arranque as any).create).toHaveBeenCalledWith(
       expect.objectContaining({ competencia_id: 7, estado: 'en_curso' }),
-      expect.objectContaining({ transaction: expect.anything() })
+      expect.objectContaining({ transaction: expect.anything() }),
     );
   });
 
   it('doble armar concurrente: cada uno crea+poda dentro de su tx (sin poda a medias)', async () => {
     (Arranque as any).create
-      .mockResolvedValueOnce({ id: 101, competencia_id: 7, modo: 'directo', estado: 'en_curso', t0_ms: 1, pausa_acumulada_ms: 0, rondas: 3, countdown_seg: null, programado_para_ms: null, duracion_minutos: 20, version: 1, evento_id: 1 })
-      .mockResolvedValueOnce({ id: 102, competencia_id: 7, modo: 'directo', estado: 'en_curso', t0_ms: 2, pausa_acumulada_ms: 0, rondas: 3, countdown_seg: null, programado_para_ms: null, duracion_minutos: 20, version: 1, evento_id: 1 });
+      .mockResolvedValueOnce({
+        id: 101,
+        competencia_id: 7,
+        modo: 'directo',
+        estado: 'en_curso',
+        t0_ms: 1,
+        pausa_acumulada_ms: 0,
+        rondas: 3,
+        countdown_seg: null,
+        programado_para_ms: null,
+        duracion_minutos: 20,
+        version: 1,
+        evento_id: 1,
+      })
+      .mockResolvedValueOnce({
+        id: 102,
+        competencia_id: 7,
+        modo: 'directo',
+        estado: 'en_curso',
+        t0_ms: 2,
+        pausa_acumulada_ms: 0,
+        rondas: 3,
+        countdown_seg: null,
+        programado_para_ms: null,
+        duracion_minutos: 20,
+        version: 1,
+        evento_id: 1,
+      });
     const [a, b] = await Promise.all([
       programarArranque(7, { modo: 'directo' }, 1),
       programarArranque(7, { modo: 'directo' }, 2),
@@ -92,7 +118,7 @@ describe('programarArranque serializado', () => {
 
   it('programado con menos de 30 s lanza antes de tocar la DB', async () => {
     await expect(
-      programarArranque(7, { modo: 'programado', programadoParaMs: Date.now() + 1000 }, 1)
+      programarArranque(7, { modo: 'programado', programadoParaMs: Date.now() + 1000 }, 1),
     ).rejects.toThrow(/30 segundos/);
     expect(txMock).not.toHaveBeenCalled();
   });

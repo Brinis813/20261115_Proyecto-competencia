@@ -40,21 +40,13 @@ jest.mock('../config/database', () => ({
 jest.mock('../middleware/evento', () => ({}));
 
 import { generarHeats, moverAtleta, quitarAtleta } from '../services/heatService';
-import {
-  Heat,
-  HeatParticipante,
-  HeatHorario,
-  Categoria,
-  Participante,
-  Competencia,
-} from '../models';
+import { Heat, HeatParticipante, HeatHorario, Categoria, Participante } from '../models';
 
 const mockHeat = Heat as jest.Mocked<typeof Heat>;
 const mockHeatParticipante = HeatParticipante as jest.Mocked<typeof HeatParticipante>;
 const mockHeatHorario = HeatHorario as jest.Mocked<typeof HeatHorario>;
 const mockCategoria = Categoria as jest.Mocked<typeof Categoria>;
 const mockParticipante = Participante as jest.Mocked<typeof Participante>;
-const mockCompetencia = Competencia as jest.Mocked<typeof Competencia>;
 
 const superadminAlcance = { permitidas: null } as any;
 
@@ -72,7 +64,7 @@ describe('generarHeats', () => {
     mockCategoria.findByPk.mockResolvedValue(null);
 
     await expect(generarHeats(99, 4, 'alfabetico', superadminAlcance)).rejects.toThrow(
-      'Categoría no encontrada'
+      'Categoría no encontrada',
     );
   });
 
@@ -87,7 +79,7 @@ describe('generarHeats', () => {
     mockParticipante.findAll.mockResolvedValue([]);
 
     await expect(generarHeats(1, 4, 'alfabetico', superadminAlcance)).rejects.toThrow(
-      'La categoría no tiene atletas inscritos'
+      'La categoría no tiene atletas inscritos',
     );
   });
 
@@ -102,20 +94,23 @@ describe('generarHeats', () => {
 
     const atletas = [
       { id: 1, nombre: 'Ana', apellidos: 'Rojas', cedula: '001', categoria_id: 1, evento_id: 10 },
-      { id: 2, nombre: 'Carlos', apellidos: 'Duarte', cedula: '002', categoria_id: 1, evento_id: 10 },
+      {
+        id: 2,
+        nombre: 'Carlos',
+        apellidos: 'Duarte',
+        cedula: '002',
+        categoria_id: 1,
+        evento_id: 10,
+      },
       { id: 3, nombre: 'Luis', apellidos: 'Perez', cedula: '003', categoria_id: 1, evento_id: 10 },
     ];
-    mockParticipante.findAll
-      .mockResolvedValueOnce(atletas as any)
-      .mockResolvedValue([]);
+    mockParticipante.findAll.mockResolvedValueOnce(atletas as any).mockResolvedValue([]);
     mockHeat.create.mockResolvedValue({ id: 100, numero: 1 } as any);
     mockHeatParticipante.bulkCreate.mockResolvedValue([] as any);
 
     stubConstruirVista();
     // Restore Participante.findAll for the athlete query since stubConstruirVista reset it
-    mockParticipante.findAll
-      .mockResolvedValueOnce(atletas as any)
-      .mockResolvedValue([] as any);
+    mockParticipante.findAll.mockResolvedValueOnce(atletas as any).mockResolvedValue([] as any);
     mockHeat.findAll.mockResolvedValue([]);
     mockHeatParticipante.findAll.mockResolvedValue([]);
     mockHeatHorario.findAll.mockResolvedValue([]);
@@ -134,16 +129,16 @@ describe('generarHeats', () => {
     } as any);
 
     await expect(generarHeats(1, 4, 'otro' as any, superadminAlcance)).rejects.toThrow(
-      'Modo inválido: usa alfabetico o aleatorio'
+      'Modo inválido: usa alfabetico o aleatorio',
     );
   });
 
   it('lanza error si capacidad es inválida', async () => {
     await expect(generarHeats(1, 0, 'alfabetico')).rejects.toThrow(
-      'La capacidad máxima debe estar entre 1 y 50'
+      'La capacidad máxima debe estar entre 1 y 50',
     );
     await expect(generarHeats(1, 60, 'alfabetico')).rejects.toThrow(
-      'La capacidad máxima debe estar entre 1 y 50'
+      'La capacidad máxima debe estar entre 1 y 50',
     );
   });
 });
@@ -163,7 +158,9 @@ describe('moverAtleta', () => {
     } as any);
     mockParticipante.findByPk.mockResolvedValue(null);
 
-    await expect(moverAtleta(999, 10, null, superadminAlcance)).rejects.toThrow('Atleta no encontrado');
+    await expect(moverAtleta(999, 10, null, superadminAlcance)).rejects.toThrow(
+      'Atleta no encontrado',
+    );
   });
 
   it('lanza error si el atleta no pertenece a la categoría', async () => {
@@ -178,7 +175,7 @@ describe('moverAtleta', () => {
     } as any);
 
     await expect(moverAtleta(5, 10, null, superadminAlcance)).rejects.toThrow(
-      'El atleta no pertenece a esta categoría'
+      'El atleta no pertenece a esta categoría',
     );
   });
 
@@ -236,7 +233,7 @@ describe('moverAtleta', () => {
         participante_id: 5,
         carril_numero: 2,
       }),
-      expect.anything()
+      expect.anything(),
     );
   });
 
@@ -260,7 +257,7 @@ describe('moverAtleta', () => {
     ] as any);
 
     await expect(moverAtleta(5, 10, 1, superadminAlcance)).rejects.toThrow(
-      'El carril 1 ya está ocupado'
+      'El carril 1 ya está ocupado',
     );
   });
 });
@@ -274,7 +271,7 @@ describe('quitarAtleta', () => {
     mockHeatParticipante.destroy.mockResolvedValue(0);
 
     await expect(quitarAtleta(5, 1, superadminAlcance)).rejects.toThrow(
-      'El atleta no está en ningún heat'
+      'El atleta no está en ningún heat',
     );
   });
 

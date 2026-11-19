@@ -65,7 +65,9 @@ function BloqueMovimientos({ wod }: { wod: Wod }) {
       {claves.length > 0
         ? claves.map((division) => (
             <div key={division}>
-              <p className="text-2xs font-bold text-hyrox-primary uppercase tracking-wide">{division}</p>
+              <p className="text-2xs font-bold text-hyrox-primary uppercase tracking-wide">
+                {division}
+              </p>
               <ul className="mt-1 space-y-1">
                 {(porDivision[division] ?? []).map((m, i) => (
                   <li key={i} className="flex items-center justify-between gap-2 text-xs">
@@ -160,7 +162,9 @@ export default function ResumenCompetencia({
               {(detalle.duracion_minutos ?? 0) > 0 && (
                 <span className="badge-gray">Cap {detalle.duracion_minutos} min</span>
               )}
-              {(detalle.rondas ?? 0) > 1 && <span className="badge-gray">{detalle.rondas} rondas</span>}
+              {(detalle.rondas ?? 0) > 1 && (
+                <span className="badge-gray">{detalle.rondas} rondas</span>
+              )}
               <span className="badge-gray">{detalle.estado}</span>
             </div>
             <dl className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-xs">
@@ -184,21 +188,24 @@ export default function ResumenCompetencia({
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-hyrox-ghost">Categorías</dt>
-                <dd className="text-hyrox-paper text-right">{formatearCategorias(detalle.divisiones)}</dd>
+                <dd className="text-hyrox-paper text-right">
+                  {formatearCategorias(detalle.divisiones)}
+                </dd>
               </div>
             </dl>
           </section>
 
           <section aria-label="WODs">
-            <p className="eyebrow mb-2">
-              WODs ({wods.length})
-            </p>
+            <p className="eyebrow mb-2">WODs ({wods.length})</p>
             {wods.length === 0 ? (
               <p className="text-xs text-hyrox-warning">Sin wods definidos</p>
             ) : (
               <ul className="space-y-3">
                 {wods.map((w) => (
-                  <li key={w.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                  <li
+                    key={w.id}
+                    className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3"
+                  >
                     <p className="flex items-center gap-2 text-sm">
                       {w.imagen_url ? (
                         <img
@@ -211,8 +218,12 @@ export default function ResumenCompetencia({
                           {w.orden}
                         </span>
                       )}
-                      <span className="font-semibold text-hyrox-paper truncate flex-1">{w.nombre_ejercicio}</span>
-                      <span className="text-hyrox-ghost shrink-0 text-xs">{ETIQUETA_MEDICION[w.tipo_medicion]}</span>
+                      <span className="font-semibold text-hyrox-paper truncate flex-1">
+                        {w.nombre_ejercicio}
+                      </span>
+                      <span className="text-hyrox-ghost shrink-0 text-xs">
+                        {ETIQUETA_MEDICION[w.tipo_medicion]}
+                      </span>
                     </p>
                     <p className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-2xs text-hyrox-mist font-mono">
                       <span>Max {w.puntaje_maximo} pts</span>

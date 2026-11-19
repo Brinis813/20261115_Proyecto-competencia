@@ -77,7 +77,9 @@ describe('aislamiento multi-tenant', () => {
   test('RBAC: participante no entra a rutas staff', () => {
     const { res, estado } = respuestaMock();
     const next = jest.fn();
-    const req = { user: { id: 3, cedula: 'y', rol: 'participante', tipo: 'participante' } } as AuthRequest;
+    const req = {
+      user: { id: 3, cedula: 'y', rol: 'participante', tipo: 'participante' },
+    } as AuthRequest;
     requireRoles('admin', 'juez')(req, res as Response, next);
     expect(next).not.toHaveBeenCalled();
     expect(estado.codigo).toBe(403);
@@ -131,8 +133,13 @@ describe('juez asignado puede ver a su participante (bug prod juez/8/19)', () =>
 
   test('lookup: mismo evento -> 200', async () => {
     (Participante.findOne as jest.Mock).mockResolvedValue({
-      id: 7, nombre: 'Ana', apellidos: 'Ruiz', cedula: '10203040',
-      box: 'B', categoria: 'RX', evento_id: 1,
+      id: 7,
+      nombre: 'Ana',
+      apellidos: 'Ruiz',
+      cedula: '10203040',
+      box: 'B',
+      categoria: 'RX',
+      evento_id: 1,
     });
     const req = reqJuez({ activa: 1, permitidas: [1] });
     req.body = { cedula: '10203040' };
@@ -144,8 +151,13 @@ describe('juez asignado puede ver a su participante (bug prod juez/8/19)', () =>
 
   test('lookup: evento distinto pero con asignación -> 200 (fallback)', async () => {
     (Participante.findOne as jest.Mock).mockResolvedValue({
-      id: 7, nombre: 'Ana', apellidos: 'Ruiz', cedula: '10203040',
-      box: 'B', categoria: 'RX', evento_id: 2,
+      id: 7,
+      nombre: 'Ana',
+      apellidos: 'Ruiz',
+      cedula: '10203040',
+      box: 'B',
+      categoria: 'RX',
+      evento_id: 2,
     });
     (Asignacion.findOne as jest.Mock).mockResolvedValue({ id: 1 });
     const req = reqJuez({ activa: 1, permitidas: [1] });
@@ -160,8 +172,13 @@ describe('juez asignado puede ver a su participante (bug prod juez/8/19)', () =>
 
   test('lookup: evento distinto y sin asignación -> 403', async () => {
     (Participante.findOne as jest.Mock).mockResolvedValue({
-      id: 7, nombre: 'Ana', apellidos: 'Ruiz', cedula: '10203040',
-      box: 'B', categoria: 'RX', evento_id: 2,
+      id: 7,
+      nombre: 'Ana',
+      apellidos: 'Ruiz',
+      cedula: '10203040',
+      box: 'B',
+      categoria: 'RX',
+      evento_id: 2,
     });
     (Asignacion.findOne as jest.Mock).mockResolvedValue(null);
     const req = reqJuez({ activa: 1, permitidas: [1] });
@@ -174,8 +191,13 @@ describe('juez asignado puede ver a su participante (bug prod juez/8/19)', () =>
 
   test('lookup: participante legacy sin evento -> 200 sin exigir asignación', async () => {
     (Participante.findOne as jest.Mock).mockResolvedValue({
-      id: 7, nombre: 'Ana', apellidos: 'Ruiz', cedula: '10203040',
-      box: 'B', categoria: 'RX', evento_id: null,
+      id: 7,
+      nombre: 'Ana',
+      apellidos: 'Ruiz',
+      cedula: '10203040',
+      box: 'B',
+      categoria: 'RX',
+      evento_id: null,
     });
     const req = reqJuez({ activa: null, permitidas: [] });
     req.body = { cedula: '10203040' };

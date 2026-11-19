@@ -2,7 +2,8 @@ import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config/database';
 
 export type GeneroCategoria = 'Masculino' | 'Femenino' | 'Mixto';
-export type TipoParticipacionCategoria = 'Individual' | 'Escalado' | 'Duplas' | 'Equipos' | 'Relevos';
+export type TipoParticipacionCategoria =
+  'Individual' | 'Escalado' | 'Duplas' | 'Equipos' | 'Relevos';
 
 /**
  * @deprecated Opción B: la categoría es SOLO perfil de participación
@@ -57,5 +58,5 @@ Categoria.init(
     tableName: 'categorias',
     timestamps: true,
     underscored: true,
-  }
+  },
 );

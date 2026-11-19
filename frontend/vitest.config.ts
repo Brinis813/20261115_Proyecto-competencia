@@ -9,12 +9,12 @@ export default defineConfig({
     setupFiles: ['./src/__tests__/setup.ts'],
     css: false,
     coverage: {
-      thresholds: {
-        statements: 50,
-        branches: 40,
-        functions: 50,
-        lines: 50,
-      },
+      // La política de cobertura vive en `.coverage-floors.json` y en `scripts/coverage-gate.mjs`:
+      // suelo global que solo sube + archivos tocados con >= 80 % de líneas.
+      reporter: ['text', 'json-summary'],
+      include: ['src/**/*.{ts,tsx}'],
+      // Contenido estático y tipos: no hay lógica que probar, medirlos distorsiona el número.
+      exclude: ['src/data/**', 'src/types/**', 'src/**/*.d.ts', 'src/__tests__/**'],
     },
   },
 });

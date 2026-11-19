@@ -71,7 +71,6 @@ export function useSubidaImagen(persistencia: PersistenciaImagen) {
       .catch((err) => setError(mensajeDeError(err, 'No se pudo cargar la imagen')))
       .finally(() => setCargando(false));
     // Solo al montar: la persistencia se lee por ref para no recargar.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function onElegir(e: React.ChangeEvent<HTMLInputElement>) {
@@ -148,7 +147,7 @@ export function useSubidaImagen(persistencia: PersistenciaImagen) {
 export async function subirArchivoImagen(
   endpoint: string,
   archivo: File,
-  metodo: 'post' | 'put' = 'post'
+  metodo: 'post' | 'put' = 'post',
 ): Promise<string | null> {
   const datos = new FormData();
   datos.append('imagen', archivo);

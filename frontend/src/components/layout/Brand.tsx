@@ -13,7 +13,14 @@ export default function Brand({ size = 'sm' }: { size?: 'sm' | 'lg' }) {
         aria-hidden="true"
       >
         {/* Marca tipografica: la barra diagonal evoca el cronometro en marcha. */}
-        <svg viewBox="0 0 24 24" className={grande ? 'w-6 h-6' : 'w-4 h-4'} fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+        <svg
+          viewBox="0 0 24 24"
+          className={grande ? 'w-6 h-6' : 'w-4 h-4'}
+          fill="none"
+          stroke="white"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        >
           <path d="M4 18 L10 6 M14 18 L20 6" />
           <path d="M7 12 L17 12" />
         </svg>
@@ -28,7 +35,11 @@ export default function Brand({ size = 'sm' }: { size?: 'sm' | 'lg' }) {
         >
           COMPETITION<span className="text-hyrox-primary"> MANAGER</span>
         </span>
-        {grande && <span className="block text-xs text-hyrox-mist mt-1.5">Cronometraje y clasificacion en vivo</span>}
+        {grande && (
+          <span className="block text-xs text-hyrox-mist mt-1.5">
+            Cronometraje y clasificacion en vivo
+          </span>
+        )}
       </span>
     </span>
   );

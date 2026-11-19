@@ -26,5 +26,11 @@ AuditLog.init(
     evento_id: { type: DataTypes.INTEGER, allowNull: true },
     detalle: { type: DataTypes.JSON, allowNull: true },
   },
-  { sequelize, tableName: 'audit_log', timestamps: true, createdAt: 'created_at', updatedAt: false }
+  {
+    sequelize,
+    tableName: 'audit_log',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: false,
+  },
 );

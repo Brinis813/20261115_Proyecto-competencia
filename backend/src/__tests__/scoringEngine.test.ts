@@ -41,8 +41,20 @@ describe('parsearValor', () => {
 describe('puntuarWod', () => {
   const filas = (entradas: Array<[number, string]>, abandonos: number[] = []) =>
     entradas
-      .map(([participante_id, valor_bruto]) => ({ participante_id, resultado_id: 0, valor_bruto, abandono: false }))
-      .concat(abandonos.map((id) => ({ participante_id: id, resultado_id: 0, valor_bruto: 'ABANDONO', abandono: true })));
+      .map(([participante_id, valor_bruto]) => ({
+        participante_id,
+        resultado_id: 0,
+        valor_bruto,
+        abandono: false,
+      }))
+      .concat(
+        abandonos.map((id) => ({
+          participante_id: id,
+          resultado_id: 0,
+          valor_bruto: 'ABANDONO',
+          abandono: true,
+        })),
+      );
 
   it('en tiempo, gana el menor', () => {
     const resultado = puntuarWod(
@@ -52,7 +64,7 @@ describe('puntuarWod', () => {
         [3, '04:15'],
       ]),
       'tiempo',
-      100
+      100,
     );
 
     expect(resultado.map((r) => r.participante_id)).toEqual([2, 3, 1]);
@@ -67,7 +79,7 @@ describe('puntuarWod', () => {
         [3, '95'],
       ]),
       'repeticiones',
-      100
+      100,
     );
 
     expect(reps.map((r) => r.participante_id)).toEqual([2, 3, 1]);
@@ -82,7 +94,7 @@ describe('puntuarWod', () => {
         [3, '05:00'],
       ]),
       'tiempo',
-      100
+      100,
     );
 
     const porId = new Map(resultado.map((r) => [r.participante_id, r]));
@@ -102,10 +114,10 @@ describe('puntuarWod', () => {
           [1, '04:00'],
           [2, '05:00'],
         ],
-        [3]
+        [3],
       ),
       'tiempo',
-      100
+      100,
     );
 
     const dnf = resultado.find((r) => r.participante_id === 3)!;
@@ -115,7 +127,10 @@ describe('puntuarWod', () => {
   });
 
   it('los puntos nunca bajan de cero aunque haya mas atletas que puntaje', () => {
-    const entradas: Array<[number, string]> = Array.from({ length: 8 }, (_, i) => [i + 1, `${i + 1}0`]);
+    const entradas: Array<[number, string]> = Array.from({ length: 8 }, (_, i) => [
+      i + 1,
+      `${i + 1}0`,
+    ]);
     const resultado = puntuarWod(filas(entradas), 'repeticiones', 3);
 
     expect(resultado.map((r) => r.puntos)).toEqual([3, 2, 1, 0, 0, 0, 0, 0]);
@@ -123,7 +138,14 @@ describe('puntuarWod', () => {
   });
 
   it('respeta el puntaje maximo configurado en el WOD', () => {
-    const resultado = puntuarWod(filas([[1, '10'], [2, '5']]), 'repeticiones', 50);
+    const resultado = puntuarWod(
+      filas([
+        [1, '10'],
+        [2, '5'],
+      ]),
+      'repeticiones',
+      50,
+    );
     expect(resultado[0].puntos).toBe(50);
     expect(resultado[1].puntos).toBe(49);
   });
@@ -136,21 +158,39 @@ describe('puntuarWod', () => {
           resultado_id: 0,
           valor_bruto: '300000',
           abandono: false,
-          detalle: { splits: [{ segmento_numero: 1, segmento_nombre: 'A', tiempo_acumulado_ms: 300000, tiempo_parcial_ms: 300000 }] }
+          detalle: {
+            splits: [
+              {
+                segmento_numero: 1,
+                segmento_nombre: 'A',
+                tiempo_acumulado_ms: 300000,
+                tiempo_parcial_ms: 300000,
+              },
+            ],
+          },
         },
         {
           participante_id: 2,
           resultado_id: 0,
           valor_bruto: '210000',
           abandono: false,
-          detalle: { splits: [{ segmento_numero: 1, segmento_nombre: 'A', tiempo_acumulado_ms: 210000, tiempo_parcial_ms: 210000 }] }
+          detalle: {
+            splits: [
+              {
+                segmento_numero: 1,
+                segmento_nombre: 'A',
+                tiempo_acumulado_ms: 210000,
+                tiempo_parcial_ms: 210000,
+              },
+            ],
+          },
         },
       ],
       'time_trial_splits',
-      100
+      100,
     );
 
-    expect(resultado.map(r => r.participante_id)).toEqual([2, 1]);
+    expect(resultado.map((r) => r.participante_id)).toEqual([2, 1]);
     expect(resultado[0].valor).toBe(210000);
     expect(resultado[1].valor).toBe(300000);
   });
@@ -158,15 +198,60 @@ describe('puntuarWod', () => {
   it('puntua correctamente HYROX 8 segmentos, 3 atletas', () => {
     const resultado = puntuarWod(
       [
-        { participante_id: 1, resultado_id: 0, valor_bruto: '300000', abandono: false, detalle: { splits: [{ segmento_numero: 8, segmento_nombre: 'Run8', tiempo_acumulado_ms: 300000, tiempo_parcial_ms: 30000 }] } },
-        { participante_id: 2, resultado_id: 0, valor_bruto: '210000', abandono: false, detalle: { splits: [{ segmento_numero: 8, segmento_nombre: 'Run8', tiempo_acumulado_ms: 210000, tiempo_parcial_ms: 30000 }] } },
-        { participante_id: 3, resultado_id: 0, valor_bruto: '250000', abandono: false, detalle: { splits: [{ segmento_numero: 8, segmento_nombre: 'Run8', tiempo_acumulado_ms: 250000, tiempo_parcial_ms: 30000 }] } },
+        {
+          participante_id: 1,
+          resultado_id: 0,
+          valor_bruto: '300000',
+          abandono: false,
+          detalle: {
+            splits: [
+              {
+                segmento_numero: 8,
+                segmento_nombre: 'Run8',
+                tiempo_acumulado_ms: 300000,
+                tiempo_parcial_ms: 30000,
+              },
+            ],
+          },
+        },
+        {
+          participante_id: 2,
+          resultado_id: 0,
+          valor_bruto: '210000',
+          abandono: false,
+          detalle: {
+            splits: [
+              {
+                segmento_numero: 8,
+                segmento_nombre: 'Run8',
+                tiempo_acumulado_ms: 210000,
+                tiempo_parcial_ms: 30000,
+              },
+            ],
+          },
+        },
+        {
+          participante_id: 3,
+          resultado_id: 0,
+          valor_bruto: '250000',
+          abandono: false,
+          detalle: {
+            splits: [
+              {
+                segmento_numero: 8,
+                segmento_nombre: 'Run8',
+                tiempo_acumulado_ms: 250000,
+                tiempo_parcial_ms: 30000,
+              },
+            ],
+          },
+        },
       ],
       'time_trial_splits',
-      100
+      100,
     );
 
-    expect(resultado.map(r => r.participante_id)).toEqual([2, 3, 1]);
+    expect(resultado.map((r) => r.participante_id)).toEqual([2, 3, 1]);
     expect(resultado[0].puntos).toBe(100);
     expect(resultado[1].puntos).toBe(99);
     expect(resultado[2].puntos).toBe(98);
@@ -180,27 +265,51 @@ describe('puntuarWod', () => {
           resultado_id: 0,
           valor_bruto: '300000',
           abandono: false,
-          detalle: { splits: [
-            { segmento_numero: 1, segmento_nombre: 'S1', tiempo_acumulado_ms: 20000, tiempo_parcial_ms: 20000 },
-            { segmento_numero: 2, segmento_nombre: 'S2', tiempo_acumulado_ms: 300000, tiempo_parcial_ms: 280000 }
-          ]}
+          detalle: {
+            splits: [
+              {
+                segmento_numero: 1,
+                segmento_nombre: 'S1',
+                tiempo_acumulado_ms: 20000,
+                tiempo_parcial_ms: 20000,
+              },
+              {
+                segmento_numero: 2,
+                segmento_nombre: 'S2',
+                tiempo_acumulado_ms: 300000,
+                tiempo_parcial_ms: 280000,
+              },
+            ],
+          },
         },
         {
           participante_id: 2,
           resultado_id: 0,
           valor_bruto: '300000',
           abandono: false,
-          detalle: { splits: [
-            { segmento_numero: 1, segmento_nombre: 'S1', tiempo_acumulado_ms: 15000, tiempo_parcial_ms: 15000 },
-            { segmento_numero: 2, segmento_nombre: 'S2', tiempo_acumulado_ms: 300000, tiempo_parcial_ms: 285000 }
-          ]}
+          detalle: {
+            splits: [
+              {
+                segmento_numero: 1,
+                segmento_nombre: 'S1',
+                tiempo_acumulado_ms: 15000,
+                tiempo_parcial_ms: 15000,
+              },
+              {
+                segmento_numero: 2,
+                segmento_nombre: 'S2',
+                tiempo_acumulado_ms: 300000,
+                tiempo_parcial_ms: 285000,
+              },
+            ],
+          },
         },
       ],
       'time_trial_splits',
-      100
+      100,
     );
 
-    expect(resultado.map(r => r.participante_id)).toEqual([2, 1]);
+    expect(resultado.map((r) => r.participante_id)).toEqual([2, 1]);
   });
 
   it('devuelve una lista vacia si no hay resultados', () => {
@@ -217,7 +326,7 @@ describe('puntuarWod', () => {
         { participante_id: 4, resultado_id: 0, valor_bruto: '55', abandono: false, capado: true },
       ],
       'tiempo',
-      100
+      100,
     );
 
     // Finalizadores primero (por tiempo), luego capados (por reps desc).
@@ -235,12 +344,24 @@ describe('puntuarWod', () => {
     // Mismo total de reps; gana quien tiene menor tiempo de tie-break.
     const resultado = puntuarWod(
       [
-        { participante_id: 1, resultado_id: 0, valor_bruto: '100', abandono: false, desempate: 65000 },
-        { participante_id: 2, resultado_id: 0, valor_bruto: '100', abandono: false, desempate: 58000 },
+        {
+          participante_id: 1,
+          resultado_id: 0,
+          valor_bruto: '100',
+          abandono: false,
+          desempate: 65000,
+        },
+        {
+          participante_id: 2,
+          resultado_id: 0,
+          valor_bruto: '100',
+          abandono: false,
+          desempate: 58000,
+        },
         { participante_id: 3, resultado_id: 0, valor_bruto: '90', abandono: false },
       ],
       'repeticiones',
-      100
+      100,
     );
 
     const porId = new Map(resultado.map((r) => [r.participante_id, r]));
@@ -258,7 +379,7 @@ describe('puntuarWod', () => {
         { participante_id: 2, resultado_id: 0, valor_bruto: '100', abandono: false },
       ],
       'repeticiones',
-      100
+      100,
     );
     const porId = new Map(resultado.map((r) => [r.participante_id, r]));
     expect(porId.get(1)!.posicion).toBe(1);
@@ -273,7 +394,7 @@ describe('puntuarWod', () => {
         { participante_id: 3, resultado_id: 0, valor_bruto: 'ABANDONO', abandono: true },
       ],
       'tiempo',
-      100
+      100,
     );
 
     const porId = new Map(resultado.map((r) => [r.participante_id, r]));
@@ -293,7 +414,7 @@ describe('puntuarWod', () => {
         { participante_id: 3, valor_bruto: '350', abandono: false },
       ],
       'calorías',
-      100
+      100,
     );
 
     const porId = new Map(resultado.map((r) => [r.participante_id, r]));
@@ -314,7 +435,7 @@ describe('puntuarWod', () => {
         { participante_id: 3, valor_bruto: '85', abandono: false },
       ],
       'repeticiones',
-      100
+      100,
     );
 
     const porId = new Map(resultado.map((r) => [r.participante_id, r]));
@@ -334,7 +455,7 @@ describe('puntuarWod', () => {
         { participante_id: 3, valor_bruto: '0', abandono: false, disqualificado: true },
       ],
       'repeticiones',
-      100
+      100,
     );
 
     const porId = new Map(resultado.map((r) => [r.participante_id, r]));
@@ -348,13 +469,25 @@ describe('puntuarWod', () => {
   it('NONE ignora el desempate: misma marca = mismo puesto y mismos puntos', () => {
     const resultado = puntuarWod(
       [
-        { participante_id: 1, resultado_id: 0, valor_bruto: '100', abandono: false, desempate: 65000 },
-        { participante_id: 2, resultado_id: 0, valor_bruto: '100', abandono: false, desempate: 58000 },
+        {
+          participante_id: 1,
+          resultado_id: 0,
+          valor_bruto: '100',
+          abandono: false,
+          desempate: 65000,
+        },
+        {
+          participante_id: 2,
+          resultado_id: 0,
+          valor_bruto: '100',
+          abandono: false,
+          desempate: 58000,
+        },
         { participante_id: 3, resultado_id: 0, valor_bruto: '90', abandono: false },
       ],
       'repeticiones',
       100,
-      'NONE'
+      'NONE',
     );
 
     const porId = new Map(resultado.map((r) => [r.participante_id, r]));
@@ -370,12 +503,26 @@ describe('puntuarWod', () => {
     const resultado = puntuarWod(
       [
         { participante_id: 1, resultado_id: 0, valor_bruto: '04:00', abandono: false },
-        { participante_id: 2, resultado_id: 0, valor_bruto: '40', abandono: false, capado: true, desempate: 240000 },
-        { participante_id: 3, resultado_id: 0, valor_bruto: '40', abandono: false, capado: true, desempate: 210000 },
+        {
+          participante_id: 2,
+          resultado_id: 0,
+          valor_bruto: '40',
+          abandono: false,
+          capado: true,
+          desempate: 240000,
+        },
+        {
+          participante_id: 3,
+          resultado_id: 0,
+          valor_bruto: '40',
+          abandono: false,
+          capado: true,
+          desempate: 210000,
+        },
       ],
       'tiempo',
       100,
-      'TIEBREAK_MARK'
+      'TIEBREAK_MARK',
     );
 
     const porId = new Map(resultado.map((r) => [r.participante_id, r]));
@@ -392,7 +539,7 @@ describe('puntuarWod', () => {
       ],
       'peso',
       100,
-      'TIEBREAK_MARK'
+      'TIEBREAK_MARK',
     );
 
     const porId = new Map(resultado.map((r) => [r.participante_id, r]));

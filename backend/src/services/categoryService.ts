@@ -26,9 +26,13 @@ export async function getAllCategories(filtro: Record<string, any> = {}) {
   // Defensa contra duplicados históricos (misma etiqueta con distinto id por
   // la clave única con evento_id NULL + semillas repetidas): la UI los mostraba
   // repetidos. Se conserva el de id menor por cada (evento, nombre, género).
-  const unicas = new Map<string, typeof categorias[number]>();
+  const unicas = new Map<string, (typeof categorias)[number]>();
   for (const cat of [...categorias].sort((a, b) => a.id - b.id)) {
-    const clave = `${cat.evento_id ?? 'null'}|${String(cat.nombre ?? '').trim().toLowerCase()}|${String(cat.genero ?? '').trim().toLowerCase()}`;
+    const clave = `${cat.evento_id ?? 'null'}|${String(cat.nombre ?? '')
+      .trim()
+      .toLowerCase()}|${String(cat.genero ?? '')
+      .trim()
+      .toLowerCase()}`;
     if (!unicas.has(clave)) unicas.set(clave, cat);
   }
 
@@ -36,14 +40,18 @@ export async function getAllCategories(filtro: Record<string, any> = {}) {
     [...unicas.values()].map(async (cat) => {
       const total = await Participante.count({
         where: {
-          [Op.or]: [{ categoria_id: cat.id }, { categoria: `${cat.nombre} ${cat.genero}` }, { categoria: cat.nombre }],
+          [Op.or]: [
+            { categoria_id: cat.id },
+            { categoria: `${cat.nombre} ${cat.genero}` },
+            { categoria: cat.nombre },
+          ],
         },
       });
       return {
         ...cat.toJSON(),
         total_participantes: total,
       };
-    })
+    }),
   );
 
   return resultado;
@@ -122,14 +130,17 @@ export async function updateCategory(id: number, data: Partial<CategoriaInput>) 
     });
 
     if (existente) {
-      throw new Error(`Ya existe otra categoría con el nombre "${nombreLimpio}" y género ${genero}`);
+      throw new Error(
+        `Ya existe otra categoría con el nombre "${nombreLimpio}" y género ${genero}`,
+      );
     }
   }
 
   const actualizaciones: any = {};
   if (data.nombre !== undefined) actualizaciones.nombre = nombreLimpio;
   if (data.genero !== undefined) actualizaciones.genero = genero;
-  if (data.tipo_participacion !== undefined) actualizaciones.tipo_participacion = data.tipo_participacion;
+  if (data.tipo_participacion !== undefined)
+    actualizaciones.tipo_participacion = data.tipo_participacion;
 
   await categoria.update(actualizaciones);
 
@@ -137,7 +148,7 @@ export async function updateCategory(id: number, data: Partial<CategoriaInput>) 
   if (data.nombre !== undefined) {
     await Participante.update(
       { categoria: `${nombreLimpio} ${genero}` },
-      { where: { categoria_id: id } }
+      { where: { categoria_id: id } },
     );
   }
 
@@ -161,7 +172,7 @@ export async function deleteCategory(id: number) {
 
   if (participantesAsociados > 0) {
     throw new Error(
-      `No se puede eliminar la categoría "${categoria.nombre} (${categoria.genero})" porque está siendo utilizada por ${participantesAsociados} atleta(s). Reasigna o edita los atletas antes de eliminarla.`
+      `No se puede eliminar la categoría "${categoria.nombre} (${categoria.genero})" porque está siendo utilizada por ${participantesAsociados} atleta(s). Reasigna o edita los atletas antes de eliminarla.`,
     );
   }
 

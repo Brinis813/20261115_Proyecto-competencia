@@ -27,5 +27,11 @@ ResultHistory.init(
     valor_bruto: { type: DataTypes.STRING(50), allowNull: true },
     accion: { type: DataTypes.ENUM('creado', 'reseteado'), allowNull: false },
   },
-  { sequelize, tableName: 'result_history', timestamps: true, createdAt: 'created_at', updatedAt: false }
+  {
+    sequelize,
+    tableName: 'result_history',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: false,
+  },
 );

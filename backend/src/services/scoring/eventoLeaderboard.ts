@@ -21,7 +21,10 @@ import { getLeaderboard } from './leaderboard';
  *
  * `categoria` filtra por etiqueta exacta (ej. "RX Masculino"); ausente = todas.
  */
-const eventoCache = new Map<string, { data: Awaited<ReturnType<typeof armarEventoLeaderboard>>; expires: number }>();
+const eventoCache = new Map<
+  string,
+  { data: Awaited<ReturnType<typeof armarEventoLeaderboard>>; expires: number }
+>();
 const EVENTO_TTL_MS = 5_000;
 const EVENTO_CACHE_MAX = 100;
 
@@ -60,10 +63,9 @@ async function armarEventoLeaderboard(eventoId: number, categoria?: string | nul
   const { Evento } = await import('../../models');
   const evento = await Evento.findByPk(eventoId);
   if (!evento) throw new Error('Evento no encontrada');
-  const scoringType: 'POINTS_ACCUMULATION' | 'WINNER_PER_Competencia' =
-    (evento.scoring_type ?? 'POINTS_ACCUMULATION') as 'POINTS_ACCUMULATION' | 'WINNER_PER_Competencia';
-  const tiebreakPolicy: EventoTieBreakPolicy =
-    evento.tiebreak_policy ?? 'BEST_INDIVIDUAL_RANK';
+  const scoringType: 'POINTS_ACCUMULATION' | 'WINNER_PER_Competencia' = (evento.scoring_type ??
+    'POINTS_ACCUMULATION') as 'POINTS_ACCUMULATION' | 'WINNER_PER_Competencia';
+  const tiebreakPolicy: EventoTieBreakPolicy = evento.tiebreak_policy ?? 'BEST_INDIVIDUAL_RANK';
   const tiebreakCompetenciaId: number | null = evento.tiebreak_competencia_id ?? null;
 
   const competencias = await Competencia.findAll({
@@ -75,7 +77,9 @@ async function armarEventoLeaderboard(eventoId: number, categoria?: string | nul
   // Paralelizar para reducir latencia: con 5 competencias, ~25 queries en paralelo en vez de secuenciales.
   const leaderboardPromises = competencias.map(async (w) => {
     const lb = await getLeaderboard(w.id);
-    const filtrado = categoria ? lb.leaderboard.filter((e) => e.categoria === categoria) : lb.leaderboard;
+    const filtrado = categoria
+      ? lb.leaderboard.filter((e) => e.categoria === categoria)
+      : lb.leaderboard;
     return {
       competencia: { id: w.id, nombre: w.nombre },
       leaderboard: filtrado,
@@ -114,15 +118,13 @@ async function armarEventoLeaderboard(eventoId: number, categoria?: string | nul
   >();
   for (const p of porCompetencia) {
     for (const e of p.leaderboard) {
-      const actual =
-        acumulado.get(e.participante_id) ??
-        {
-          entrada: { ...e, resultados: [], wods_completados: 0, puntos_total: 0, puesto: 0 },
-          puntos_total: 0,
-          competencias_completadas: 0,
-          puestos_por_competencia: new Map<number, number>(),
-          cuenta_primeros: [0, 0, 0] as [number, number, number],
-        };
+      const actual = acumulado.get(e.participante_id) ?? {
+        entrada: { ...e, resultados: [], wods_completados: 0, puntos_total: 0, puesto: 0 },
+        puntos_total: 0,
+        competencias_completadas: 0,
+        puestos_por_competencia: new Map<number, number>(),
+        cuenta_primeros: [0, 0, 0] as [number, number, number],
+      };
       actual.puntos_total += e.puntos_total;
       actual.competencias_completadas += 1;
       actual.entrada.wods_completados += e.wods_completados;
@@ -134,7 +136,8 @@ async function armarEventoLeaderboard(eventoId: number, categoria?: string | nul
     }
   }
 
-  const ultimoCompetenciaId = porCompetencia.length > 0 ? porCompetencia[porCompetencia.length - 1].competencia.id : -1;
+  const ultimoCompetenciaId =
+    porCompetencia.length > 0 ? porCompetencia[porCompetencia.length - 1].competencia.id : -1;
 
   const general = [...acumulado.values()].map((a) => ({
     ...a.entrada,
@@ -211,8 +214,8 @@ async function armarEventoLeaderboard(eventoId: number, categoria?: string | nul
   return {
     evento: {
       id: evento.id,
-    nombre: evento.nombre,
-    scoringType,
+      nombre: evento.nombre,
+      scoringType,
       tiebreakPolicy,
       tiebreakCompetenciaId,
     },

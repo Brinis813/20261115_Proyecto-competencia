@@ -60,7 +60,7 @@ Heat.init(
         fields: ['categoria_id', 'numero'],
       },
     ],
-  }
+  },
 );
 
 Categoria.hasMany(Heat, { foreignKey: 'categoria_id', as: 'heats' });

@@ -57,7 +57,9 @@ export async function login(req: AuthRequest, res: Response) {
 export async function registro(req: AuthRequest, res: Response) {
   try {
     if (!env.REGISTRO_ABIERTO) {
-      return res.status(403).json({ message: 'El alta de cuentas esta cerrada en esta instalacion' });
+      return res
+        .status(403)
+        .json({ message: 'El alta de cuentas esta cerrada en esta instalacion' });
     }
 
     const { email, correoEnviado } = await authService.registrarUsuario(req.body);
@@ -170,7 +172,7 @@ export async function confirmarReset(req: AuthRequest, res: Response) {
   try {
     const result = await authService.restablecerPassword(
       String(req.body?.token ?? ''),
-      String(req.body?.newPassword ?? '')
+      String(req.body?.newPassword ?? ''),
     );
     res.json(result);
   } catch (error: any) {

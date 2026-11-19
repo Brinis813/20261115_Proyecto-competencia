@@ -5,10 +5,23 @@ import api, { mensajeDeError } from '../../api/client';
 import { useAuth } from '../../contexts/AuthContext';
 import AppShell from '../../components/layout/AppShell';
 import { Alert, EmptyState, SkeletonList, cx } from '../../components/ui';
-import { formatearValor, unidadDeWod, type PosicionParticipante, type Resultado, type TipoMedicion } from '../../types';
+import {
+  formatearValor,
+  unidadDeWod,
+  type PosicionParticipante,
+  type Resultado,
+  type TipoMedicion,
+} from '../../types';
 
 interface RespuestaResultados {
-  participant: { id: number; nombre: string; apellidos: string; cedula: string; box: string; categoria: string | null };
+  participant: {
+    id: number;
+    nombre: string;
+    apellidos: string;
+    cedula: string;
+    box: string;
+    categoria: string | null;
+  };
   resultsByCompetencia: Record<string, { competencia_nombre: string; resultados: Resultado[] }>;
   positions: PosicionParticipante[];
 }
@@ -39,7 +52,10 @@ export default function ParticipantePage() {
   const porCompetencia = Object.entries(datos?.resultsByCompetencia ?? {});
 
   return (
-    <AppShell title="Mis resultados" subtitle={user ? `${user.nombre} ${user.apellidos}` : undefined}>
+    <AppShell
+      title="Mis resultados"
+      subtitle={user ? `${user.nombre} ${user.apellidos}` : undefined}
+    >
       <div className="max-w-4xl space-y-4">
         {error && <Alert tone="error">{error}</Alert>}
 
@@ -84,16 +100,20 @@ export default function ParticipantePage() {
                               ? 'text-hyrox-silver'
                               : posicion.posicion === 3
                                 ? 'text-hyrox-bronze'
-                                : 'text-hyrox-paper'
+                                : 'text-hyrox-paper',
                         )}
                       >
                         {posicion.posicion ?? '–'}
                       </span>
-                      <span className="text-xs text-hyrox-mist pb-1.5">de {posicion.total_participantes}</span>
+                      <span className="text-xs text-hyrox-mist pb-1.5">
+                        de {posicion.total_participantes}
+                      </span>
                     </div>
 
                     <p className="mt-3 text-sm">
-                      <span className="font-mono font-bold text-hyrox-primary">{posicion.puntos_total}</span>
+                      <span className="font-mono font-bold text-hyrox-primary">
+                        {posicion.puntos_total}
+                      </span>
                       <span className="text-hyrox-mist"> puntos acumulados</span>
                     </p>
                   </Link>
@@ -118,7 +138,10 @@ export default function ParticipantePage() {
                   {[...grupo.resultados]
                     .sort((a, b) => (a.Wod?.orden ?? 0) - (b.Wod?.orden ?? 0))
                     .map((resultado) => (
-                      <li key={resultado.id} className="flex items-center gap-3 px-4 sm:px-5 py-3.5">
+                      <li
+                        key={resultado.id}
+                        className="flex items-center gap-3 px-4 sm:px-5 py-3.5"
+                      >
                         <span className="grid place-items-center w-8 h-8 rounded-lg bg-white/[0.05] font-mono text-2xs font-bold text-hyrox-mist shrink-0">
                           {resultado.Wod?.orden ?? '–'}
                         </span>
@@ -135,7 +158,7 @@ export default function ParticipantePage() {
                           <span
                             className={cx(
                               'block font-mono font-bold',
-                              resultado.abandono ? 'text-hyrox-danger' : 'text-hyrox-paper'
+                              resultado.abandono ? 'text-hyrox-danger' : 'text-hyrox-paper',
                             )}
                           >
                             {formatearValor(
@@ -143,7 +166,7 @@ export default function ParticipantePage() {
                               (resultado.Wod?.tipo_medicion ?? 'repeticiones') as TipoMedicion,
                               resultado.abandono,
                               resultado.capado,
-                              unidadDeWod(resultado.Wod ?? null)
+                              unidadDeWod(resultado.Wod ?? null),
                             )}
                           </span>
                           <span className="flex items-center justify-end gap-1 text-2xs text-hyrox-primary font-mono">

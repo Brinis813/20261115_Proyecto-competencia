@@ -17,7 +17,8 @@ const nivelActual = NIVELES[env.LOG_LEVEL as Nivel] ?? NIVELES.info;
 // Los codigos de color se omiten cuando la salida no es una terminal
 // (Docker, Dokploy, un archivo), donde solo ensuciarian el texto.
 const conColor = process.stdout.isTTY;
-const pintar = (codigo: string, texto: string) => (conColor ? `\x1b[${codigo}m${texto}\x1b[0m` : texto);
+const pintar = (codigo: string, texto: string) =>
+  conColor ? `\x1b[${codigo}m${texto}\x1b[0m` : texto;
 
 const ETIQUETAS: Record<Nivel, string> = {
   error: pintar('31', 'error'),
@@ -42,7 +43,7 @@ function emitir(nivel: Nivel, mensaje: string, ...extra: unknown[]) {
         mensaje,
         extra: extra.length > 0 ? extra : undefined,
         ts: new Date().toISOString(),
-      })
+      }),
     );
     return;
   }

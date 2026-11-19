@@ -24,8 +24,12 @@ export default function VerificarPage() {
   const { aplicarSesion } = useAuth();
   const token = params.get('token') ?? '';
 
-  const [estado, setEstado] = useState<'verificando' | 'ok' | 'error'>(token ? 'verificando' : 'error');
-  const [error, setError] = useState(token ? '' : 'El enlace no trae ningun codigo de verificacion.');
+  const [estado, setEstado] = useState<'verificando' | 'ok' | 'error'>(
+    token ? 'verificando' : 'error',
+  );
+  const [error, setError] = useState(
+    token ? '' : 'El enlace no trae ningun codigo de verificacion.',
+  );
   const [evento, setEvento] = useState<string>('');
 
   // React 18 monta dos veces en desarrollo; el token es de un solo uso, asi que
@@ -59,7 +63,10 @@ export default function VerificarPage() {
         <div className="surface p-6 sm:p-7 text-center">
           {estado === 'verificando' && (
             <>
-              <Loader2 className="w-8 h-8 mx-auto text-hyrox-primary animate-spin" aria-hidden="true" />
+              <Loader2
+                className="w-8 h-8 mx-auto text-hyrox-primary animate-spin"
+                aria-hidden="true"
+              />
               <p className="text-sm text-hyrox-mist mt-4">Confirmando tu correo...</p>
             </>
           )}
@@ -97,7 +104,9 @@ function PanelError({ mensaje }: { mensaje: string }) {
     e.preventDefault();
     setEnviando(true);
     try {
-      const { data } = await api.post<{ message: string }>('/auth/reenviar-verificacion', { email });
+      const { data } = await api.post<{ message: string }>('/auth/reenviar-verificacion', {
+        email,
+      });
       setAviso(data.message);
     } catch {
       setAviso('No se pudo pedir el enlace. Intentalo de nuevo en un momento.');
@@ -128,7 +137,13 @@ function PanelError({ mensaje }: { mensaje: string }) {
             placeholder="tu@correo.com"
             required
           />
-          <Button type="submit" variant="secondary" fullWidth loading={enviando} disabled={!email.trim()}>
+          <Button
+            type="submit"
+            variant="secondary"
+            fullWidth
+            loading={enviando}
+            disabled={!email.trim()}
+          >
             Enviarme otro enlace
           </Button>
         </form>

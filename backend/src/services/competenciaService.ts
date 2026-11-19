@@ -1,5 +1,15 @@
 import { Op } from 'sequelize';
-import { Competencia, Wod, Asignacion, Usuario, Participante, Resultado, Categoria, CompetenciaCategoria, EventoUsuario } from '../models';
+import {
+  Competencia,
+  Wod,
+  Asignacion,
+  Usuario,
+  Participante,
+  Resultado,
+  Categoria,
+  CompetenciaCategoria,
+  EventoUsuario,
+} from '../models';
 import { borrarArchivoSubido } from '../utils/archivos';
 import type { TipoParticipacion, CompetenciaTieBreakPolicy } from '../models/Competencia';
 import { COMPETENCIA_TIEBREAK_POLICIES } from '../models/Competencia';
@@ -16,7 +26,8 @@ export interface WodInput {
    * físico (`tiempo` + `esquema.modalidad = 'time_trial_splits'`), porque la
    * columna no admite el sexto valor pero el scorecard sí.
    */
-  tipo_medicion: 'tiempo' | 'repeticiones' | 'peso' | 'distancia' | 'calorías' | 'time_trial_splits';
+  tipo_medicion:
+    'tiempo' | 'repeticiones' | 'peso' | 'distancia' | 'calorías' | 'time_trial_splits';
   /** Unidad de la marca cuando tipo_medicion=distancia. m = metros, km = kilómetros, mi = millas. */
   unidad_distancia?: 'm' | 'km' | 'mi' | null;
   /** Foto del WOD (URL de /api/uploads/wods). null = sin imagen. */
@@ -67,8 +78,14 @@ export function etiquetaCategoria(categoria: { nombre: string; genero: string })
  * Deja `competencia_categorias` con exactamente las categorias enviadas y devuelve sus
  * etiquetas, que es lo que se guarda en `competencias.divisiones` como copia derivada.
  */
-async function sincronizarCategorias(competenciaId: number, ids: number[], t: any): Promise<string[]> {
-  const unicos = [...new Set(ids.map((n) => Number(n)).filter((n) => Number.isInteger(n) && n > 0))];
+async function sincronizarCategorias(
+  competenciaId: number,
+  ids: number[],
+  t: any,
+): Promise<string[]> {
+  const unicos = [
+    ...new Set(ids.map((n) => Number(n)).filter((n) => Number.isInteger(n) && n > 0)),
+  ];
 
   await CompetenciaCategoria.destroy({ where: { competencia_id: competenciaId }, transaction: t });
   if (unicos.length === 0) return [];
@@ -80,7 +97,7 @@ async function sincronizarCategorias(competenciaId: number, ids: number[], t: an
 
   await CompetenciaCategoria.bulkCreate(
     categorias.map((c) => ({ competencia_id: competenciaId, categoria_id: c.id })),
-    { transaction: t }
+    { transaction: t },
   );
 
   return categorias.map(etiquetaCategoria);
@@ -116,7 +133,7 @@ export function sanearDivisionesSalida(divisiones: unknown): string[] | null {
           }
           return '';
         })
-        .filter(Boolean)
+        .filter(Boolean),
     ),
   ];
   return limpias.length > 0 ? limpias : null;
@@ -139,7 +156,10 @@ function normalizarRondas(rondas?: number | null): number {
  * Rondas efectivas de una competencia leido de la base: usa `competencias.rondas` y, en filas
  * anteriores a la columna, el `esquema.rondas` del primer WOD guiado.
  */
-function rondasEfectivas(competencia: { rondas?: unknown; wods?: Array<{ esquema?: { rondas?: unknown } | null }> }): number {
+function rondasEfectivas(competencia: {
+  rondas?: unknown;
+  wods?: Array<{ esquema?: { rondas?: unknown } | null }>;
+}): number {
   const directa = Number((competencia as Record<string, unknown>).rondas);
   if (Number.isFinite(directa) && directa >= 1) return Math.min(100, Math.round(directa));
   for (const c of competencia.wods ?? []) {
@@ -154,12 +174,21 @@ function rondasEfectivas(competencia: { rondas?: unknown; wods?: Array<{ esquema
  * del juez (que multiplica reps x rondas) siga cuadrando aunque lea el
  * esquema. Los esquemas max_load/splits no llevan rondas.
  */
-function esquemaConRondas(esquema: EsquemaWod | null | undefined, rondas: number): EsquemaWod | null {
+function esquemaConRondas(
+  esquema: EsquemaWod | null | undefined,
+  rondas: number,
+): EsquemaWod | null {
   if (!esquema) return null;
   if (esquema.modalidad !== 'for_time' && esquema.modalidad !== 'amrap') return esquema;
   // Esquema puramente informativo (meta de distancia sin movimientos): no se
   // le inyectan rondas para no ensuciar el JSON.
-  if (!esquema.movimientos && !esquema.movimientos_por_division && !esquema.intentos && !esquema.segmentos) return esquema;
+  if (
+    !esquema.movimientos &&
+    !esquema.movimientos_por_division &&
+    !esquema.intentos &&
+    !esquema.segmentos
+  )
+    return esquema;
   return { ...esquema, rondas };
 }
 
@@ -180,7 +209,7 @@ function esquemaConRondas(esquema: EsquemaWod | null | undefined, rondas: number
  */
 export function podarEsquemaADivisiones(
   esquema: EsquemaWod | null | undefined,
-  divisiones: string[] | null
+  divisiones: string[] | null,
 ): EsquemaWod | null | undefined {
   if (!esquema) return esquema;
   const canonicas = (divisiones ?? []).map((d) => d.trim()).filter(Boolean);
@@ -227,8 +256,7 @@ export function podarEsquemaADivisiones(
   }
   if (copiado.distancia_meta && typeof copiado.distancia_meta === 'object') {
     copiado.distancia_meta = podarMapa(copiado.distancia_meta as Record<string, number>) as
-      | number
-      | Record<string, number>;
+      number | Record<string, number>;
   }
   return copiado;
 }
@@ -244,10 +272,13 @@ export function podarEsquemaADivisiones(
  */
 function validarEsquemaContraDivisiones(
   wods: Array<{ nombre_ejercicio: string; esquema?: EsquemaWod | null }>,
-  divisiones: string[] | null
+  divisiones: string[] | null,
 ): string | null {
   const validas = new Set((divisiones ?? []).map((d) => d.trim().toLowerCase()).filter(Boolean));
-  const revisarClaves = (movNombre: string, fuente: Record<string, number> | undefined): string | null => {
+  const revisarClaves = (
+    movNombre: string,
+    fuente: Record<string, number> | undefined,
+  ): string | null => {
     if (!fuente) return null;
     for (const clave of Object.keys(fuente)) {
       const k = clave.trim().toLowerCase();
@@ -312,12 +343,16 @@ function normalizarUnidadDistancia(unidad?: string | null): 'm' | 'km' | 'mi' {
  * modalidad en `esquema.modalidad`, que es lo que leen el scorecard del juez
  * y el motor de puntuación (menor tiempo gana, sin capados).
  */
-function normalizarTipoMedicion(
-  wod: Pick<WodInput, 'tipo_medicion' | 'esquema'>
-): { tipo_medicion: 'tiempo' | 'repeticiones' | 'peso' | 'distancia' | 'calorías'; esquema: EsquemaWod | null } {
+function normalizarTipoMedicion(wod: Pick<WodInput, 'tipo_medicion' | 'esquema'>): {
+  tipo_medicion: 'tiempo' | 'repeticiones' | 'peso' | 'distancia' | 'calorías';
+  esquema: EsquemaWod | null;
+} {
   const esquema = (wod.esquema ?? null) as EsquemaWod | null;
   if (wod.tipo_medicion === 'time_trial_splits') {
-    const segmentos = esquema && 'segmentos' in esquema && Array.isArray(esquema.segmentos) ? esquema.segmentos : [];
+    const segmentos =
+      esquema && 'segmentos' in esquema && Array.isArray(esquema.segmentos)
+        ? esquema.segmentos
+        : [];
     return {
       tipo_medicion: 'tiempo',
       esquema: { modalidad: 'time_trial_splits', segmentos },
@@ -350,7 +385,7 @@ function borrarPortadaCompetenciaAnterior(imagenUrl: string | null): void {
  */
 export async function actualizarImagenCompetencia(
   id: number,
-  imagenUrl: string | null
+  imagenUrl: string | null,
 ): Promise<{ id: number; imagen_url: string | null }> {
   const url = imagenUrl ? String(imagenUrl).trim() : '';
   if (url && (!url.startsWith('/api/uploads/competencias/') || url.length > 500)) {
@@ -376,7 +411,11 @@ export async function createCompetencia(data: CompetenciaInput) {
     // poder validar el esquema contra las divisiones efectivas (Opción B).
     let etiquetas: string[] | null = normalizarDivisiones(data.divisiones);
     if (data.categoria_ids !== undefined && data.categoria_ids !== null) {
-      const unicos = [...new Set(data.categoria_ids.map((n) => Number(n)).filter((n) => Number.isInteger(n) && n > 0))];
+      const unicos = [
+        ...new Set(
+          data.categoria_ids.map((n) => Number(n)).filter((n) => Number.isInteger(n) && n > 0),
+        ),
+      ];
       if (unicos.length > 0) {
         const categorias = await Categoria.findAll({ where: { id: unicos }, transaction: t });
         if (categorias.length !== unicos.length) {
@@ -390,16 +429,20 @@ export async function createCompetencia(data: CompetenciaInput) {
     // Las divisiones obsoletas del esquema (categoría eliminada/renombrada,
     // cliente cacheado) se podan solas en vez de reventar con 400: si no, el
     // usuario no podría guardar ni la corrección.
-    data.wods = data.wods.map((w) => ({ ...w, esquema: podarEsquemaADivisiones(w.esquema, etiquetas) }));
+    data.wods = data.wods.map((w) => ({
+      ...w,
+      esquema: podarEsquemaADivisiones(w.esquema, etiquetas),
+    }));
     const errorEsquema = validarEsquemaContraDivisiones(data.wods, etiquetas);
     if (errorEsquema) throw new Error(errorEsquema);
 
     // Las rondas viven en la competencia. Si el cliente aun manda rondas por esquema
     // (datos viejos), la de la competencia manda; si no manda rondas, se hereda la del
     // primer WOD guiado para no perder el valor configurado.
-    let rondas = data.rondas !== undefined && data.rondas !== null
-      ? normalizarRondas(data.rondas)
-      : rondasEfectivas({ rondas: undefined, wods: data.wods });
+    const rondas =
+      data.rondas !== undefined && data.rondas !== null
+        ? normalizarRondas(data.rondas)
+        : rondasEfectivas({ rondas: undefined, wods: data.wods });
 
     const competencia = await Competencia.create(
       {
@@ -414,20 +457,28 @@ export async function createCompetencia(data: CompetenciaInput) {
         duracion_minutos: normalizarDuracion(data.duracion_minutos),
         rondas,
         desempate_nombre: data.desempate_nombre || null,
-        desempate_tipo_medicion: (data.desempate_tipo_medicion as 'tiempo' | 'repeticiones' | 'peso' | 'distancia' | null) || null,
-        tiebreak_policy: data.tiebreak_policy && (COMPETENCIA_TIEBREAK_POLICIES as string[]).includes(data.tiebreak_policy)
-          ? data.tiebreak_policy
-          : 'DESIGNATED_CIRCUIT_SPLIT',
-        divisiones: etiquetas && etiquetas.length > 0 ? etiquetas : normalizarDivisiones(data.divisiones),
+        desempate_tipo_medicion:
+          (data.desempate_tipo_medicion as
+            'tiempo' | 'repeticiones' | 'peso' | 'distancia' | null) || null,
+        tiebreak_policy:
+          data.tiebreak_policy &&
+          (COMPETENCIA_TIEBREAK_POLICIES as string[]).includes(data.tiebreak_policy)
+            ? data.tiebreak_policy
+            : 'DESIGNATED_CIRCUIT_SPLIT',
+        divisiones:
+          etiquetas && etiquetas.length > 0 ? etiquetas : normalizarDivisiones(data.divisiones),
       },
-      { transaction: t }
+      { transaction: t },
     );
 
     // Las categorias mandan sobre el texto libre: si vienen, `divisiones` se
     // reescribe con sus etiquetas (ya calculadas arriba para validar el esquema).
     if (data.categoria_ids !== undefined && data.categoria_ids !== null) {
       await sincronizarCategorias(competencia.id, data.categoria_ids, t);
-      await competencia.update({ divisiones: etiquetas && etiquetas.length > 0 ? etiquetas : null }, { transaction: t });
+      await competencia.update(
+        { divisiones: etiquetas && etiquetas.length > 0 ? etiquetas : null },
+        { transaction: t },
+      );
     }
 
     await Wod.bulkCreate(
@@ -441,15 +492,19 @@ export async function createCompetencia(data: CompetenciaInput) {
           unidad_distancia: normalizarUnidadDistancia(c.unidad_distancia),
           imagen_url: normalizarImagenWod(c.imagen_url),
           tiempo_estimado_duracion: c.tiempo_estimado_duracion,
-          tiempo_cap: normalizado.tipo_medicion === 'tiempo' ? normalizarTiempoCap(c.tiempo_cap) : 0,
+          tiempo_cap:
+            normalizado.tipo_medicion === 'tiempo' ? normalizarTiempoCap(c.tiempo_cap) : 0,
           esquema: esquemaConRondas(normalizado.esquema, rondas),
           puntaje_maximo: c.puntaje_maximo,
         };
       }),
-      { transaction: t }
+      { transaction: t },
     );
 
-    return Competencia.findByPk(competencia.id, { include: ['wods', 'categorias'], transaction: t });
+    return Competencia.findByPk(competencia.id, {
+      include: ['wods', 'categorias'],
+      transaction: t,
+    });
   });
 }
 
@@ -466,7 +521,9 @@ export async function getAllCompetencias(filtro: Record<string, any> = {}) {
   return competencias.map((w) => {
     const json = w.toJSON() as Record<string, unknown>;
     json.divisiones = sanearDivisionesSalida(json.divisiones);
-    json.rondas = rondasEfectivas(json as { rondas?: unknown; wods?: Array<{ esquema?: { rondas?: unknown } | null }> });
+    json.rondas = rondasEfectivas(
+      json as { rondas?: unknown; wods?: Array<{ esquema?: { rondas?: unknown } | null }> },
+    );
     return json;
   });
 }
@@ -479,7 +536,9 @@ export async function getCompetenciaById(id: number) {
   if (!competencia) return null;
   const json = competencia.toJSON() as Record<string, unknown>;
   json.divisiones = sanearDivisionesSalida(json.divisiones);
-  json.rondas = rondasEfectivas(json as { rondas?: unknown; wods?: Array<{ esquema?: { rondas?: unknown } | null }> });
+  json.rondas = rondasEfectivas(
+    json as { rondas?: unknown; wods?: Array<{ esquema?: { rondas?: unknown } | null }> },
+  );
   return json;
 }
 
@@ -509,11 +568,18 @@ export async function updateCompetencia(id: number, data: Partial<CompetenciaInp
     ] as const) {
       if (data[campo] !== undefined) campos[campo] = data[campo];
     }
-    if (data.tiebreak_policy !== undefined && !(COMPETENCIA_TIEBREAK_POLICIES as string[]).includes(data.tiebreak_policy)) {
-      throw new Error('tiebreak_policy inválida: usa NONE, TIEBREAK_MARK o DESIGNATED_CIRCUIT_SPLIT');
+    if (
+      data.tiebreak_policy !== undefined &&
+      !(COMPETENCIA_TIEBREAK_POLICIES as string[]).includes(data.tiebreak_policy)
+    ) {
+      throw new Error(
+        'tiebreak_policy inválida: usa NONE, TIEBREAK_MARK o DESIGNATED_CIRCUIT_SPLIT',
+      );
     }
-    if (data.duracion_minutos !== undefined) campos.duracion_minutos = normalizarDuracion(data.duracion_minutos);
-    if (data.rondas !== undefined && data.rondas !== null) campos.rondas = normalizarRondas(data.rondas);
+    if (data.duracion_minutos !== undefined)
+      campos.duracion_minutos = normalizarDuracion(data.duracion_minutos);
+    if (data.rondas !== undefined && data.rondas !== null)
+      campos.rondas = normalizarRondas(data.rondas);
     if (data.divisiones !== undefined) campos.divisiones = normalizarDivisiones(data.divisiones);
 
     if (data.categoria_ids !== undefined && data.categoria_ids !== null) {
@@ -558,12 +624,17 @@ export async function updateCompetencia(id: number, data: Partial<CompetenciaInp
 
     // Rondas efectivas tras el update: las recién enviadas, o las que ya
     // tenía la competencia (con fallback al primer esquema en filas antiguas).
-    const rondasEfectivasTx = campos.rondas !== undefined
-      ? campos.rondas
-      : rondasEfectivas({
-          rondas: (competencia as unknown as Record<string, unknown>).rondas,
-          wods: data.wods ?? (await Wod.findAll({ where: { competencia_id: id }, transaction: t })).map((c) => ({ esquema: c.esquema as { rondas?: unknown } | null })),
-        });
+    const rondasEfectivasTx =
+      campos.rondas !== undefined
+        ? campos.rondas
+        : rondasEfectivas({
+            rondas: (competencia as unknown as Record<string, unknown>).rondas,
+            wods:
+              data.wods ??
+              (await Wod.findAll({ where: { competencia_id: id }, transaction: t })).map((c) => ({
+                esquema: c.esquema as { rondas?: unknown } | null,
+              })),
+          });
 
     if (data.wods) {
       const existentes = await Wod.findAll({ where: { competencia_id: id }, transaction: t });
@@ -577,7 +648,7 @@ export async function updateCompetencia(id: number, data: Partial<CompetenciaInp
         });
         if (conResultados > 0) {
           throw new Error(
-            'No se pueden eliminar wods que ya tienen resultados registrados. Resetea esas mediciones primero.'
+            'No se pueden eliminar wods que ya tienen resultados registrados. Resetea esas mediciones primero.',
           );
         }
         for (const c of aBorrar) borrarImagenWodAnterior(c.imagen_url ?? null);
@@ -594,7 +665,8 @@ export async function updateCompetencia(id: number, data: Partial<CompetenciaInp
           unidad_distancia: normalizarUnidadDistancia(wod.unidad_distancia),
           imagen_url: normalizarImagenWod(wod.imagen_url),
           tiempo_estimado_duracion: wod.tiempo_estimado_duracion,
-          tiempo_cap: normalizado.tipo_medicion === 'tiempo' ? normalizarTiempoCap(wod.tiempo_cap) : 0,
+          tiempo_cap:
+            normalizado.tipo_medicion === 'tiempo' ? normalizarTiempoCap(wod.tiempo_cap) : 0,
           esquema: esquemaConRondas(normalizado.esquema, rondasEfectivasTx),
           puntaje_maximo: wod.puntaje_maximo,
         };
@@ -635,14 +707,21 @@ export async function deleteCompetencia(id: number) {
     if (!competencia) throw new Error('Competencia no encontrado');
 
     const [resultados, asignaciones] = await Promise.all([
-      Resultado.count({ include: [{ model: Wod, as: 'Wod', where: { competencia_id: id } }], transaction: t }),
+      Resultado.count({
+        include: [{ model: Wod, as: 'Wod', where: { competencia_id: id } }],
+        transaction: t,
+      }),
       Asignacion.count({ where: { competencia_id: id }, transaction: t }),
     ]);
     if (resultados > 0) {
-      throw new Error(`No se puede eliminar: la competencia tiene ${resultados} resultado(s) registrado(s). Finalizala primero.`);
+      throw new Error(
+        `No se puede eliminar: la competencia tiene ${resultados} resultado(s) registrado(s). Finalizala primero.`,
+      );
     }
     if (asignaciones > 0) {
-      throw new Error(`No se puede eliminar: la competencia tiene ${asignaciones} asignacion(es) activa(s). Elimina las asignaciones primero.`);
+      throw new Error(
+        `No se puede eliminar: la competencia tiene ${asignaciones} asignacion(es) activa(s). Elimina las asignaciones primero.`,
+      );
     }
 
     portada = competencia.imagen_url ?? null;
@@ -695,7 +774,11 @@ export async function assignCompetencia(data: {
 
   await sequelize.transaction(async (t) => {
     await Asignacion.destroy({
-      where: { competencia_id: data.competencia_id, wod_id: scope, participante_id: participanteIds },
+      where: {
+        competencia_id: data.competencia_id,
+        wod_id: scope,
+        participante_id: participanteIds,
+      },
       transaction: t,
     });
 
@@ -709,8 +792,12 @@ export async function assignCompetencia(data: {
     if (competencia.evento_id != null) {
       const juezIds = [...new Set(data.pares.map((p) => p.usuario_id))];
       await EventoUsuario.bulkCreate(
-        juezIds.map((usuario_id) => ({ evento_id: competencia.evento_id as number, usuario_id, rol: 'juez' as const })),
-        { ignoreDuplicates: true, transaction: t }
+        juezIds.map((usuario_id) => ({
+          evento_id: competencia.evento_id as number,
+          usuario_id,
+          rol: 'juez' as const,
+        })),
+        { ignoreDuplicates: true, transaction: t },
       );
     }
 
@@ -767,7 +854,10 @@ export async function getCompetenciasByJudge(usuarioId: number) {
   // competencia_id -> { todos, wods asignados }
   const porCompetencia = new Map<number, { todos: boolean; wods: Set<number> }>();
   for (const a of asignaciones) {
-    const entrada = porCompetencia.get(a.competencia_id) ?? { todos: false, wods: new Set<number>() };
+    const entrada = porCompetencia.get(a.competencia_id) ?? {
+      todos: false,
+      wods: new Set<number>(),
+    };
     if (a.wod_id == null) entrada.todos = true;
     else entrada.wods.add(a.wod_id);
     porCompetencia.set(a.competencia_id, entrada);
@@ -794,7 +884,9 @@ export async function getCompetenciasByJudge(usuarioId: number) {
       json.wods = (json.wods ?? []).filter((c) => filtro.wods.has(c.id));
     }
     json.divisiones = sanearDivisionesSalida(json.divisiones);
-    json.rondas = rondasEfectivas(json as { rondas?: unknown; wods?: Array<{ esquema?: { rondas?: unknown } | null }> });
+    json.rondas = rondasEfectivas(
+      json as { rondas?: unknown; wods?: Array<{ esquema?: { rondas?: unknown } | null }> },
+    );
     return json;
   });
 }
@@ -828,7 +920,9 @@ export async function getPublicCompetencias(eventoId?: number | null) {
   return competencias.map((w) => {
     const json = w.toJSON() as Record<string, unknown>;
     json.divisiones = sanearDivisionesSalida(json.divisiones);
-    json.rondas = rondasEfectivas(json as { rondas?: unknown; wods?: Array<{ esquema?: { rondas?: unknown } | null }> });
+    json.rondas = rondasEfectivas(
+      json as { rondas?: unknown; wods?: Array<{ esquema?: { rondas?: unknown } | null }> },
+    );
     return json;
   });
 }

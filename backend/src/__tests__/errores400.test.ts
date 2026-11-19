@@ -40,29 +40,60 @@ jest.mock('../config/database', () => {
 
 jest.mock('sequelize', () => {
   class MockModel {
-    static init(_attrs: any, _opts: any) { return this; }
-    static findAll() { return []; }
-    static findOne() { return null; }
-    static findByPk() { return null; }
-    static create() { return {}; }
-    static update() { return [0]; }
-    static destroy() { return 0; }
-    static findAndCountAll() { return { rows: [], count: 0 }; }
-    static count() { return 0; }
-    static belongsTo() { return this as any; }
-    static hasMany() { return this as any; }
-    static belongsToMany() { return this as any; }
-    static addScope() { return this as any; }
-    static scope() { return this as any; }
+    static init(_attrs: any, _opts: any) {
+      return this;
+    }
+    static findAll() {
+      return [];
+    }
+    static findOne() {
+      return null;
+    }
+    static findByPk() {
+      return null;
+    }
+    static create() {
+      return {};
+    }
+    static update() {
+      return [0];
+    }
+    static destroy() {
+      return 0;
+    }
+    static findAndCountAll() {
+      return { rows: [], count: 0 };
+    }
+    static count() {
+      return 0;
+    }
+    static belongsTo() {
+      return this as any;
+    }
+    static hasMany() {
+      return this as any;
+    }
+    static belongsToMany() {
+      return this as any;
+    }
+    static addScope() {
+      return this as any;
+    }
+    static scope() {
+      return this as any;
+    }
   }
   return {
-    DataTypes: new Proxy({}, {
-      get(_target, prop) {
-        if (prop === 'ENUM') return (..._vals: any[]) => ({ type: 'ENUM' });
-        if (prop === 'STRING') return (_len?: number) => ({ type: 'STRING' });
-        return { type: String(prop) };
+    DataTypes: new Proxy(
+      {},
+      {
+        get(_target, prop) {
+          if (prop === 'ENUM') return (..._vals: any[]) => ({ type: 'ENUM' });
+          if (prop === 'STRING') return (_len?: number) => ({ type: 'STRING' });
+          return { type: String(prop) };
+        },
       },
-    }),
+    ),
     Model: MockModel,
     Op: { in: Symbol('Op.in'), or: Symbol('Op.or'), ne: Symbol('Op.ne') },
     Sequelize: jest.fn(),
@@ -80,7 +111,9 @@ jest.mock('../models', () => ({
   Arranque: { findOne: jest.fn().mockResolvedValue(null) },
 }));
 
-jest.mock('../utils/logger', () => ({ log: { error: jest.fn(), info: jest.fn(), warn: jest.fn() } }));
+jest.mock('../utils/logger', () => ({
+  log: { error: jest.fn(), info: jest.fn(), warn: jest.fn() },
+}));
 jest.mock('../utils/monitoring', () => ({
   initMonitoring: jest.fn(),
   requestContext: (_req: any, _res: any, next: any) => next(),
@@ -149,7 +182,9 @@ jest.mock('../middleware/auth', () => ({
 jest.mock('../services/resultService', () => ({ saveResult: jest.fn() }));
 jest.mock('../services/competenciaService', () => ({
   createCompetencia: jest.fn(),
-  actualizarImagenCompetencia: jest.fn().mockImplementation(async (id: number, url: string | null) => ({ id, imagen_url: url })),
+  actualizarImagenCompetencia: jest
+    .fn()
+    .mockImplementation(async (id: number, url: string | null) => ({ id, imagen_url: url })),
 }));
 jest.mock('../services/arranqueService', () => ({
   estadoArranque: jest.fn(),
@@ -192,7 +227,7 @@ function buildApp() {
   return app;
 }
 
-const BER = (nombre: string) => (Resultado as any)[nombre] as jest.Mock;
+const _BER = (nombre: string) => (Resultado as any)[nombre] as jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -308,7 +343,10 @@ describe('400: uploads', () => {
     const res = await request(buildApp())
       .put('/competencias/1/imagen')
       .set('Authorization', `Bearer ${ADMIN}`)
-      .attach('imagen', Buffer.from('<html>nope</html>'), { filename: 'x.exe', contentType: 'application/octet-stream' });
+      .attach('imagen', Buffer.from('<html>nope</html>'), {
+        filename: 'x.exe',
+        contentType: 'application/octet-stream',
+      });
     expect(res.status).toBe(400);
   });
 
@@ -316,7 +354,10 @@ describe('400: uploads', () => {
     const res = await request(buildApp())
       .put('/competencias/1/imagen')
       .set('Authorization', `Bearer ${ADMIN}`)
-      .attach('imagen', Buffer.alloc(6 * 1024 * 1024, 1), { filename: 'grande.jpg', contentType: 'image/jpeg' });
+      .attach('imagen', Buffer.alloc(6 * 1024 * 1024, 1), {
+        filename: 'grande.jpg',
+        contentType: 'image/jpeg',
+      });
     expect(res.status).toBe(400);
     expect(res.body.message).toMatch(/tamaño/i);
   });
@@ -325,7 +366,10 @@ describe('400: uploads', () => {
     const res = await request(buildApp())
       .put('/competencias/abc/imagen')
       .set('Authorization', `Bearer ${ADMIN}`)
-      .attach('imagen', Buffer.from([0xff, 0xd8, 0xff, 0xd9]), { filename: 'a.jpg', contentType: 'image/jpeg' });
+      .attach('imagen', Buffer.from([0xff, 0xd8, 0xff, 0xd9]), {
+        filename: 'a.jpg',
+        contentType: 'image/jpeg',
+      });
     expect(res.status).toBe(400);
   });
 
@@ -333,7 +377,10 @@ describe('400: uploads', () => {
     const res = await request(buildApp())
       .put('/competencias/1/imagen')
       .set('Authorization', `Bearer ${ADMIN}`)
-      .attach('imagen', Buffer.from([0xff, 0xd8, 0xff, 0xd9]), { filename: 'ok.jpg', contentType: 'image/jpeg' });
+      .attach('imagen', Buffer.from([0xff, 0xd8, 0xff, 0xd9]), {
+        filename: 'ok.jpg',
+        contentType: 'image/jpeg',
+      });
     expect(res.status).toBe(200);
     expect(res.body.imagen_url).toMatch(/^\/api\/uploads\/competencias\//);
   });
@@ -342,7 +389,10 @@ describe('400: uploads', () => {
     const res = await request(buildApp())
       .put('/competencias/1/imagen')
       .set('Authorization', `Bearer ${ADMIN}`)
-      .attach('imagen', Buffer.from('<html><script>alert(1)</script></html>'), { filename: 'spoof.jpg', contentType: 'image/jpeg' });
+      .attach('imagen', Buffer.from('<html><script>alert(1)</script></html>'), {
+        filename: 'spoof.jpg',
+        contentType: 'image/jpeg',
+      });
     expect(res.status).toBe(400);
     expect(res.body.message).toMatch(/no es una imagen/i);
   });
@@ -415,8 +465,12 @@ describe('archivos: magic bytes y borrado seguro', () => {
 
 describe('mensajeSeguro: sin fugas en 400/500', () => {
   it('oculta SQL/Sequelize tras mensaje genérico', () => {
-    expect(mensajeSeguro(new Error('ER_DUP_ENTRY: Duplicate entry'))).toBe('No se pudo completar la operacion');
-    expect(mensajeSeguro(new Error('select * from usuarios'))).toBe('No se pudo completar la operacion');
+    expect(mensajeSeguro(new Error('ER_DUP_ENTRY: Duplicate entry'))).toBe(
+      'No se pudo completar la operacion',
+    );
+    expect(mensajeSeguro(new Error('select * from usuarios'))).toBe(
+      'No se pudo completar la operacion',
+    );
   });
 
   it('deja pasar mensajes de negocio normales', () => {

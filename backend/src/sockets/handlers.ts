@@ -56,12 +56,15 @@ function claveBloqueo(participanteId: number, wodId: number): string {
 }
 
 // Limpieza periodica de bloqueos huerfanos (juez que cerro la app sin liberar).
-const limpieza = setInterval(() => {
-  const ahora = Date.now();
-  for (const [clave, bloqueo] of bloqueos.entries()) {
-    if (ahora - bloqueo.timestamp > TTL_BLOQUEO) bloqueos.delete(clave);
-  }
-}, 5 * 60 * 1000);
+const limpieza = setInterval(
+  () => {
+    const ahora = Date.now();
+    for (const [clave, bloqueo] of bloqueos.entries()) {
+      if (ahora - bloqueo.timestamp > TTL_BLOQUEO) bloqueos.delete(clave);
+    }
+  },
+  5 * 60 * 1000,
+);
 limpieza.unref?.();
 
 /**
@@ -70,7 +73,11 @@ limpieza.unref?.();
  * Evento A podia bloquear (TTL 30 min) la medicion de un atleta del
  * Evento B. Los admins no necesitan asignacion.
  */
-async function puedeBloquear(usuario: TokenPayload, participanteId: number, wodId: number): Promise<boolean> {
+async function puedeBloquear(
+  usuario: TokenPayload,
+  participanteId: number,
+  wodId: number,
+): Promise<boolean> {
   if (usuario.rol !== 'juez') return true;
   try {
     const wod = await Wod.findByPk(wodId, { attributes: ['competencia_id'] });
@@ -122,7 +129,10 @@ export function setupSocketHandlers(io: Server): void {
         socket.emit('leaderboard-update', { competenciaId, ...data });
       } catch (err) {
         log.error('socket: no se pudo construir la clasificacion', err);
-        socket.emit('leaderboard-error', { competenciaId, message: 'No se pudo cargar la clasificacion' });
+        socket.emit('leaderboard-error', {
+          competenciaId,
+          message: 'No se pudo cargar la clasificacion',
+        });
       }
     }
 
@@ -167,58 +177,72 @@ export function setupSocketHandlers(io: Server): void {
 
     // --- Bloqueo de participantes: solo para jueces y administradores ---
 
-    socket.on('check-participant-lock', (data: { participante_id: number; wod_id: number }, callback: any) => {
-      if (typeof callback !== 'function') return;
-      const parsed = checkLockSchema.safeParse(data);
-      if (!parsed.success) { callback({ locked: false, message: '' }); return; }
-      if (!usuario || usuario.rol === 'participante') {
-        callback({ locked: false, message: '' });
-        return;
-      }
+    socket.on(
+      'check-participant-lock',
+      (data: { participante_id: number; wod_id: number }, callback: any) => {
+        if (typeof callback !== 'function') return;
+        const parsed = checkLockSchema.safeParse(data);
+        if (!parsed.success) {
+          callback({ locked: false, message: '' });
+          return;
+        }
+        if (!usuario || usuario.rol === 'participante') {
+          callback({ locked: false, message: '' });
+          return;
+        }
 
-      const bloqueo = bloqueos.get(claveBloqueo(parsed.data.participante_id, parsed.data.wod_id));
-      const bloqueadoPorOtro = bloqueo && bloqueo.judgeId !== usuario.id;
+        const bloqueo = bloqueos.get(claveBloqueo(parsed.data.participante_id, parsed.data.wod_id));
+        const bloqueadoPorOtro = bloqueo && bloqueo.judgeId !== usuario.id;
 
-      callback({
-        locked: Boolean(bloqueadoPorOtro),
-        message: bloqueadoPorOtro ? `Lo esta evaluando ${bloqueo!.judgeName} en este momento` : '',
-      });
-    });
+        callback({
+          locked: Boolean(bloqueadoPorOtro),
+          message: bloqueadoPorOtro
+            ? `Lo esta evaluando ${bloqueo!.judgeName} en este momento`
+            : '',
+        });
+      },
+    );
 
     // Con ACK opcional: el juez lo usa tras reconectar para confirmar que el
     // bloqueo quedó registrado (antes era fire-and-forget y un paquete
     // perdido en la ventana de reconnect dejaba dos jueces sobre un atleta).
     // Sin callback se comporta igual que antes (compatibilidad total).
-    socket.on('lock-participant', async (data: { participante_id: number; wod_id: number; judgeName: string }, callback?: (r: { ok: boolean }) => void) => {
-      const responde = typeof callback === 'function' ? callback : null;
-      if (!usuario || usuario.rol === 'participante') {
-        responde?.({ ok: false });
-        return;
-      }
-      // Anti-flapping: un cliente en bucle no puede saturar puedeBloquear (DB).
-      if (!throttleSocket(socket.id, 'lock-participant', 10)) {
-        responde?.({ ok: false });
-        return;
-      }
-      const parsed = lockParticipantSchema.safeParse(data);
-      if (!parsed.success) {
-        responde?.({ ok: false });
-        return;
-      }
-      // Solo quien tiene asignacion puede bloquear (ver puedeBloquear).
-      if (!(await puedeBloquear(usuario, parsed.data.participante_id, parsed.data.wod_id))) {
-        responde?.({ ok: false });
-        return;
-      }
-      bloqueos.set(claveBloqueo(parsed.data.participante_id, parsed.data.wod_id), {
-        judgeId: usuario.id,
-        // El nombre visible sale del cliente solo como etiqueta; la identidad
-        // que cuenta para los permisos es siempre la del token.
-        judgeName: String(parsed.data.judgeName ?? 'Juez').slice(0, 60),
-        timestamp: Date.now(),
-      });
-      responde?.({ ok: true });
-    });
+    socket.on(
+      'lock-participant',
+      async (
+        data: { participante_id: number; wod_id: number; judgeName: string },
+        callback?: (r: { ok: boolean }) => void,
+      ) => {
+        const responde = typeof callback === 'function' ? callback : null;
+        if (!usuario || usuario.rol === 'participante') {
+          responde?.({ ok: false });
+          return;
+        }
+        // Anti-flapping: un cliente en bucle no puede saturar puedeBloquear (DB).
+        if (!throttleSocket(socket.id, 'lock-participant', 10)) {
+          responde?.({ ok: false });
+          return;
+        }
+        const parsed = lockParticipantSchema.safeParse(data);
+        if (!parsed.success) {
+          responde?.({ ok: false });
+          return;
+        }
+        // Solo quien tiene asignacion puede bloquear (ver puedeBloquear).
+        if (!(await puedeBloquear(usuario, parsed.data.participante_id, parsed.data.wod_id))) {
+          responde?.({ ok: false });
+          return;
+        }
+        bloqueos.set(claveBloqueo(parsed.data.participante_id, parsed.data.wod_id), {
+          judgeId: usuario.id,
+          // El nombre visible sale del cliente solo como etiqueta; la identidad
+          // que cuenta para los permisos es siempre la del token.
+          judgeName: String(parsed.data.judgeName ?? 'Juez').slice(0, 60),
+          timestamp: Date.now(),
+        });
+        responde?.({ ok: true });
+      },
+    );
 
     socket.on('unlock-participant', (data: { participante_id: number; wod_id: number }) => {
       if (!usuario) return;
@@ -288,7 +312,10 @@ function recordarFirma(competenciaId: number, firma: string): void {
   lastEmitted.set(competenciaId, firma);
 }
 
-export async function broadcastLeaderboard(competenciaId: number, resultado?: Resultado): Promise<void> {
+export async function broadcastLeaderboard(
+  competenciaId: number,
+  resultado?: Resultado,
+): Promise<void> {
   if (!ioRef) return;
   try {
     const data = await getLeaderboard(competenciaId);
@@ -300,10 +327,22 @@ export async function broadcastLeaderboard(competenciaId: number, resultado?: Re
     // puesto, mejor tiempo) nunca llegaba a las pantallas porque el dedup
     // la consideraba "sin cambios".
     const lista = Array.isArray((data as { leaderboard?: unknown }).leaderboard)
-      ? (data as { leaderboard: Array<{ participante_id: number; puesto: number; puntos_total: number; resultados?: Array<{ valor_bruto?: string | null }> }> }).leaderboard
+      ? (
+          data as {
+            leaderboard: Array<{
+              participante_id: number;
+              puesto: number;
+              puntos_total: number;
+              resultados?: Array<{ valor_bruto?: string | null }>;
+            }>;
+          }
+        ).leaderboard
       : [];
     const firma = lista
-      .map((e) => `${e.participante_id}:${e.puesto}:${e.puntos_total}:${(e.resultados ?? []).map((r) => r.valor_bruto ?? '').join(',')}`)
+      .map(
+        (e) =>
+          `${e.participante_id}:${e.puesto}:${e.puntos_total}:${(e.resultados ?? []).map((r) => r.valor_bruto ?? '').join(',')}`,
+      )
       .join('|');
 
     const anterior = lastEmitted.get(competenciaId);
@@ -313,7 +352,9 @@ export async function broadcastLeaderboard(competenciaId: number, resultado?: Re
     }
 
     recordarFirma(competenciaId, firma);
-    ioRef.to(`competencia-${competenciaId}`).emit('leaderboard-update', { competenciaId, ...data, resultado });
+    ioRef
+      .to(`competencia-${competenciaId}`)
+      .emit('leaderboard-update', { competenciaId, ...data, resultado });
     noteBroadcast('leaderboard-update');
   } catch (err) {
     log.error('socket: no se pudo difundir la clasificacion', err);

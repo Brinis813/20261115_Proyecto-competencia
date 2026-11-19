@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useState, useRef, ReactNode, useCallback } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+  ReactNode,
+  useCallback,
+} from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
@@ -106,15 +114,23 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socket.disconnect().connect();
   }, [user?.id, socket]);
 
-  const joinCompetencia = useCallback((competenciaId: number) => socket.emit('join-competencia', competenciaId), [socket]);
-  const leaveCompetencia = useCallback((competenciaId: number) => socket.emit('leave-competencia', competenciaId), [socket]);
+  const joinCompetencia = useCallback(
+    (competenciaId: number) => socket.emit('join-competencia', competenciaId),
+    [socket],
+  );
+  const leaveCompetencia = useCallback(
+    (competenciaId: number) => socket.emit('leave-competencia', competenciaId),
+    [socket],
+  );
   const requestLeaderboard = useCallback(
     (competenciaId: number) => socket.emit('request-leaderboard', competenciaId),
-    [socket]
+    [socket],
   );
 
   return (
-    <SocketContext.Provider value={{ socket, estado, joinCompetencia, leaveCompetencia, requestLeaderboard }}>
+    <SocketContext.Provider
+      value={{ socket, estado, joinCompetencia, leaveCompetencia, requestLeaderboard }}
+    >
       {children}
     </SocketContext.Provider>
   );

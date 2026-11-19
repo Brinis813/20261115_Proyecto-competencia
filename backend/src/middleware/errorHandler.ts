@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { isProduction } from '../config/env';
-import { log } from '../utils/logger';
 import { contextoDeRequest, reportError } from '../utils/monitoring';
 
 /** Cualquier ruta /api que no exista devuelve JSON, no el HTML de Express. */
@@ -20,6 +19,8 @@ export function errorHandler(err: any, req: Request, res: Response, _next: NextF
   // En produccion nunca se filtra el mensaje interno: puede contener SQL,
   // rutas del servidor o nombres de tablas.
   res.status(err?.status || 500).json({
-    message: isProduction ? 'Error interno del servidor' : err?.message || 'Error interno del servidor',
+    message: isProduction
+      ? 'Error interno del servidor'
+      : err?.message || 'Error interno del servidor',
   });
 }

@@ -13,10 +13,24 @@ vi.mock('../components/layout/AppShell', () => ({
 
 vi.mock('../components/ui', () => ({
   Alert: ({ children, tone }: { children: React.ReactNode; tone?: string }) => (
-    <div data-testid="alert" data-tone={tone}>{children}</div>
+    <div data-testid="alert" data-tone={tone}>
+      {children}
+    </div>
   ),
-  Button: ({ children, onClick, loading, disabled }: { children: React.ReactNode; onClick?: () => void; loading?: boolean; disabled?: boolean }) => (
-    <button onClick={onClick} disabled={disabled || loading}>{children}</button>
+  Button: ({
+    children,
+    onClick,
+    loading,
+    disabled,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    loading?: boolean;
+    disabled?: boolean;
+  }) => (
+    <button onClick={onClick} disabled={disabled || loading}>
+      {children}
+    </button>
   ),
   ConfirmDialog: () => <div data-testid="confirm-dialog" />,
   EmptyState: ({ title, description }: { title?: string; description?: string }) => (
@@ -26,10 +40,27 @@ vi.mock('../components/ui', () => ({
     </div>
   ),
   IconButton: ({ label, onClick }: { label?: string; onClick?: () => void }) => (
-    <button aria-label={label} onClick={onClick}>icon</button>
+    <button aria-label={label} onClick={onClick}>
+      icon
+    </button>
   ),
-  Select: ({ label, children, value, onChange }: { label?: string; children: React.ReactNode; value?: string; onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void }) => (
-    <div><label>{label}</label><select value={value} onChange={onChange}>{children}</select></div>
+  Select: ({
+    label,
+    children,
+    value,
+    onChange,
+  }: {
+    label?: string;
+    children: React.ReactNode;
+    value?: string;
+    onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  }) => (
+    <div>
+      <label>{label}</label>
+      <select value={value} onChange={onChange}>
+        {children}
+      </select>
+    </div>
   ),
   SkeletonList: () => <div data-testid="skeleton-list" />,
   Spinner: () => <div data-testid="spinner" />,

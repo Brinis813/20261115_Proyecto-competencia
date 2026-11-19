@@ -1,6 +1,12 @@
 import type { CompetenciaTieBreakPolicy } from '../../models';
 import type { FilaPuntuada, ResultadoEntrada, TipoMedicion } from './types';
-import { parsearValor, parsearNumero, menorEsMejor, obtenerTiempoTotalDeSplits, obtenerTiempoDesempateDeSplits } from './parse';
+import {
+  parsearValor,
+  parsearNumero,
+  menorEsMejor,
+  obtenerTiempoTotalDeSplits,
+  obtenerTiempoDesempateDeSplits,
+} from './parse';
 
 /**
  * Ordena por valor y asigna posicion absoluta a partir de `rangoBase` atletas
@@ -12,12 +18,18 @@ import { parsearValor, parsearNumero, menorEsMejor, obtenerTiempoTotalDeSplits, 
  * Los puntos son `puntaje_maximo - (posicion - 1)`, con minimo 0.
  */
 function rankear(
-  filas: Array<{ participante_id: number; resultado_id: number; valor_bruto: string; valor: number; desempate: number | null }>,
+  filas: Array<{
+    participante_id: number;
+    resultado_id: number;
+    valor_bruto: string;
+    valor: number;
+    desempate: number | null;
+  }>,
   ascendente: boolean,
   rangoBase: number,
   puntajeMaximo: number,
   capado: boolean,
-  ignorarDesempate = false
+  ignorarDesempate = false,
 ): FilaPuntuada[] {
   const CASI_INFINITO = Number.MAX_SAFE_INTEGER;
   filas.sort((a, b) => {
@@ -70,7 +82,7 @@ export function puntuarWod(
   resultados: ResultadoEntrada[],
   tipoMedicion: TipoMedicion,
   puntajeMaximo: number,
-  policy: CompetenciaTieBreakPolicy = 'DESIGNATED_CIRCUIT_SPLIT'
+  policy: CompetenciaTieBreakPolicy = 'DESIGNATED_CIRCUIT_SPLIT',
 ): FilaPuntuada[] {
   const esTiempo = tipoMedicion === 'tiempo';
   const esSplits = tipoMedicion === 'time_trial_splits';
@@ -82,8 +94,12 @@ export function puntuarWod(
   // El "capado" solo tiene sentido en pruebas de tiempo con tope; en el resto
   // se ignora la marca y el resultado se trata como un finalizador normal.
   // Para time_trial_splits, no hay capados (es una prueba de etapas, no con tope).
-  const capados = esTiempo ? resultados.filter((r) => !r.abandono && !r.disqualificado && r.capado) : [];
-  const finalizadores = resultados.filter((r) => !r.abandono && !r.disqualificado && !(esTiempo && r.capado));
+  const capados = esTiempo
+    ? resultados.filter((r) => !r.abandono && !r.disqualificado && r.capado)
+    : [];
+  const finalizadores = resultados.filter(
+    (r) => !r.abandono && !r.disqualificado && !(esTiempo && r.capado),
+  );
 
   // Nivel 1: finalizadores por su valor.
   const filasFin = rankear(
@@ -117,7 +133,7 @@ export function puntuarWod(
     0,
     puntajeMaximo,
     false,
-    sinDesempate
+    sinDesempate,
   );
 
   // Nivel 2: capados por reps hechas (mayor es mejor), detras de los finalizadores.
@@ -133,7 +149,7 @@ export function puntuarWod(
     filasFin.length,
     puntajeMaximo,
     true,
-    sinDesempate
+    sinDesempate,
   );
 
   // Nivel 3: abandonos, comparten la ultima posicion, 0 puntos.

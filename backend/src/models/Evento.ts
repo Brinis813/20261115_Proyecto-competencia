@@ -21,10 +21,7 @@ export const SCORING_TYPES: ScoringType[] = ['POINTS_ACCUMULATION', 'WINNER_PER_
  * - LAST_Competencia_SCORE: mejor puesto en la última competencia disputada.
  */
 export type EventoTieBreakPolicy =
-  | 'NONE'
-  | 'BEST_INDIVIDUAL_RANK'
-  | 'DESIGNATED_TIEBREAK_Competencia'
-  | 'LAST_Competencia_SCORE';
+  'NONE' | 'BEST_INDIVIDUAL_RANK' | 'DESIGNATED_TIEBREAK_Competencia' | 'LAST_Competencia_SCORE';
 
 export const EVENTO_TIEBREAK_POLICIES: EventoTieBreakPolicy[] = [
   'NONE',
@@ -99,7 +96,12 @@ Evento.init(
       defaultValue: 'POINTS_ACCUMULATION',
     },
     tiebreak_policy: {
-      type: DataTypes.ENUM('NONE', 'BEST_INDIVIDUAL_RANK', 'DESIGNATED_TIEBREAK_Competencia', 'LAST_Competencia_SCORE'),
+      type: DataTypes.ENUM(
+        'NONE',
+        'BEST_INDIVIDUAL_RANK',
+        'DESIGNATED_TIEBREAK_Competencia',
+        'LAST_Competencia_SCORE',
+      ),
       allowNull: false,
       defaultValue: 'BEST_INDIVIDUAL_RANK',
     },
@@ -125,7 +127,7 @@ Evento.init(
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-  }
+  },
 );
 
 /**
@@ -135,7 +137,7 @@ Evento.init(
 export function estadoDeEvento(
   fechaInicio: string,
   fechaFin: string,
-  hoy = new Date()
+  hoy = new Date(),
 ): EstadoEvento {
   const dia = hoy.toISOString().slice(0, 10);
   if (dia < fechaInicio) return 'proxima';

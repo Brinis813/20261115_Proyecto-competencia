@@ -39,11 +39,11 @@ export async function seedDemoData(): Promise<void> {
       await conn.query(
         `INSERT IGNORE INTO categorias (nombre, genero)
          VALUES (?, ?)`,
-        c
+        c,
       );
       const [res] = await conn.query<any[]>(
         `SELECT id FROM categorias WHERE nombre = ? AND genero = ? LIMIT 1`,
-        [c[0], c[1]]
+        [c[0], c[1]],
       );
       if (res[0]?.id) catMap.set(`${c[0]}-${c[1]}`, res[0].id);
     }
@@ -63,7 +63,7 @@ export async function seedDemoData(): Promise<void> {
       const [res] = await conn.query<any>(
         `INSERT INTO usuarios (nombre, apellidos, cedula, box, rol, password, password_cambiado)
          VALUES (?, ?, ?, ?, 'juez', ?, FALSE)`,
-        [...j, juezHash]
+        [...j, juezHash],
       );
       juezIds.push(res.insertId);
     }
@@ -71,17 +71,53 @@ export async function seedDemoData(): Promise<void> {
     // La categoria coincide con una division de la competencia (Rx / Scaled) para que el
     // scorecard cargue las reps por division del atleta.
     const participantes = [
-      ['Maria', 'Lopez', '87654321', '1990-05-15', 'Box Central', 'maria.lopez@example.com', 'Rx', catMap.get('Rx-Femenino') ?? null],
-      ['Juan', 'Perez', '11223344', '1985-08-20', 'Box Norte', 'juan.perez@example.com', 'Rx', catMap.get('Rx-Masculino') ?? null],
-      ['Ana', 'Rodriguez', '55667788', '1992-12-10', 'Box Central', 'ana.rodriguez@example.com', 'Scaled', catMap.get('Scaled-Femenino') ?? null],
-      ['Diego', 'Martinez', '99887766', '1994-03-02', 'Box Sur', 'diego.martinez@example.com', 'Scaled', catMap.get('Scaled-Masculino') ?? null],
+      [
+        'Maria',
+        'Lopez',
+        '87654321',
+        '1990-05-15',
+        'Box Central',
+        'maria.lopez@example.com',
+        'Rx',
+        catMap.get('Rx-Femenino') ?? null,
+      ],
+      [
+        'Juan',
+        'Perez',
+        '11223344',
+        '1985-08-20',
+        'Box Norte',
+        'juan.perez@example.com',
+        'Rx',
+        catMap.get('Rx-Masculino') ?? null,
+      ],
+      [
+        'Ana',
+        'Rodriguez',
+        '55667788',
+        '1992-12-10',
+        'Box Central',
+        'ana.rodriguez@example.com',
+        'Scaled',
+        catMap.get('Scaled-Femenino') ?? null,
+      ],
+      [
+        'Diego',
+        'Martinez',
+        '99887766',
+        '1994-03-02',
+        'Box Sur',
+        'diego.martinez@example.com',
+        'Scaled',
+        catMap.get('Scaled-Masculino') ?? null,
+      ],
     ];
     const participanteIds: number[] = [];
     for (const p of participantes) {
       const [res] = await conn.query<any>(
         `INSERT INTO participantes (nombre, apellidos, cedula, fecha_nacimiento, box, email, categoria, categoria_id)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        p
+        p,
       );
       participanteIds.push(res.insertId);
     }
@@ -92,7 +128,7 @@ export async function seedDemoData(): Promise<void> {
       `INSERT INTO competencias (nombre, descripcion, metodo_desempate, tipo_flujo, tipo_publicacion, estado, divisiones, rondas)
        VALUES ('Competencia 1 - Funcional', 'WODs funcionales de alta intensidad',
                'Menor tiempo en el WOD de remo', 'en_serie', 'tiempo_real', 'activo', ?, 2)`,
-      [divisiones]
+      [divisiones],
     );
     const competenciaId = competencia.insertId;
 
@@ -118,7 +154,16 @@ export async function seedDemoData(): Promise<void> {
     // [competencia, orden, nombre, tipo, dur_estimada, tiempo_cap, esquema, puntaje]
     const wods: Array<[number, number, string, string, number, number, string | null, number]> = [
       [competenciaId, 1, 'Chipper 2 rondas (For Time)', 'tiempo', 300, 420, esqChipper, 100],
-      [competenciaId, 2, 'AMRAP 5min (Thrusters + Box Jumps)', 'repeticiones', 300, 0, esqAmrap, 100],
+      [
+        competenciaId,
+        2,
+        'AMRAP 5min (Thrusters + Box Jumps)',
+        'repeticiones',
+        300,
+        0,
+        esqAmrap,
+        100,
+      ],
       [competenciaId, 3, 'Max Deadlift', 'peso', 120, 0, esqMaxLoad, 100],
       [competenciaId, 4, 'Sled Push 50m', 'distancia', 120, 0, null, 100],
     ];
@@ -127,7 +172,7 @@ export async function seedDemoData(): Promise<void> {
       const [res] = await conn.query<any>(
         `INSERT INTO wods (competencia_id, orden, nombre_ejercicio, tipo_medicion, tiempo_estimado_duracion, tiempo_cap, esquema, puntaje_maximo)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        c
+        c,
       );
       wodIds.push(res.insertId);
     }
@@ -139,7 +184,7 @@ export async function seedDemoData(): Promise<void> {
       for (let i = 0; i < participanteIds.length; i++) {
         await conn.query(
           'INSERT INTO asignaciones (competencia_id, wod_id, usuario_id, participante_id) VALUES (?, ?, ?, ?)',
-          [competenciaId, wodId, juezIds[i], participanteIds[i]]
+          [competenciaId, wodId, juezIds[i], participanteIds[i]],
         );
       }
     }

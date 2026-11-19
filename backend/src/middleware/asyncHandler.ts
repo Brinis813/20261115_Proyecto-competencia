@@ -8,7 +8,7 @@ import { Request, Response, NextFunction } from 'express';
  * este es el estándar para código nuevo.
  */
 export function asyncHandler(
-  fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>,
 ) {
   return (req: Request, res: Response, next: NextFunction): void => {
     fn(req, res, next).catch(next);

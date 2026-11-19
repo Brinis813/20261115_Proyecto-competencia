@@ -20,7 +20,10 @@ import AppShell from '../../components/layout/AppShell';
 import { Alert, Button, ConfirmDialog, Field } from '../../components/ui';
 import CuentaAtras from '../../components/judge/CuentaAtras';
 import ChecklistPrevio, { PUNTOS_CHECKLIST } from '../../components/judge/ChecklistPrevio';
-import CronometroView, { type CronometroHandle, type EstadoCrono } from '../../components/judge/CronometroView';
+import CronometroView, {
+  type CronometroHandle,
+  type EstadoCrono,
+} from '../../components/judge/CronometroView';
 import ContadorReps from '../../components/judge/ContadorReps';
 import ContadorSegmentos from '../../components/judge/ContadorSegmentos';
 import ContadorEsquema, { type MovimientoObjetivo } from '../../components/judge/ContadorEsquema';
@@ -28,7 +31,11 @@ import ContadorSerie from '../../components/judge/ContadorSerie';
 import CompetenciaStartBanner from '../../components/judge/CompetenciaStartBanner';
 import { useCompetenciaStartStore } from '../../stores/competenciaStartStore';
 import RegistroNoReps, { type NoRep } from '../../components/judge/RegistroNoReps';
-import IntentosPeso, { BARRA_POR_DEFECTO, MAX_INTENTOS, type IntentoPeso } from '../../components/judge/IntentosPeso';
+import IntentosPeso, {
+  BARRA_POR_DEFECTO,
+  MAX_INTENTOS,
+  type IntentoPeso,
+} from '../../components/judge/IntentosPeso';
 import TemporizadorIntervalos, { PRESETS } from '../../components/judge/TemporizadorIntervalos';
 import type { ConfigIntervalos } from '../../hooks/useIntervalTimer';
 import {
@@ -93,7 +100,11 @@ export default function JuezMedicionPage() {
   const cronoRef = useRef<CronometroHandle>(null);
   const [cronoEstado, setCronoEstado] = useState<EstadoCrono>({ enMarcha: false, conMarca: false });
   const onEstadoCrono = useCallback((s: EstadoCrono) => setCronoEstado(s), []);
-  const { isSupported: wakeLockDisponible, request: pedirWakeLock, release: soltarWakeLock } = useWakeLock();
+  const {
+    isSupported: wakeLockDisponible,
+    request: pedirWakeLock,
+    release: soltarWakeLock,
+  } = useWakeLock();
   const { pendingCount, savePending, syncPending } = useOfflineSync();
 
   const [competencia, setCompetencia] = useState<Competencia | null>(null);
@@ -142,8 +153,7 @@ export default function JuezMedicionPage() {
     (faseReloj === 'cuenta_regresiva' ||
       faseReloj === 'pausado' ||
       faseReloj === 'finalizado' ||
-      (faseReloj === 'armado' &&
-        (snapArranque.tipoArranque !== 'manual_juez' || !inicioManual)));
+      (faseReloj === 'armado' && (snapArranque.tipoArranque !== 'manual_juez' || !inicioManual)));
 
   // Pausa global del admin por novedad: se congela todo el registro (cronómetro
   // local, conteos, pesos) sin perder lo ya anotado; al reanudar sigue desde ahí.
@@ -184,7 +194,7 @@ export default function JuezMedicionPage() {
   // original en Competencias anteriores a la columna).
   const rondasEsquema = rondasEfectivasMedicion(
     Number(competencia?.rondas) >= 1 ? Number(competencia?.rondas) : undefined,
-    esquema?.rondas
+    esquema?.rondas,
   );
   // For Time: el objetivo es el trabajo total (reps x rondas) y topa el conteo.
   // AMRAP: el objetivo es la referencia por ronda; el atleta puede superarla.
@@ -192,7 +202,7 @@ export default function JuezMedicionPage() {
   const movObjetivo: MovimientoObjetivo[] = useMemo(
     () => construirMovObjetivo(movsEsquema, division, esTiempo, rondasEsquema),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [esquema, division, esTiempo, rondasEsquema]
+    [esquema, division, esTiempo, rondasEsquema],
   );
   // Solo aplica a For Time (tiempo) y AMRAP (reps o calorías con meta),
   // que es donde hay movimientos.
@@ -202,7 +212,10 @@ export default function JuezMedicionPage() {
   const secuencial = competencia?.tipo_flujo === 'en_serie' && usaEsquema;
   const claveSerie = `${participante?.id ?? 'sin'}-${division}-${rondasEsquema}-${movObjetivo.length}`;
   const totalEsquema = useMemo(() => conteoEsquema.reduce((a, b) => a + b, 0), [conteoEsquema]);
-  const objetivoEsquema = useMemo(() => movObjetivo.reduce((a, m) => a + m.objetivo, 0), [movObjetivo]);
+  const objetivoEsquema = useMemo(
+    () => movObjetivo.reduce((a, m) => a + m.objetivo, 0),
+    [movObjetivo],
+  );
 
   const checklistCompleto = checklist.every(Boolean);
   const penalizacionSeg = noReps.length * PENALIZACION_NO_REP_SEG;
@@ -220,7 +233,9 @@ export default function JuezMedicionPage() {
     api
       .get<Competencia[]>('/competencias/judge')
       .then((res) => {
-        const w = (Array.isArray(res.data) ? res.data : []).find((x) => x.id === Number(competenciaId));
+        const w = (Array.isArray(res.data) ? res.data : []).find(
+          (x) => x.id === Number(competenciaId),
+        );
         const c = w?.wods?.find((x) => x.id === Number(wodId));
         if (!w || !c) {
           setError('No estas asignado a este WOD o ya no existe.');
@@ -289,9 +304,11 @@ export default function JuezMedicionPage() {
         },
         (res?: { ok: boolean }) => {
           if (res && !res.ok) {
-            setError('Se perdió el bloqueo del atleta en la reconexión: verifica que nadie más lo esté midiendo');
+            setError(
+              'Se perdió el bloqueo del atleta en la reconexión: verifica que nadie más lo esté midiendo',
+            );
           }
-        }
+        },
       );
     };
     socket.on('connect', reBloquear);
@@ -335,7 +352,8 @@ export default function JuezMedicionPage() {
     if (!esTiempo) setReps((n) => n + 1);
   }
 
-  const maxIntentos = esquema?.modalidad === 'max_load' ? esquema.intentos ?? MAX_INTENTOS : MAX_INTENTOS;
+  const maxIntentos =
+    esquema?.modalidad === 'max_load' ? (esquema.intentos ?? MAX_INTENTOS) : MAX_INTENTOS;
 
   function registrarIntento(valido: boolean) {
     if (registroCongelado || intentos.length >= maxIntentos) return;
@@ -363,7 +381,6 @@ export default function JuezMedicionPage() {
       return n > 0 ? n : null;
     }
     return null;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [esquema, division]);
 
   const resumenPrueba: string[] = useMemo(() => {
@@ -421,7 +438,6 @@ export default function JuezMedicionPage() {
     }
     // Resto (genérico): captura manual del total.
     return ['Introduce el total'];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     tipo,
     esTiempo,
@@ -471,8 +487,12 @@ export default function JuezMedicionPage() {
       if (socket?.connected) {
         const bloqueo = await new Promise<{ locked: boolean; message: string }>((resolve) => {
           const t = setTimeout(
-            () => resolve({ locked: true, message: 'No se pudo verificar el bloqueo: comprueba tu conexion y reintenta' }),
-            2500
+            () =>
+              resolve({
+                locked: true,
+                message: 'No se pudo verificar el bloqueo: comprueba tu conexion y reintenta',
+              }),
+            2500,
           );
           socket.emit(
             'check-participant-lock',
@@ -480,7 +500,7 @@ export default function JuezMedicionPage() {
             (respuesta: { locked: boolean; message: string }) => {
               clearTimeout(t);
               resolve(respuesta);
-            }
+            },
           );
         });
 
@@ -505,7 +525,7 @@ export default function JuezMedicionPage() {
       setError(
         err?.response?.status === 404
           ? 'No existe ningun participante con esa cedula'
-          : mensajeDeError(err, 'No se pudo verificar el participante')
+          : mensajeDeError(err, 'No se pudo verificar el participante'),
       );
     } finally {
       setBuscando(false);
@@ -548,7 +568,7 @@ export default function JuezMedicionPage() {
         setError(
           tipo === 'calorías'
             ? 'Teclea manual las calorías quemadas antes de enviar'
-            : 'Introduce el resultado antes de enviar'
+            : 'Introduce el resultado antes de enviar',
         );
         return;
       }
@@ -583,7 +603,11 @@ export default function JuezMedicionPage() {
     // Desglose para auditar la medicion guiada, y marca de desempate.
     // En modo manual se audita el arranque por dedo (tolerancia humana).
     const marcaManual = inicioManual
-      ? { inicio_manual: true as const, t0_local_ms: inicioManual.t0LocalMs, offset_ms: inicioManual.offsetMs }
+      ? {
+          inicio_manual: true as const,
+          t0_local_ms: inicioManual.t0LocalMs,
+          offset_ms: inicioManual.offsetMs,
+        }
       : {};
     const detalle: DetalleMedicion | undefined = construirDetalle({
       abandono,
@@ -675,7 +699,12 @@ export default function JuezMedicionPage() {
           : undefined
       }
       actions={
-        <Button variant="ghost" size="sm" icon={ArrowLeft} onClick={() => navigate(`/juez/${competenciaId}`)}>
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={ArrowLeft}
+          onClick={() => navigate(`/juez/${competenciaId}`)}
+        >
           <span className="hidden sm:inline">Wods</span>
         </Button>
       }
@@ -716,8 +745,8 @@ export default function JuezMedicionPage() {
         {/* Pausa global por novedad: el registro queda congelado sin perder lo anotado. */}
         {enPausa && paso === 'medir' && (
           <Alert tone="warning">
-            Heat en pausa por decisión del administrador. Cronómetro, conteos y pesos congelados: espera la
-            reanudación, nada de lo anotado se ha perdido.
+            Heat en pausa por decisión del administrador. Cronómetro, conteos y pesos congelados:
+            espera la reanudación, nada de lo anotado se ha perdido.
           </Alert>
         )}
 
@@ -738,7 +767,10 @@ export default function JuezMedicionPage() {
               Introduce su cedula para comprobar que no tiene ya una medicion en este WOD.
             </p>
 
-            <form onSubmit={buscarParticipante} className="flex flex-col sm:flex-row gap-3 sm:items-end">
+            <form
+              onSubmit={buscarParticipante}
+              className="flex flex-col sm:flex-row gap-3 sm:items-end"
+            >
               <Field
                 label="Cedula del participante"
                 className="flex-1"
@@ -749,14 +781,22 @@ export default function JuezMedicionPage() {
                 placeholder="Numero de documento"
                 autoFocus
               />
-              <Button type="submit" icon={Search} loading={buscando} disabled={!cedula.trim() || medicionBloqueada} className="sm:w-auto">
+              <Button
+                type="submit"
+                icon={Search}
+                loading={buscando}
+                disabled={!cedula.trim() || medicionBloqueada}
+                className="sm:w-auto"
+              >
                 Buscar
               </Button>
             </form>
             {medicionBloqueada && (
               <p className="mt-2 text-2xs text-hyrox-warning">
-                {faseReloj === 'cuenta_regresiva' && 'El heat arranca al terminar la cuenta regresiva.'}
-                {faseReloj === 'armado' && 'El heat está armado: espera el arranque del administrador.'}
+                {faseReloj === 'cuenta_regresiva' &&
+                  'El heat arranca al terminar la cuenta regresiva.'}
+                {faseReloj === 'armado' &&
+                  'El heat está armado: espera el arranque del administrador.'}
                 {faseReloj === 'pausado' && 'El heat está en pausa: espera la reanudación.'}
                 {faseReloj === 'finalizado' && 'El heat ya finalizó.'}
               </p>
@@ -788,7 +828,9 @@ export default function JuezMedicionPage() {
             {/* Resumen de la prueba según su modalidad: qué debe registrar el juez. */}
             {resumenPrueba.length > 0 && (
               <section className="surface p-4" aria-label="Resumen de la prueba">
-                <p className="eyebrow mb-2">La prueba · {wod ? ETIQUETA_MEDICION[wod.tipo_medicion] : ''}</p>
+                <p className="eyebrow mb-2">
+                  La prueba · {wod ? ETIQUETA_MEDICION[wod.tipo_medicion] : ''}
+                </p>
                 <ul className="flex flex-wrap gap-1.5">
                   {resumenPrueba.map((item) => (
                     <li
@@ -829,7 +871,9 @@ export default function JuezMedicionPage() {
                   onSolicitarInicio={() => setCuentaAtras(true)}
                   onReiniciar={limpiarMedicion}
                   onNoRep={anotarNoRep}
-                  onVuelta={() => setVueltas((v) => [...v, cronoRef.current?.getTextoActual() ?? ''])}
+                  onVuelta={() =>
+                    setVueltas((v) => [...v, cronoRef.current?.getTextoActual() ?? ''])
+                  }
                   onDesempate={() => setDesempate(cronoRef.current?.getTextoActual() ?? null)}
                 />
 
@@ -858,7 +902,8 @@ export default function JuezMedicionPage() {
                     )}
                     {objetivoEsquema > 0 && totalEsquema >= objetivoEsquema && (
                       <Alert tone="success">
-                        Trabajo completo ({totalEsquema} reps). Detén el cronómetro para fijar el tiempo.
+                        Trabajo completo ({totalEsquema} reps). Detén el cronómetro para fijar el
+                        tiempo.
                       </Alert>
                     )}
                   </>
@@ -925,7 +970,8 @@ export default function JuezMedicionPage() {
                   ) : (
                     <>
                       <p className="text-xs text-hyrox-mist">
-                        El atleta no completo la prueba dentro del tope: anota las repeticiones que llego a hacer.
+                        El atleta no completo la prueba dentro del tope: anota las repeticiones que
+                        llego a hacer.
                       </p>
                       {usaEsquema ? (
                         secuencial ? (
@@ -947,7 +993,11 @@ export default function JuezMedicionPage() {
                           />
                         )
                       ) : (
-                        <ContadorReps valor={reps} onCambiar={setReps} etiqueta="Reps antes del tope" />
+                        <ContadorReps
+                          valor={reps}
+                          onCambiar={setReps}
+                          etiqueta="Reps antes del tope"
+                        />
                       )}
                       <Button
                         icon={Send}
@@ -1046,7 +1096,10 @@ export default function JuezMedicionPage() {
                 </div>
 
                 {modoIntervalos && (
-                  <TemporizadorIntervalos config={configIntervalos} onCambiarConfig={setConfigIntervalos} />
+                  <TemporizadorIntervalos
+                    config={configIntervalos}
+                    onCambiarConfig={setConfigIntervalos}
+                  />
                 )}
 
                 {noReps.length > 0 && (
@@ -1058,7 +1111,13 @@ export default function JuezMedicionPage() {
                 )}
 
                 <section className="surface p-5 space-y-4">
-                  <Button icon={Send} onClick={() => guardar(false)} loading={guardando} disabled={enPausa || reps <= 0} fullWidth>
+                  <Button
+                    icon={Send}
+                    onClick={() => guardar(false)}
+                    loading={guardando}
+                    disabled={enPausa || reps <= 0}
+                    fullWidth
+                  >
                     Enviar {reps} {tipo === 'calorías' ? 'cal' : 'repeticiones'}
                   </Button>
                   {botonAbandono}
@@ -1074,7 +1133,9 @@ export default function JuezMedicionPage() {
                   peso={pesoIntento}
                   onCambiarPeso={setPesoIntento}
                   onRegistrar={registrarIntento}
-                  onDeshacer={() => { if (!registroCongelado) setIntentos((previos) => previos.slice(0, -1)); }}
+                  onDeshacer={() => {
+                    if (!registroCongelado) setIntentos((previos) => previos.slice(0, -1));
+                  }}
                   unidad={UNIDAD_MEDICION.peso}
                   maxIntentos={maxIntentos}
                   deshabilitado={registroCongelado}

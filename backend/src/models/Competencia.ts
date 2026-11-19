@@ -24,10 +24,7 @@ export const TIPOS_PARTICIPACION: TipoParticipacion[] = [
  * - DESIGNATED_CIRCUIT_SPLIT: el total se ordena por la competencia designada
  *   (`wod_desempate_id`) y luego por mejor posición individual.
  */
-export type CompetenciaTieBreakPolicy =
-  | 'NONE'
-  | 'TIEBREAK_MARK'
-  | 'DESIGNATED_CIRCUIT_SPLIT';
+export type CompetenciaTieBreakPolicy = 'NONE' | 'TIEBREAK_MARK' | 'DESIGNATED_CIRCUIT_SPLIT';
 
 export const COMPETENCIA_TIEBREAK_POLICIES: CompetenciaTieBreakPolicy[] = [
   'NONE',
@@ -43,7 +40,8 @@ export class Competencia extends Model {
   declare tipo_flujo: 'en_serie' | 'estaciones_simultaneas';
   declare tipo_publicacion: 'tiempo_real' | 'al_finalizar_circuito';
   declare desempate_nombre: string | null;
-  declare desempate_tipo_medicion: 'tiempo' | 'repeticiones' | 'peso' | 'distancia' | 'calorías' | null;
+  declare desempate_tipo_medicion:
+    'tiempo' | 'repeticiones' | 'peso' | 'distancia' | 'calorías' | null;
   declare wod_desempate_id: number | null;
   /** Política de desempate de la competencia. Default: estándar (competencia designada). */
   declare tiebreak_policy: CompetenciaTieBreakPolicy;
@@ -145,5 +143,5 @@ Competencia.init(
     tableName: 'competencias',
     timestamps: true,
     underscored: true,
-  }
+  },
 );

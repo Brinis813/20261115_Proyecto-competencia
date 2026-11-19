@@ -72,7 +72,11 @@ export default function LoginPage() {
             role="tablist"
             aria-label="Tipo de acceso"
           >
-            <BotonModo activo={modo === 'staff'} onClick={() => setModo('staff')} icon={ShieldCheck}>
+            <BotonModo
+              activo={modo === 'staff'}
+              onClick={() => setModo('staff')}
+              icon={ShieldCheck}
+            >
               Admin / Juez
             </BotonModo>
             <BotonModo activo={modo === 'atleta'} onClick={() => setModo('atleta')} icon={User}>
@@ -128,11 +132,16 @@ export default function LoginPage() {
           <div className="mt-8 pt-6 border-t border-white/[0.06] text-center">
             <p className="text-sm text-hyrox-mist mb-3">
               ¿Organizas un evento?{' '}
-              <Link to="/registro" className="font-semibold text-hyrox-primary hover:text-hyrox-ember">
+              <Link
+                to="/registro"
+                className="font-semibold text-hyrox-primary hover:text-hyrox-ember"
+              >
                 Crea tu cuenta
               </Link>
             </p>
-            <p className="text-xs text-hyrox-mist mb-3">No necesitas cuenta para ver la clasificacion</p>
+            <p className="text-xs text-hyrox-mist mb-3">
+              No necesitas cuenta para ver la clasificacion
+            </p>
             <Link
               to="/inicio"
               className="inline-flex items-center gap-2 text-sm font-semibold text-hyrox-primary hover:text-hyrox-ember transition-colors"
@@ -167,7 +176,9 @@ function BotonModo({
       className={cx(
         'flex-1 flex items-center justify-center gap-2 min-h-[2.75rem] px-3 rounded-xl',
         'text-sm font-semibold cursor-pointer transition-all duration-200',
-        activo ? 'bg-hyrox-primary text-white shadow-glow-primary' : 'text-hyrox-mist hover:text-hyrox-paper'
+        activo
+          ? 'bg-hyrox-primary text-white shadow-glow-primary'
+          : 'text-hyrox-mist hover:text-hyrox-paper',
       )}
     >
       <Icon className="w-4 h-4" aria-hidden="true" />

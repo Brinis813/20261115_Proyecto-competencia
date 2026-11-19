@@ -36,25 +36,29 @@ const FASE_ANTES = [
   {
     icono: ClipboardList,
     titulo: 'Competencias y ejercicios',
-    texto: 'Crea la prueba en 3 niveles: datos, ejercicios y movimientos por categoria. 6 mediciones: tiempo, repeticiones, peso, distancia, calorias y splits HYROX.',
+    texto:
+      'Crea la prueba en 3 niveles: datos, ejercicios y movimientos por categoria. 6 mediciones: tiempo, repeticiones, peso, distancia, calorias y splits HYROX.',
     etiqueta: '6 MEDICIONES',
   },
   {
     icono: Users,
     titulo: 'Atletas y categorias',
-    texto: 'Da de alta atletas uno a uno o importa cientos desde CSV con plantilla descargable. Cada uno compite en su categoria.',
+    texto:
+      'Da de alta atletas uno a uno o importa cientos desde CSV con plantilla descargable. Cada uno compite en su categoria.',
     etiqueta: 'CSV MASIVO',
   },
   {
     icono: UserCheck,
     titulo: 'Jueces y asignaciones',
-    texto: 'Cada juez recibe sus atletas con contraseña temporal de un solo uso. Vinculo 1:1 por competencia, opcionalmente por ejercicio.',
+    texto:
+      'Cada juez recibe sus atletas con contraseña temporal de un solo uso. Vinculo 1:1 por competencia, opcionalmente por ejercicio.',
     etiqueta: '1:1 JUEZ-ATLETA',
   },
   {
     icono: CalendarClock,
     titulo: 'Heats y arranque',
-    texto: 'Series por categoria con carril fijo y cronograma automatico. Arranque sincronizado para todos los jueces: directo, cuenta regresiva o programado.',
+    texto:
+      'Series por categoria con carril fijo y cronograma automatico. Arranque sincronizado para todos los jueces: directo, cuenta regresiva o programado.',
     etiqueta: 'SALIDA UNICA',
   },
 ];
@@ -63,25 +67,29 @@ const FASE_DURANTE = [
   {
     icono: Timer,
     titulo: 'Medicion del juez',
-    texto: 'Cronometro que no se detiene ni con la pantalla apagada, scorecard guiado ejercicio por ejercicio y modo sin conexion que sincroniza solo.',
+    texto:
+      'Cronometro que no se detiene ni con la pantalla apagada, scorecard guiado ejercicio por ejercicio y modo sin conexion que sincroniza solo.',
     etiqueta: 'DESDE EL MOVIL',
   },
   {
     icono: Radio,
     titulo: 'Clasificacion en vivo',
-    texto: 'Cada medicion recalcula y se emite por WebSocket a la pantalla del evento. Sin recargar: las flechas muestran quien sube y quien baja.',
+    texto:
+      'Cada medicion recalcula y se emite por WebSocket a la pantalla del evento. Sin recargar: las flechas muestran quien sube y quien baja.',
     etiqueta: 'WEBSOCKET',
   },
   {
     icono: Flag,
     titulo: 'Pausa y time cap',
-    texto: 'Ante cualquier novedad, pausa global que congela todo sin perder lo anotado. Al vencer el tope, el registro pasa a reps automaticamente.',
+    texto:
+      'Ante cualquier novedad, pausa global que congela todo sin perder lo anotado. Al vencer el tope, el registro pasa a reps automaticamente.',
     etiqueta: 'CONTROL TOTAL',
   },
   {
     icono: Zap,
     titulo: 'Correccion al instante',
-    texto: 'Un error se resetea desde Resultados y el juez vuelve a medir. La clasificacion se recalcula y queda rastro en el historial.',
+    texto:
+      'Un error se resetea desde Resultados y el juez vuelve a medir. La clasificacion se recalcula y queda rastro en el historial.',
     etiqueta: 'SIN PAPELES',
   },
 ];
@@ -90,19 +98,22 @@ const FASE_DESPUES = [
   {
     icono: FileText,
     titulo: 'Informe final',
-    texto: 'General por evento, detalle por competencia con marca y juez, y lista de atletas y jueces. Vista de impresion lista para PDF.',
+    texto:
+      'General por evento, detalle por competencia con marca y juez, y lista de atletas y jueces. Vista de impresion lista para PDF.',
     etiqueta: 'PDF + CSV',
   },
   {
     icono: Download,
     titulo: 'Exportacion a Excel',
-    texto: 'Un CSV por secciones con BOM para Excel, o un CSV por competencia desde Resultados. Tus datos salen cuando quieras.',
+    texto:
+      'Un CSV por secciones con BOM para Excel, o un CSV por competencia desde Resultados. Tus datos salen cuando quieras.',
     etiqueta: 'TUS DATOS',
   },
   {
     icono: Medal,
     titulo: 'Historial auditable',
-    texto: 'Cada guardado y cada reseteo deja fila en el historial. El desempate aplicado se muestra en pantalla: nada queda en discusion.',
+    texto:
+      'Cada guardado y cada reseteo deja fila en el historial. El desempate aplicado se muestra en pantalla: nada queda en discusion.',
     etiqueta: 'TRAZABILIDAD',
   },
 ];
@@ -168,8 +179,8 @@ export default function PortadaPage() {
             <span className="text-hyrox-primary">NOSOTROS LLEVAMOS EL TIEMPO.</span>
           </h1>
           <p className="mt-4 text-sm sm:text-lg text-hyrox-paper/85 text-balance max-w-xl mx-auto">
-            Competencias, jueces y atletas organizados antes de la primera manga. Cronometraje
-            desde el movil y clasificacion en vivo durante. Informe final despues.
+            Competencias, jueces y atletas organizados antes de la primera manga. Cronometraje desde
+            el movil y clasificacion en vivo durante. Informe final despues.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <a href="#eventos" className="btn-primary">
@@ -196,7 +207,9 @@ export default function PortadaPage() {
           ].map((c) => (
             <div key={c.etiqueta} className="surface p-4 text-center">
               <p className="font-display text-3xl font-extrabold text-hyrox-primary">{c.valor}</p>
-              <p className="mt-1 text-2xs uppercase tracking-eyebrow text-hyrox-mist">{c.etiqueta}</p>
+              <p className="mt-1 text-2xs uppercase tracking-eyebrow text-hyrox-mist">
+                {c.etiqueta}
+              </p>
             </div>
           ))}
         </section>
@@ -208,8 +221,8 @@ export default function PortadaPage() {
             Elige un evento y sigue la clasificacion.
           </h2>
           <p className="mt-2 text-sm text-hyrox-mist max-w-2xl">
-            Se actualiza sola cada vez que un juez registra una medicion. Dejala fija en la
-            pantalla del box.
+            Se actualiza sola cada vez que un juez registra una medicion. Dejala fija en la pantalla
+            del box.
           </p>
 
           <div className="mt-6">
@@ -299,8 +312,8 @@ export default function PortadaPage() {
               EL MARCADOR NO ESPERA.
             </p>
             <p className="mt-2 text-sm text-hyrox-mist max-w-xl mx-auto">
-              Un juez guarda una medicion y la tabla se mueve en segundos en todos los
-              dispositivos. Sin refrescar. Sin hojas de calculo.
+              Un juez guarda una medicion y la tabla se mueve en segundos en todos los dispositivos.
+              Sin refrescar. Sin hojas de calculo.
             </p>
             <a href="#eventos" className="btn-primary mt-5 inline-flex">
               <Bell className="w-4 h-4" aria-hidden="true" />
@@ -331,7 +344,9 @@ export default function PortadaPage() {
               <figure
                 key={foto.src}
                 className={`relative overflow-hidden rounded-2xl bg-hyrox-carbon ${
-                  i === 0 ? 'row-span-2 aspect-[2/3] sm:aspect-auto' : 'aspect-[4/3] sm:col-span-2 sm:aspect-[16/7]'
+                  i === 0
+                    ? 'row-span-2 aspect-[2/3] sm:aspect-auto'
+                    : 'aspect-[4/3] sm:col-span-2 sm:aspect-[16/7]'
                 }`}
               >
                 <img
@@ -381,8 +396,8 @@ export default function PortadaPage() {
             TU PROXIMO EVENTO EMPIEZA AQUI.
           </h2>
           <p className="mt-2 text-sm text-hyrox-mist max-w-xl mx-auto">
-            Crea tu cuenta, monta tu primer evento y deja la clasificacion fija en la pantalla
-            del box. Sin instalar nada.
+            Crea tu cuenta, monta tu primer evento y deja la clasificacion fija en la pantalla del
+            box. Sin instalar nada.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             {!user ? (

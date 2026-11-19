@@ -48,7 +48,7 @@ HeatHorario.init(
     tableName: 'heat_horarios',
     timestamps: true,
     underscored: true,
-  }
+  },
 );
 
 Heat.belongsToMany(Competencia, {

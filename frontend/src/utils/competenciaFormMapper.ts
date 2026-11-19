@@ -107,7 +107,8 @@ export function wodVacio(): WodUI {
 
 /** Cantidad objetivo del movimiento según su medición (para `reps` del esquema). */
 export function objetivoDeMovimiento(m: MovimientoUI): number {
-  if (m.tipo_medicion === 'repeticiones') return Math.max(0, Math.round(Number(m.repeticiones) || 0));
+  if (m.tipo_medicion === 'repeticiones')
+    return Math.max(0, Math.round(Number(m.repeticiones) || 0));
   if (m.tipo_medicion === 'calorías') return Math.max(0, Math.round(Number(m.calorias) || 0));
   if (m.tipo_medicion === 'distancia') return Math.max(0, Math.round(Number(m.distancia) || 0));
   if (m.tipo_medicion === 'peso') return Math.max(0, Math.round(Number(m.intentos) || 0));

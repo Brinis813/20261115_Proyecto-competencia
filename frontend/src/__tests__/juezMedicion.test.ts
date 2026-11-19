@@ -112,7 +112,7 @@ describe('mejorPesoDeIntentos', () => {
         { peso: 60, valido: true },
         { peso: 80, valido: true },
         { peso: 100, valido: false },
-      ])
+      ]),
     ).toBe(80);
   });
 });
@@ -143,10 +143,18 @@ describe('construirMovObjetivo', () => {
   });
   it('conserva campos opcionales del movimiento', () => {
     const res = construirMovObjetivo(
-      [{ nombre: 'Run', reps: { General: 1 }, tipo_medicion: 'distancia' as const, unidad_distancia: 'm' as const, distancia: 400 }],
+      [
+        {
+          nombre: 'Run',
+          reps: { General: 1 },
+          tipo_medicion: 'distancia' as const,
+          unidad_distancia: 'm' as const,
+          distancia: 400,
+        },
+      ],
       'General',
       false,
-      1
+      1,
     );
     expect(res[0].tipo_medicion).toBe('distancia');
     expect(res[0].distancia).toBe(400);
@@ -174,7 +182,12 @@ describe('construirValorBruto', () => {
       error: 'Usa el cronometro para tomar el tiempo antes de enviar',
     });
     expect(
-      construirValorBruto({ ...baseValor, esTiempo: true, elapsed: 1000, tiempoFinalFormateado: '01:40.00' })
+      construirValorBruto({
+        ...baseValor,
+        esTiempo: true,
+        elapsed: 1000,
+        tiempoFinalFormateado: '01:40.00',
+      }),
     ).toEqual({ valorBruto: '01:40.00', capado: false });
   });
   it('peso exige mejor intento', () => {
@@ -195,10 +208,20 @@ describe('construirValorBruto', () => {
         ...baseValor,
         esSplits: true,
         splits: [
-          { segmento_numero: 1, segmento_nombre: 'A', tiempo_acumulado_ms: 1000, tiempo_parcial_ms: 1000 },
-          { segmento_numero: 2, segmento_nombre: 'B', tiempo_acumulado_ms: 2500, tiempo_parcial_ms: 1500 },
+          {
+            segmento_numero: 1,
+            segmento_nombre: 'A',
+            tiempo_acumulado_ms: 1000,
+            tiempo_parcial_ms: 1000,
+          },
+          {
+            segmento_numero: 2,
+            segmento_nombre: 'B',
+            tiempo_acumulado_ms: 2500,
+            tiempo_parcial_ms: 1500,
+          },
         ],
-      })
+      }),
     ).toEqual({ valorBruto: '2500', capado: false });
   });
   it('conteo exige reps', () => {
@@ -249,7 +272,9 @@ describe('construirDetalle', () => {
     expect(d).toMatchObject({ modalidad: 'max_load', mejor: 60 });
   });
   it('detalle de splits', () => {
-    const splits = [{ segmento_numero: 1, segmento_nombre: 'A', tiempo_acumulado_ms: 5, tiempo_parcial_ms: 5 }] as never[];
+    const splits = [
+      { segmento_numero: 1, segmento_nombre: 'A', tiempo_acumulado_ms: 5, tiempo_parcial_ms: 5 },
+    ] as never[];
     const d = construirDetalle({ ...base, esSplits: true, splits });
     expect(d).toMatchObject({ modalidad: 'time_trial_splits' });
   });

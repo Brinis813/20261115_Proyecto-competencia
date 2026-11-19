@@ -20,7 +20,7 @@ function SenalDeClic({ foco, className }: { foco?: Foco; className?: string }) {
     <span
       className={cx(
         'pointer-events-none absolute w-[4.4%] aspect-square -translate-x-1/2 -translate-y-1/2',
-        className
+        className,
       )}
       style={{ left: `${foco.x}%`, top: `${foco.y}%` }}
       aria-hidden="true"
@@ -85,12 +85,20 @@ export default function TutorialDetalle({
 
           <div className="flex flex-wrap items-center gap-2">
             {tutorial.gif && (
-              <Button variant="secondary" size="sm" icon={Play} onClick={() => setVerGif((v) => !v)}>
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={Play}
+                onClick={() => setVerGif((v) => !v)}
+              >
                 {verGif ? 'Ocultar animación' : 'Ver animación'}
               </Button>
             )}
             {tutorial.ruta && (
-              <Link to={tutorial.ruta} className="btn-primary btn-sm inline-flex items-center gap-2">
+              <Link
+                to={tutorial.ruta}
+                className="btn-primary btn-sm inline-flex items-center gap-2"
+              >
                 Ir a la pantalla
                 <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
               </Link>
@@ -124,13 +132,18 @@ export default function TutorialDetalle({
                     <span className="font-display text-3xl font-bold text-hyrox-primary/70 tabular-nums leading-none">
                       {String(i + 1).padStart(2, '0')}
                     </span>
-                    <h3 className="text-base font-bold text-hyrox-paper leading-snug">{paso.titulo}</h3>
+                    <h3 className="text-base font-bold text-hyrox-paper leading-snug">
+                      {paso.titulo}
+                    </h3>
                   </div>
                   <p className="text-sm text-hyrox-mist leading-relaxed mt-3">{paso.detalle}</p>
 
                   {paso.aviso && (
                     <p className="mt-4 flex gap-2.5 rounded-xl border border-hyrox-warning/25 bg-hyrox-warning/10 px-3.5 py-3 text-sm text-hyrox-paper/90">
-                      <AlertTriangle className="w-4.5 h-4.5 shrink-0 text-hyrox-warning mt-0.5" aria-hidden="true" />
+                      <AlertTriangle
+                        className="w-4.5 h-4.5 shrink-0 text-hyrox-warning mt-0.5"
+                        aria-hidden="true"
+                      />
                       <span>{paso.aviso}</span>
                     </p>
                   )}
@@ -139,11 +152,12 @@ export default function TutorialDetalle({
                 <button
                   type="button"
                   onClick={() =>
-                    paso.imagen && setAmpliada({ src: paso.imagen, alt: paso.titulo, foco: paso.foco })
+                    paso.imagen &&
+                    setAmpliada({ src: paso.imagen, alt: paso.titulo, foco: paso.foco })
                   }
                   className={cx(
                     'relative block w-full text-left rounded-xl transition-transform duration-200',
-                    paso.imagen && 'hover:scale-[1.01] cursor-zoom-in'
+                    paso.imagen && 'hover:scale-[1.01] cursor-zoom-in',
                   )}
                   aria-label={`Ampliar la captura del paso ${i + 1}`}
                 >

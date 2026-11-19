@@ -20,9 +20,7 @@ const competenciaBaseSchema = {
   tipo_publicacion: z.enum(['tiempo_real', 'al_finalizar_circuito']),
   estado: z.enum(['borrador', 'activo', 'finalizado']).optional(),
   // Formato de la prueba: individual, relevos, duplas, equipos o escalado.
-  tipo_participacion: z
-    .enum(['Individual', 'Relevos', 'Duplas', 'Equipos', 'Escalado'])
-    .optional(),
+  tipo_participacion: z.enum(['Individual', 'Relevos', 'Duplas', 'Equipos', 'Escalado']).optional(),
   // Duración / time cap de la competencia completa en minutos (null o 0 = sin tope).
   duracion_minutos: z.number().int().min(0).max(1440).nullable().optional(),
   // Número de rondas que se repite cada ejercicio (1-100, default 1).
@@ -67,7 +65,7 @@ export const assignCompetenciaSchema = z.object({
       z.object({
         usuario_id: z.number().int().positive(),
         participante_id: z.number().int().positive(),
-      })
+      }),
     )
     .min(1, 'Agrega al menos una pareja juez-atleta'),
 });

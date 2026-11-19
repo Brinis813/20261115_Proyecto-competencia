@@ -36,7 +36,8 @@ export default function PortadaEditor() {
         <div>
           <h2 className="eyebrow">Portada del evento</h2>
           <p className="text-2xs text-hyrox-ghost mt-0.5">
-            {u.titulo ? `${u.titulo} · ` : ''}Se ve en las tarjetas y en la página pública del evento
+            {u.titulo ? `${u.titulo} · ` : ''}Se ve en las tarjetas y en la página pública del
+            evento
           </p>
         </div>
       </header>
@@ -58,8 +59,16 @@ export default function PortadaEditor() {
         )}
 
         <div className="flex-1 min-w-0 space-y-3">
-          {u.error && <Alert tone="error" onDismiss={() => u.setError('')}>{u.error}</Alert>}
-          {u.exito && <Alert tone="success" onDismiss={() => u.setExito('')}>{u.exito}</Alert>}
+          {u.error && (
+            <Alert tone="error" onDismiss={() => u.setError('')}>
+              {u.error}
+            </Alert>
+          )}
+          {u.exito && (
+            <Alert tone="success" onDismiss={() => u.setExito('')}>
+              {u.exito}
+            </Alert>
+          )}
 
           <input
             ref={u.inputRef}
@@ -68,10 +77,18 @@ export default function PortadaEditor() {
             onChange={u.onElegir}
             className="block w-full text-sm text-hyrox-mist file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-hyrox-primary/15 file:text-hyrox-primary hover:file:bg-hyrox-primary/25 file:cursor-pointer"
           />
-          <p className="field-hint">JPG, PNG o WebP de hasta {MAX_MB_IMAGEN} MB. Se recomienda apaisada (16:9).</p>
+          <p className="field-hint">
+            JPG, PNG o WebP de hasta {MAX_MB_IMAGEN} MB. Se recomienda apaisada (16:9).
+          </p>
 
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" icon={ImagePlus} onClick={u.guardar} loading={u.guardando} disabled={!u.seleccion}>
+            <Button
+              size="sm"
+              icon={ImagePlus}
+              onClick={u.guardar}
+              loading={u.guardando}
+              disabled={!u.seleccion}
+            >
               {u.imagenUrl ? 'Reemplazar portada' : 'Subir portada'}
             </Button>
             {u.imagenUrl && (

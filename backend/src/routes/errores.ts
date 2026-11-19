@@ -32,13 +32,19 @@ function desinfectar(valor: unknown): string {
     .slice(0, 500);
 }
 
-router.post('/', strictRateLimiter(20, 60 * 1000), validate(errorFrontendSchema), (req: Request, res: Response) => {
-  const cuerpo = req.body as Record<string, unknown>;
-  reportError(new Error(`frontend: ${desinfectar(cuerpo.mensaje)}`), {
-    ...contextoDeRequest(req as never),
-    endpoint: (cuerpo.endpoint as string) || (contextoDeRequest(req as never).endpoint ?? 'frontend'),
-  });
-  res.status(202).json({ message: 'Error registrado' });
-});
+router.post(
+  '/',
+  strictRateLimiter(20, 60 * 1000),
+  validate(errorFrontendSchema),
+  (req: Request, res: Response) => {
+    const cuerpo = req.body as Record<string, unknown>;
+    reportError(new Error(`frontend: ${desinfectar(cuerpo.mensaje)}`), {
+      ...contextoDeRequest(req as never),
+      endpoint:
+        (cuerpo.endpoint as string) || (contextoDeRequest(req as never).endpoint ?? 'frontend'),
+    });
+    res.status(202).json({ message: 'Error registrado' });
+  },
+);
 
 export default router;

@@ -54,7 +54,10 @@
     @apply text-hyrox-ghost;
   }
 
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     @apply font-display tracking-display;
   }
 
@@ -230,7 +233,9 @@
   .timer-display {
     @apply font-mono font-bold text-hyrox-primary tabular-nums;
     letter-spacing: -0.03em;
-    text-shadow: 0 0 48px rgba(255, 107, 0, 0.35), 0 0 96px rgba(255, 107, 0, 0.12);
+    text-shadow:
+      0 0 48px rgba(255, 107, 0, 0.35),
+      0 0 96px rgba(255, 107, 0, 0.12);
   }
 
   /* ---------- Utilidades ---------- */

@@ -8,7 +8,7 @@ import { log } from '../../utils/logger';
 export async function autoPopulateCategories(conn: mysql.Connection): Promise<void> {
   try {
     const [partRows] = await conn.query<any[]>(
-      `SELECT DISTINCT categoria FROM participantes WHERE categoria IS NOT NULL AND TRIM(categoria) != ''`
+      `SELECT DISTINCT categoria FROM participantes WHERE categoria IS NOT NULL AND TRIM(categoria) != ''`,
     );
 
     for (const row of partRows) {
@@ -19,10 +19,20 @@ export async function autoPopulateCategories(conn: mysql.Connection): Promise<vo
       let nombre = rawCat;
 
       const lower = rawCat.toLowerCase();
-      if (lower.includes('femenino') || lower.includes('mujeres') || lower.includes('female') || lower.includes('women')) {
+      if (
+        lower.includes('femenino') ||
+        lower.includes('mujeres') ||
+        lower.includes('female') ||
+        lower.includes('women')
+      ) {
         genero = 'Femenino';
         nombre = rawCat.replace(/femenino|mujeres|female|women/gi, '').trim() || rawCat;
-      } else if (lower.includes('masculino') || lower.includes('hombres') || lower.includes('male') || lower.includes('men')) {
+      } else if (
+        lower.includes('masculino') ||
+        lower.includes('hombres') ||
+        lower.includes('male') ||
+        lower.includes('men')
+      ) {
         genero = 'Masculino';
         nombre = rawCat.replace(/masculino|hombres|male|men/gi, '').trim() || rawCat;
       }
@@ -33,18 +43,18 @@ export async function autoPopulateCategories(conn: mysql.Connection): Promise<vo
         `INSERT INTO categorias (nombre, genero)
          SELECT ?, ? FROM DUAL
          WHERE NOT EXISTS (SELECT 1 FROM categorias WHERE nombre = ? AND genero = ?)`,
-        [nombre, genero, nombre, genero]
+        [nombre, genero, nombre, genero],
       );
 
       const [catRows] = await conn.query<any[]>(
         `SELECT id FROM categorias WHERE nombre = ? AND genero = ? LIMIT 1`,
-        [nombre, genero]
+        [nombre, genero],
       );
 
       if (catRows[0]?.id) {
         await conn.query(
           `UPDATE participantes SET categoria_id = ? WHERE categoria = ? AND (categoria_id IS NULL OR categoria_id = 0)`,
-          [catRows[0].id, rawCat]
+          [catRows[0].id, rawCat],
         );
       }
     }
@@ -70,7 +80,7 @@ export async function eliminarCategoriasDuplicadas(conn: mysql.Connection): Prom
               GROUP_CONCAT(id ORDER BY id ASC) AS ids
        FROM categorias
        GROUP BY COALESCE(evento_id, -1), nombre, genero
-       HAVING COUNT(*) > 1`
+       HAVING COUNT(*) > 1`,
     );
     if (!grupos || grupos.length === 0) return;
 
@@ -86,20 +96,20 @@ export async function eliminarCategoriasDuplicadas(conn: mysql.Connection): Prom
       // Atletas apuntando a los duplicados -> canónica.
       await conn.query(
         `UPDATE participantes SET categoria_id = ? WHERE categoria_id IN (${lista})`,
-        [canonId]
+        [canonId],
       );
       // Competencias vinculadas: se migran y luego se borran los enlaces viejos
       // (INSERT IGNORE evita chocar con la PK si ya estaba vinculada).
       await conn.query(
         `INSERT IGNORE INTO competencia_categorias (competencia_id, categoria_id)
          SELECT competencia_id, ? FROM competencia_categorias WHERE categoria_id IN (${lista})`,
-        [canonId]
+        [canonId],
       );
       await conn.query(`DELETE FROM competencia_categorias WHERE categoria_id IN (${lista})`);
       // Heats: se reasignan; si el número choca con la unique
       // (categoria_id, numero), se desplaza al siguiente libre.
       const [heats] = await conn.query<any[]>(
-        `SELECT id, numero FROM heats WHERE categoria_id IN (${lista}) ORDER BY id ASC`
+        `SELECT id, numero FROM heats WHERE categoria_id IN (${lista}) ORDER BY id ASC`,
       );
       for (const h of heats ?? []) {
         try {
@@ -107,7 +117,7 @@ export async function eliminarCategoriasDuplicadas(conn: mysql.Connection): Prom
         } catch {
           const [mx] = await conn.query<any[]>(
             `SELECT COALESCE(MAX(numero), 0) AS mx FROM heats WHERE categoria_id = ?`,
-            [canonId]
+            [canonId],
           );
           const libre = Number(mx[0]?.mx ?? 0) + 1;
           await conn.query(`UPDATE heats SET categoria_id = ?, numero = ? WHERE id = ?`, [
@@ -118,7 +128,9 @@ export async function eliminarCategoriasDuplicadas(conn: mysql.Connection): Prom
         }
       }
       await conn.query(`DELETE FROM categorias WHERE id IN (${lista})`);
-      log.info(`categoría duplicada fusionada: "${g.nombre} ${g.genero}" -> id ${canonId} (${ids.length} borradas)`);
+      log.info(
+        `categoría duplicada fusionada: "${g.nombre} ${g.genero}" -> id ${canonId} (${ids.length} borradas)`,
+      );
     }
   } catch (err: any) {
     log.warn(`no se pudieron fusionar categorías duplicadas: ${err?.message}`);
@@ -141,7 +153,7 @@ export async function sanearEsquemasCompetencias(conn: mysql.Connection): Promis
   try {
     const [links] = await conn.query<any[]>(
       `SELECT cc.competencia_id, c.nombre, c.genero
-       FROM competencia_categorias cc JOIN categorias c ON c.id = cc.categoria_id`
+       FROM competencia_categorias cc JOIN categorias c ON c.id = cc.categoria_id`,
     );
     const etiquetasPorCompetencia = new Map<number, string[]>();
     for (const l of links ?? []) {
@@ -155,7 +167,7 @@ export async function sanearEsquemasCompetencias(conn: mysql.Connection): Promis
 
     const podarMapa = (
       mapa: Record<string, number> | undefined,
-      validas: Map<string, string>
+      validas: Map<string, string>,
     ): { mapa: Record<string, number> | undefined; cambio: boolean } => {
       if (!mapa || typeof mapa !== 'object') return { mapa, cambio: false };
       const saneado: Record<string, number> = {};
@@ -172,7 +184,7 @@ export async function sanearEsquemasCompetencias(conn: mysql.Connection): Promis
     };
 
     const [wods] = await conn.query<any[]>(
-      `SELECT id, competencia_id, esquema FROM wods WHERE esquema IS NOT NULL`
+      `SELECT id, competencia_id, esquema FROM wods WHERE esquema IS NOT NULL`,
     );
     let saneados = 0;
     for (const w of wods ?? []) {
@@ -190,7 +202,10 @@ export async function sanearEsquemasCompetencias(conn: mysql.Connection): Promis
       const validas = new Map(divisiones.map((d) => [d.trim().toLowerCase(), d.trim()]));
       let cambio = false;
 
-      if (esquema.movimientos_por_division && typeof esquema.movimientos_por_division === 'object') {
+      if (
+        esquema.movimientos_por_division &&
+        typeof esquema.movimientos_por_division === 'object'
+      ) {
         const podadas: Record<string, any[]> = {};
         for (const [clave, lista] of Object.entries<any>(esquema.movimientos_por_division)) {
           const c = validas.get(clave.trim().toLowerCase());
@@ -213,7 +228,8 @@ export async function sanearEsquemasCompetencias(conn: mysql.Connection): Promis
           if (podadas[c] === undefined) podadas[c] = normalizada;
           else podadas[c].push(...normalizada);
         }
-        if (JSON.stringify(podadas) !== JSON.stringify(esquema.movimientos_por_division)) cambio = true;
+        if (JSON.stringify(podadas) !== JSON.stringify(esquema.movimientos_por_division))
+          cambio = true;
         esquema = { ...esquema, movimientos_por_division: podadas };
       }
       if (Array.isArray(esquema.movimientos)) {
@@ -240,7 +256,10 @@ export async function sanearEsquemasCompetencias(conn: mysql.Connection): Promis
       }
 
       if (cambio) {
-        await conn.query(`UPDATE wods SET esquema = ? WHERE id = ?`, [JSON.stringify(esquema), w.id]);
+        await conn.query(`UPDATE wods SET esquema = ? WHERE id = ?`, [
+          JSON.stringify(esquema),
+          w.id,
+        ]);
         saneados++;
       }
     }
@@ -261,7 +280,7 @@ export async function sanearEsquemasCompetencias(conn: mysql.Connection): Promis
 export async function sanearDivisionesCompetencias(conn: mysql.Connection): Promise<void> {
   try {
     const [rows] = await conn.query<any[]>(
-      `SELECT id, divisiones FROM competencias WHERE divisiones IS NOT NULL`
+      `SELECT id, divisiones FROM competencias WHERE divisiones IS NOT NULL`,
     );
 
     for (const row of rows) {
@@ -287,7 +306,7 @@ export async function sanearDivisionesCompetencias(conn: mysql.Connection): Prom
               }
               return '';
             })
-            .filter(Boolean)
+            .filter(Boolean),
         ),
       ];
 
@@ -295,7 +314,9 @@ export async function sanearDivisionesCompetencias(conn: mysql.Connection): Prom
         JSON.stringify(limpias),
         row.id,
       ]);
-      log.info(`divisiones saneadas de la competencia ${row.id}: ${limpias.join(' · ') || '(vacías)'}`);
+      log.info(
+        `divisiones saneadas de la competencia ${row.id}: ${limpias.join(' · ') || '(vacías)'}`,
+      );
     }
   } catch (err: any) {
     log.warn(`no se pudieron sanear las divisiones: ${(err as Error).message}`);

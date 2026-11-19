@@ -66,5 +66,5 @@ Participante.init(
     tableName: 'participantes',
     timestamps: true,
     underscored: true,
-  }
+  },
 );

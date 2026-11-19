@@ -30,5 +30,5 @@ CompetenciaCategoria.init(
     modelName: 'CompetenciaCategoria',
     tableName: 'competencia_categorias',
     timestamps: false,
-  }
+  },
 );

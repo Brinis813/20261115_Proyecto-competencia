@@ -25,7 +25,7 @@ export async function repararAsignaciones(conn: mysql.Connection): Promise<void>
     const [llave] = await conn.query<any[]>(
       `SELECT COLUMN_NAME AS c FROM information_schema.STATISTICS
        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'asignaciones'
-         AND INDEX_NAME = 'unique_asignacion' ORDER BY SEQ_IN_INDEX`
+         AND INDEX_NAME = 'unique_asignacion' ORDER BY SEQ_IN_INDEX`,
     );
     const columnas = (llave as Array<{ c: string }>).map((r) => r.c);
     const canonica = ['competencia_id', 'participante_id', 'wod_id'];
@@ -38,7 +38,9 @@ export async function repararAsignaciones(conn: mysql.Connection): Promise<void>
       ]) {
         try {
           await conn.query(sql);
-        } catch { /* ya existe: nada que hacer */ }
+        } catch {
+          /* ya existe: nada que hacer */
+        }
       }
       return;
     }
@@ -49,7 +51,7 @@ export async function repararAsignaciones(conn: mysql.Connection): Promise<void>
     const [conteo] = await conn.query<any[]>(`SELECT COUNT(*) AS total FROM asignaciones`);
     if ((conteo[0]?.total ?? 0) > 0) {
       log.warn(
-        'repararAsignaciones omitido: la tabla tiene filas con la unique legacy; sanealas a mano y reinicia'
+        'repararAsignaciones omitido: la tabla tiene filas con la unique legacy; sanealas a mano y reinicia',
       );
       return;
     }
@@ -64,13 +66,17 @@ export async function repararAsignaciones(conn: mysql.Connection): Promise<void>
     ]) {
       try {
         await conn.query(`ALTER TABLE asignaciones DROP FOREIGN KEY ${fk}`);
-      } catch { /* no existe: se sigue */ }
+      } catch {
+        /* no existe: se sigue */
+      }
     }
     try {
       await conn.query(`ALTER TABLE asignaciones DROP INDEX unique_asignacion`);
-    } catch { /* no existe: se sigue */ }
+    } catch {
+      /* no existe: se sigue */
+    }
     await conn.query(
-      `ALTER TABLE asignaciones ADD UNIQUE KEY unique_asignacion (competencia_id, participante_id, wod_id)`
+      `ALTER TABLE asignaciones ADD UNIQUE KEY unique_asignacion (competencia_id, participante_id, wod_id)`,
     );
     for (const sql of [
       `ALTER TABLE asignaciones ADD CONSTRAINT fk_asignaciones_competencia FOREIGN KEY (competencia_id) REFERENCES competencias(id) ON DELETE CASCADE`,
@@ -101,12 +107,13 @@ export async function repararAsignaciones(conn: mysql.Connection): Promise<void>
  */
 export async function repararMembresiasJueces(conn: mysql.Connection): Promise<void> {
   try {
-    if (!(await existeTabla(conn, 'asignaciones')) || !(await existeTabla(conn, 'evento_usuarios'))) return;
+    if (!(await existeTabla(conn, 'asignaciones')) || !(await existeTabla(conn, 'evento_usuarios')))
+      return;
     const [res] = await conn.query<any>(
       `INSERT IGNORE INTO evento_usuarios (evento_id, usuario_id, rol)
        SELECT DISTINCT c.evento_id, a.usuario_id, 'juez'
        FROM asignaciones a JOIN competencias c ON c.id = a.competencia_id
-       WHERE c.evento_id IS NOT NULL`
+       WHERE c.evento_id IS NOT NULL`,
     );
     const creadas = (res as { affectedRows?: number })?.affectedRows ?? 0;
     if (creadas > 0) log.info(`membresias de juez reparadas: ${creadas}`);

@@ -1,14 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import {
-  ArrowRightLeft,
-  CalendarClock,
-  Clock,
-  Flag,
-  Plus,
-  Trash2,
-  Users,
-  X,
-} from 'lucide-react';
+import { ArrowRightLeft, CalendarClock, Clock, Flag, Plus, Trash2, Users, X } from 'lucide-react';
 import api, { mensajeDeError } from '../../api/client';
 import AppShell from '../../components/layout/AppShell';
 import {
@@ -66,7 +57,9 @@ export default function HeatsPage() {
         setCompetencias(Array.isArray(resCompetencias.data) ? resCompetencias.data : []);
         if (cats.length > 0) setCategoriaId(cats[0].id);
       })
-      .catch((err) => setError(mensajeDeError(err, 'No se pudieron cargar categorías ni Competencias')))
+      .catch((err) =>
+        setError(mensajeDeError(err, 'No se pudieron cargar categorías ni Competencias')),
+      )
       .finally(() => setCargandoBase(false));
   }, []);
 
@@ -78,7 +71,10 @@ export default function HeatsPage() {
     setCargandoHeats(true);
     try {
       const res = await api.get<VistaHeats>('/heats', {
-        params: { categoria_id: categoriaId, ...(competenciaId ? { competencia_id: competenciaId } : {}) },
+        params: {
+          categoria_id: categoriaId,
+          ...(competenciaId ? { competencia_id: competenciaId } : {}),
+        },
       });
       setVista(res.data);
       // Las horas manuales parten de lo programado (editable por serie).
@@ -118,7 +114,7 @@ export default function HeatsPage() {
     mutar(
       'generar',
       api.post('/heats/generar', { categoria_id: categoriaId, capacidad_maxima: capacidad, modo }),
-      'Series generadas'
+      'Series generadas',
     );
 
   const heatVacio = () =>
@@ -126,7 +122,7 @@ export default function HeatsPage() {
     mutar(
       'vacio',
       api.post('/heats', { categoria_id: categoriaId, capacidad_maxima: capacidad }),
-      'Serie vacía creada'
+      'Serie vacía creada',
     );
 
   const limpiar = () =>
@@ -137,14 +133,18 @@ export default function HeatsPage() {
     mutar(
       `mover-${participanteId}`,
       api.post('/heats/mover', { participante_id: participanteId, heat_id: heatId }),
-      'Atleta movido de serie'
+      'Atleta movido de serie',
     );
 
   const quitar = (participanteId: number) =>
     categoriaId &&
-    mutar(`quitar-${participanteId}`, api.delete(`/heats/asignacion/${participanteId}`, {
-      data: { categoria_id: categoriaId },
-    }), 'Atleta fuera de series');
+    mutar(
+      `quitar-${participanteId}`,
+      api.delete(`/heats/asignacion/${participanteId}`, {
+        data: { categoria_id: categoriaId },
+      }),
+      'Atleta fuera de series',
+    );
 
   const eliminarHeat = (heatId: number) =>
     mutar(`del-${heatId}`, api.delete(`/heats/${heatId}`), 'Serie eliminada');
@@ -164,7 +164,7 @@ export default function HeatsPage() {
       setExito(
         res.data.sinDuracion
           ? 'Horario calculado solo con la transición: la competencia no tiene duración definida'
-          : 'Horario calculado y guardado'
+          : 'Horario calculado y guardado',
       );
       await cargar();
     } catch (err) {
@@ -203,13 +203,26 @@ export default function HeatsPage() {
   const hayHeats = (vista?.heats.length ?? 0) > 0;
 
   return (
-    <AppShell title="Heats" subtitle="Series globales por categoría, con cronograma por Competencia">
+    <AppShell
+      title="Heats"
+      subtitle="Series globales por categoría, con cronograma por Competencia"
+    >
       <div className="max-w-6xl space-y-4">
-        {error && <Alert tone="error" onDismiss={() => setError('')}>{error}</Alert>}
-        {exito && <Alert tone="success" onDismiss={() => setExito('')}>{exito}</Alert>}
+        {error && (
+          <Alert tone="error" onDismiss={() => setError('')}>
+            {error}
+          </Alert>
+        )}
+        {exito && (
+          <Alert tone="success" onDismiss={() => setExito('')}>
+            {exito}
+          </Alert>
+        )}
 
         {cargandoBase ? (
-          <div className="surface"><SkeletonList rows={4} /></div>
+          <div className="surface">
+            <SkeletonList rows={4} />
+          </div>
         ) : (
           <>
             {/* Selectores */}
@@ -217,21 +230,29 @@ export default function HeatsPage() {
               <Select
                 label="Categoría"
                 value={categoriaId === null ? '' : String(categoriaId)}
-                onChange={(e) => setCategoriaId(e.target.value === '' ? null : Number(e.target.value))}
+                onChange={(e) =>
+                  setCategoriaId(e.target.value === '' ? null : Number(e.target.value))
+                }
               >
                 <option value="">Elige una categoría…</option>
                 {categorias.map((c) => (
-                  <option key={c.id} value={String(c.id)}>{etiquetaCategoria(c)}</option>
+                  <option key={c.id} value={String(c.id)}>
+                    {etiquetaCategoria(c)}
+                  </option>
                 ))}
               </Select>
               <Select
                 label="Competencia para el cronograma"
                 value={competenciaId === null ? '' : String(competenciaId)}
-                onChange={(e) => setCompetenciaId(e.target.value === '' ? null : Number(e.target.value))}
+                onChange={(e) =>
+                  setCompetenciaId(e.target.value === '' ? null : Number(e.target.value))
+                }
               >
                 <option value="">Sin Competencia (solo series)…</option>
                 {competencias.map((w) => (
-                  <option key={w.id} value={String(w.id)}>{w.nombre}</option>
+                  <option key={w.id} value={String(w.id)}>
+                    {w.nombre}
+                  </option>
                 ))}
               </Select>
             </section>
@@ -269,7 +290,13 @@ export default function HeatsPage() {
                       >
                         Generar series
                       </Button>
-                      <Button size="sm" variant="secondary" icon={Plus} loading={accionando === 'vacio'} onClick={() => void heatVacio()}>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        icon={Plus}
+                        loading={accionando === 'vacio'}
+                        onClick={() => void heatVacio()}
+                      >
                         Serie vacía
                       </Button>
                       {hayHeats && (
@@ -298,7 +325,11 @@ export default function HeatsPage() {
                   <section className="surface p-4 sm:p-5">
                     <div className="flex flex-wrap items-center gap-2 mb-3">
                       <h2 className="eyebrow flex-1">Cronograma · {competenciaSel?.nombre}</h2>
-                      <div className="flex rounded-xl border border-white/10 overflow-hidden" role="group" aria-label="Modo de horario">
+                      <div
+                        className="flex rounded-xl border border-white/10 overflow-hidden"
+                        role="group"
+                        aria-label="Modo de horario"
+                      >
                         {(['auto', 'manual'] as const).map((m) => (
                           <button
                             key={m}
@@ -318,7 +349,9 @@ export default function HeatsPage() {
                     </div>
 
                     {!hayHeats ? (
-                      <p className="text-xs text-hyrox-mist">Primero arma las series de la categoría.</p>
+                      <p className="text-xs text-hyrox-mist">
+                        Primero arma las series de la categoría.
+                      </p>
                     ) : modoHorario === 'auto' ? (
                       <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
                         <Field
@@ -336,7 +369,11 @@ export default function HeatsPage() {
                           value={transicion}
                           onChange={(e) => setTransicion(Number(e.target.value))}
                           className="sm:max-w-[14rem]"
-                          hint={competenciaSel?.duracion_minutos ? `competencia: ${competenciaSel.duracion_minutos} min + transición` : 'La competencia no tiene duración: solo se suma la transición'}
+                          hint={
+                            competenciaSel?.duracion_minutos
+                              ? `competencia: ${competenciaSel.duracion_minutos} min + transición`
+                              : 'La competencia no tiene duración: solo se suma la transición'
+                          }
                         />
                         <Button
                           size="sm"
@@ -357,11 +394,18 @@ export default function HeatsPage() {
                               label={`Heat ${h.numero}`}
                               type="time"
                               value={horasManual[h.id] ?? ''}
-                              onChange={(e) => setHorasManual((prev) => ({ ...prev, [h.id]: e.target.value }))}
+                              onChange={(e) =>
+                                setHorasManual((prev) => ({ ...prev, [h.id]: e.target.value }))
+                              }
                             />
                           ))}
                         </div>
-                        <Button size="sm" icon={CalendarClock} loading={guardandoHorario} onClick={() => void guardarHorarioManual()}>
+                        <Button
+                          size="sm"
+                          icon={CalendarClock}
+                          loading={guardandoHorario}
+                          onClick={() => void guardarHorarioManual()}
+                        >
                           Guardar horarios
                         </Button>
                       </div>
@@ -371,7 +415,9 @@ export default function HeatsPage() {
 
                 {/* Series */}
                 {cargandoHeats ? (
-                  <div className="surface"><SkeletonList rows={3} /></div>
+                  <div className="surface">
+                    <SkeletonList rows={3} />
+                  </div>
                 ) : !hayHeats ? (
                   <div className="surface">
                     <EmptyState
@@ -396,7 +442,11 @@ export default function HeatsPage() {
                                 {competenciaSel && ` · ${competenciaSel.nombre}`}
                               </p>
                             ) : (
-                              competenciaId && <p className="text-2xs text-hyrox-ghost mt-0.5">Sin hora en esta competencia</p>
+                              competenciaId && (
+                                <p className="text-2xs text-hyrox-ghost mt-0.5">
+                                  Sin hora en esta competencia
+                                </p>
+                              )
                             )}
                           </div>
                           <IconButton
@@ -433,13 +483,17 @@ export default function HeatsPage() {
                     <section className="surface overflow-hidden">
                       <header className="panel-header">
                         <div>
-                          <h3 className="eyebrow">Sin asignar · {(vista?.sinAsignar.length ?? 0)}</h3>
-                          <p className="text-2xs text-hyrox-ghost mt-0.5">Elige la serie destino por atleta</p>
+                          <h3 className="eyebrow">Sin asignar · {vista?.sinAsignar.length ?? 0}</h3>
+                          <p className="text-2xs text-hyrox-ghost mt-0.5">
+                            Elige la serie destino por atleta
+                          </p>
                         </div>
                         <Users className="w-4 h-4 text-hyrox-ghost" aria-hidden="true" />
                       </header>
                       {(vista?.sinAsignar.length ?? 0) === 0 ? (
-                        <p className="px-5 py-4 text-xs text-hyrox-ghost">Todos los atletas tienen serie.</p>
+                        <p className="px-5 py-4 text-xs text-hyrox-ghost">
+                          Todos los atletas tienen serie.
+                        </p>
                       ) : (
                         <ul className="divide-hairline max-h-96 overflow-y-auto">
                           {vista!.sinAsignar.map((p) => (

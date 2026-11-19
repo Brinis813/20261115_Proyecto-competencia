@@ -43,7 +43,9 @@ export function parsearValor(valorBruto: string, tipo: TipoMedicion): number {
 
   if (partes.length === 2) {
     // MM:SS o MM:SS.CS
-    return seguro(parseInt(partes[0], 10)) * 60000 + Math.round(seguro(parseFloat(partes[1])) * 1000);
+    return (
+      seguro(parseInt(partes[0], 10)) * 60000 + Math.round(seguro(parseFloat(partes[1])) * 1000)
+    );
   }
 
   // Un unico numero se interpreta como segundos. Si no es numerico, el valor
@@ -66,7 +68,7 @@ export function obtenerTiempoTotalDeSplits(splits: Array<{ tiempo_acumulado_ms: 
  * Sirve para romper empates de tiempo total en HYROX.
  */
 export function obtenerTiempoDesempateDeSplits(
-  splits: Array<{ tiempo_parcial_ms: number }>
+  splits: Array<{ tiempo_parcial_ms: number }>,
 ): number {
   if (!splits || splits.length === 0) return 0;
   return Math.min(...splits.map((s) => s.tiempo_parcial_ms));

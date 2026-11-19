@@ -1,5 +1,10 @@
 import { create } from 'zustand';
-import type { LeaderboardData, LeaderboardEntry, LeaderboardWod, CompetenciaTieBreakPolicy } from '../types';
+import type {
+  LeaderboardData,
+  LeaderboardEntry,
+  LeaderboardWod,
+  CompetenciaTieBreakPolicy,
+} from '../types';
 
 /**
  * Estado de la clasificacion en vivo.
@@ -43,7 +48,10 @@ interface LeaderboardState {
   reset: () => void;
 }
 
-function calcularMovimiento(puestoAnterior: number | undefined, puestoNuevo: number): {
+function calcularMovimiento(
+  puestoAnterior: number | undefined,
+  puestoNuevo: number,
+): {
   movimiento: Movimiento;
   delta: number;
 } {
@@ -83,18 +91,25 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
     const anteriores = new Map(get().entradas.map((e) => [e.participante_id, e]));
 
     const resaltados = new Set<number>();
-    const entradas: EntradaConMovimiento[] = (data.leaderboard ?? []).map((entrada: LeaderboardEntry) => {
-      const anterior = anteriores.get(entrada.participante_id);
-      const { movimiento, delta } = calcularMovimiento(anterior?.puesto, entrada.puesto);
+    const entradas: EntradaConMovimiento[] = (data.leaderboard ?? []).map(
+      (entrada: LeaderboardEntry) => {
+        const anterior = anteriores.get(entrada.participante_id);
+        const { movimiento, delta } = calcularMovimiento(anterior?.puesto, entrada.puesto);
 
-      // Se resalta tanto el cambio de puesto como el de puntos: un atleta puede
-      // sumar puntos sin moverse y aun asi merece feedback visual.
-      if (anterior && (movimiento === 'sube' || movimiento === 'baja' || anterior.puntos_total !== entrada.puntos_total)) {
-        resaltados.add(entrada.participante_id);
-      }
+        // Se resalta tanto el cambio de puesto como el de puntos: un atleta puede
+        // sumar puntos sin moverse y aun asi merece feedback visual.
+        if (
+          anterior &&
+          (movimiento === 'sube' ||
+            movimiento === 'baja' ||
+            anterior.puntos_total !== entrada.puntos_total)
+        ) {
+          resaltados.add(entrada.participante_id);
+        }
 
-      return { ...entrada, movimiento, delta };
-    });
+        return { ...entrada, movimiento, delta };
+      },
+    );
 
     set({
       entradas,

@@ -19,7 +19,11 @@ async function juezAsignadoACompetencia(req: AuthRequest, competenciaId: number)
  * Un juez solo puede registrar un WOD concreto si esta asignado a el
  * (wod_id = ese WOD) o a la competencia completa (wod_id NULL).
  */
-async function juezAsignadoAlWod(req: AuthRequest, competenciaId: number, wodId: number): Promise<boolean> {
+async function juezAsignadoAlWod(
+  req: AuthRequest,
+  competenciaId: number,
+  wodId: number,
+): Promise<boolean> {
   if (req.user!.rol !== 'juez') return true;
   const asignacion = await Asignacion.findOne({
     where: {
@@ -33,8 +37,17 @@ async function juezAsignadoAlWod(req: AuthRequest, competenciaId: number, wodId:
 
 export async function saveResult(req: AuthRequest, res: Response) {
   try {
-    const { participante_id, wod_id, valor_bruto, abandono, capado, disqualificado, detalle, desempate, es_desempate } =
-      req.body;
+    const {
+      participante_id,
+      wod_id,
+      valor_bruto,
+      abandono,
+      capado,
+      disqualificado,
+      detalle,
+      desempate,
+      es_desempate,
+    } = req.body;
 
     // Batch 1: Queries independientes en paralelo (reduce round-trips a MySQL de 4 a 2)
     const [wod, participante, existente] = await Promise.all([
@@ -105,7 +118,9 @@ export async function saveResult(req: AuthRequest, res: Response) {
   } catch (error: any) {
     // ER_DUP_ENTRY = race condition between check and insert (UNIQUE on participante_id + wod_id)
     if (error.name === 'SequelizeUniqueConstraintError' || /ER_DUP_ENTRY/i.test(error.message)) {
-      res.status(409).json({ message: 'El participante ya tiene un resultado registrado en este WOD' });
+      res
+        .status(409)
+        .json({ message: 'El participante ya tiene un resultado registrado en este WOD' });
       return;
     }
     res.status(400).json({ message: mensajeSeguro(error) });
@@ -140,7 +155,8 @@ export async function checkParticipant(req: AuthRequest, res: Response) {
     > | null;
     res.json({
       exists: true,
-      message: `${participante?.nombre ?? 'El participante'} ${participante?.apellidos ?? ''} ya tiene un resultado registrado en este WOD`.trim(),
+      message:
+        `${participante?.nombre ?? 'El participante'} ${participante?.apellidos ?? ''} ya tiene un resultado registrado en este WOD`.trim(),
     });
   } catch (error: any) {
     log.error('checkParticipant error:', error?.message);
@@ -156,7 +172,8 @@ export async function getSplits(req: AuthRequest, res: Response) {
     const resultado = await Resultado.findByPk(resultadoId, { attributes: ['wod_id'] });
     if (!resultado) return res.status(404).json({ message: 'Resultado no encontrado' });
 
-    if (resultado.wod_id == null) return res.status(404).json({ message: 'Resultado sin WOD asociado' });
+    if (resultado.wod_id == null)
+      return res.status(404).json({ message: 'Resultado sin WOD asociado' });
 
     const wod = await Wod.findByPk(resultado.wod_id, { attributes: ['competencia_id'] });
     if (!wod) return res.status(404).json({ message: 'WOD no encontrado' });
@@ -210,7 +227,9 @@ export async function getResultsByParticipant(req: AuthRequest, res: Response) {
     // BOLA/IDOR: el staff solo ve atletas de sus eventos. Si el atleta no
     // existe se sigue (el servicio devuelve []), para no enumerar usuarios.
     if (req.user!.rol !== 'participante') {
-      const participante = await Participante.findByPk(participantId, { attributes: ['evento_id'] });
+      const participante = await Participante.findByPk(participantId, {
+        attributes: ['evento_id'],
+      });
       if (participante && !perteneceAlAlcance(req.alcance, participante.evento_id)) {
         res.status(403).json({ message: 'No tienes acceso a este participante' });
         return;
@@ -247,7 +266,17 @@ export async function getResultsByCompetencia(req: AuthRequest, res: Response) {
 
     const wods = await Wod.findAll({
       where: { competencia_id: competenciaId },
-      attributes: ['id', 'orden', 'nombre_ejercicio', 'tipo_medicion', 'unidad_distancia', 'imagen_url', 'tiempo_cap', 'esquema', 'puntaje_maximo'],
+      attributes: [
+        'id',
+        'orden',
+        'nombre_ejercicio',
+        'tipo_medicion',
+        'unidad_distancia',
+        'imagen_url',
+        'tiempo_cap',
+        'esquema',
+        'puntaje_maximo',
+      ],
       order: [['orden', 'ASC']],
     });
 
@@ -260,7 +289,12 @@ export async function getResultsByCompetencia(req: AuthRequest, res: Response) {
       abandono: boolean;
       capado: boolean;
       timestamp_servidor: Date;
-      Participante?: { nombre: string; apellidos: string; cedula: string; categoria: string | null } | null;
+      Participante?: {
+        nombre: string;
+        apellidos: string;
+        cedula: string;
+        categoria: string | null;
+      } | null;
     }
 
     const participantes = (resultados as unknown as FilaResultado[]).map((r) => ({

@@ -12,7 +12,7 @@ export function formatoCrono(seg: number): string {
 export function unidadParaTipo(
   tipo?: TipoMedicion,
   unidadDistancia?: UnidadDistancia,
-  unidadEnergia?: 'kcal' | 'cal'
+  unidadEnergia?: 'kcal' | 'cal',
 ): string {
   switch (tipo) {
     case 'peso':

@@ -37,5 +37,5 @@ EventoUsuario.init(
     modelName: 'EventoUsuario',
     tableName: 'evento_usuarios',
     timestamps: false,
-  }
+  },
 );

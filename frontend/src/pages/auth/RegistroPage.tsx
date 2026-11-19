@@ -29,7 +29,11 @@ export default function RegistroPage() {
 
   const cumplePassword = REQUISITOS_PASSWORD.every((r) => r.cumple(form.password));
   const completo =
-    form.nombre.trim() && form.apellidos.trim() && form.cedula.trim() && form.box.trim() && form.email.trim();
+    form.nombre.trim() &&
+    form.apellidos.trim() &&
+    form.cedula.trim() &&
+    form.box.trim() &&
+    form.email.trim();
 
   async function enviar(e: FormEvent) {
     e.preventDefault();
@@ -60,14 +64,15 @@ export default function RegistroPage() {
           </span>
           <h1 className="font-display text-2xl font-bold text-hyrox-paper">Revisa tu correo</h1>
           <p className="text-sm text-hyrox-mist mt-2">
-            Enviamos un enlace a <span className="text-hyrox-paper font-semibold">{enviado.email}</span>.
-            Ábrelo para activar tu cuenta; caduca en 24 horas.
+            Enviamos un enlace a{' '}
+            <span className="text-hyrox-paper font-semibold">{enviado.email}</span>. Ábrelo para
+            activar tu cuenta; caduca en 24 horas.
           </p>
 
           {!enviado.correoEnviado && (
             <Alert tone="warning" className="mt-5 text-left">
-              Esta instalación todavía no tiene servidor de correo configurado, así que el mensaje no
-              salió. El enlace queda en el registro del servidor: pídeselo a quien la administra.
+              Esta instalación todavía no tiene servidor de correo configurado, así que el mensaje
+              no salió. El enlace queda en el registro del servidor: pídeselo a quien la administra.
             </Alert>
           )}
 
@@ -85,13 +90,19 @@ export default function RegistroPage() {
 
   return (
     <Pantalla>
-      <h1 className="font-display text-2xl font-bold text-hyrox-paper text-center">Crea tu cuenta</h1>
+      <h1 className="font-display text-2xl font-bold text-hyrox-paper text-center">
+        Crea tu cuenta
+      </h1>
       <p className="text-sm text-hyrox-mist text-center mt-1 mb-6">
         Al activarla te preparamos un evento de ejemplo para que empieces a trastear.
       </p>
 
       <form onSubmit={enviar} className="space-y-4" noValidate>
-        {error && <Alert tone="error" onDismiss={() => setError('')}>{error}</Alert>}
+        {error && (
+          <Alert tone="error" onDismiss={() => setError('')}>
+            {error}
+          </Alert>
+        )}
 
         <div className="grid grid-cols-2 gap-3">
           <Field

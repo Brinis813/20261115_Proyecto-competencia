@@ -108,5 +108,5 @@ Usuario.init(
     tableName: 'usuarios',
     timestamps: true,
     underscored: true,
-  }
+  },
 );

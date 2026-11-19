@@ -16,7 +16,7 @@ export function useEstaEnLinea(): boolean {
   return useSyncExternalStore(
     suscribirseAConexion,
     () => navigator.onLine,
-    () => true
+    () => true,
   );
 }
 
@@ -72,7 +72,9 @@ export function OfflineBanner() {
     <div className="fixed inset-x-3 bottom-3 z-50 pb-safe" role="status">
       <div className="max-w-md mx-auto flex items-center gap-3 px-4 py-3 rounded-2xl bg-hyrox-danger text-white shadow-elevated">
         <WifiOff className="w-5 h-5 shrink-0" aria-hidden="true" />
-        <span className="text-sm font-medium">Sin conexion. Los resultados se guardan y se enviaran al reconectar.</span>
+        <span className="text-sm font-medium">
+          Sin conexion. Los resultados se guardan y se enviaran al reconectar.
+        </span>
       </div>
     </div>
   );

@@ -41,10 +41,9 @@ const movimientoSchema = z.object({
   puntaje: z.number().int().min(0).max(10000).optional(),
   // Reps objetivo por división (clave = etiqueta de categoría, ej. "RX Masculino").
   // Acotado a 100 divisiones: sin tope, un payload gigante quema CPU.
-  reps: z.record(z.number().int().min(0, 'Las reps no pueden ser negativas').max(100000)).refine(
-    (r) => Object.keys(r).length <= 100,
-    'Demasiadas divisiones en reps (max 100)'
-  ),
+  reps: z
+    .record(z.number().int().min(0, 'Las reps no pueden ser negativas').max(100000))
+    .refine((r) => Object.keys(r).length <= 100, 'Demasiadas divisiones en reps (max 100)'),
   // Carga prescrita por división, con las mismas claves que `reps`.
   // Ausente o 0 = el movimiento no lleva peso (carrera, burpees, remo...).
   peso: z
@@ -101,7 +100,7 @@ export const esquemaWodSchema = z
           tipo: z.enum(['carrera', 'ejercicio', 'transicion']),
           duracion_estimada_ms: z.number().int().min(0).max(86400000),
           distancia: z.string().trim().max(50).optional(),
-        })
+        }),
       )
       .max(50)
       .optional(),
@@ -152,41 +151,43 @@ export const esquemaWodSchema = z
     }
   });
 
-export const wodSchema = z.object({
-  id: z.number().int().positive().optional(),
-  orden: z.number().int().min(1),
-  nombre_ejercicio: z.string().trim().min(1, 'El nombre del ejercicio es obligatorio').max(150),
-  // Los 6 tipos del formulario; el servicio normaliza al enum físico.
-  tipo_medicion: z.enum(MEDICIONES),
-  // Unidad de la marca cuando tipo_medicion=distancia. m = metros, km = kilómetros, mi = millas.
-  unidad_distancia: z.enum(['m', 'km', 'mi']).optional(),
-  // Foto del WOD (URL devuelta por POST /competencias/wod-imagen). null = sin imagen.
-  // Solo ruta interna o http(s): ni `javascript:`, ni `file:`, ni esquemas raros.
-  imagen_url: z
-    .string()
-    .trim()
-    .max(500)
-    .refine(
-      (u) => u === '' || u.startsWith('/api/uploads/') || /^https?:\/\/[^/]+/i.test(u),
-      'La imagen debe ser una ruta /api/uploads/ o una URL http(s)'
-    )
-    .nullable()
-    .optional(),
-  tiempo_estimado_duracion: z.number().int().min(0).max(86400),
-  // Tope de tiempo OPCIONAL por ejercicio, en segundos (0 / ausente = sin tope).
-  // La duración general vive en competencias.duracion_minutos; este campo solo
-  // se usa cuando un ejercicio concreto necesita su propio tope.
-  tiempo_cap: z.number().int().min(0).max(86400).nullable().optional(),
-  esquema: esquemaWodSchema,
-  puntaje_maximo: z.number().int().min(1).max(10000),
-}).superRefine((wod, ctx) => {
-  // La meta de distancia solo tiene sentido en WODs de distancia.
-  if (wod.esquema?.distancia_meta !== undefined && wod.tipo_medicion !== 'distancia') {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'La distancia meta solo aplica a ejercicios de distancia',
-    });
-  }
-});
+export const wodSchema = z
+  .object({
+    id: z.number().int().positive().optional(),
+    orden: z.number().int().min(1),
+    nombre_ejercicio: z.string().trim().min(1, 'El nombre del ejercicio es obligatorio').max(150),
+    // Los 6 tipos del formulario; el servicio normaliza al enum físico.
+    tipo_medicion: z.enum(MEDICIONES),
+    // Unidad de la marca cuando tipo_medicion=distancia. m = metros, km = kilómetros, mi = millas.
+    unidad_distancia: z.enum(['m', 'km', 'mi']).optional(),
+    // Foto del WOD (URL devuelta por POST /competencias/wod-imagen). null = sin imagen.
+    // Solo ruta interna o http(s): ni `javascript:`, ni `file:`, ni esquemas raros.
+    imagen_url: z
+      .string()
+      .trim()
+      .max(500)
+      .refine(
+        (u) => u === '' || u.startsWith('/api/uploads/') || /^https?:\/\/[^/]+/i.test(u),
+        'La imagen debe ser una ruta /api/uploads/ o una URL http(s)',
+      )
+      .nullable()
+      .optional(),
+    tiempo_estimado_duracion: z.number().int().min(0).max(86400),
+    // Tope de tiempo OPCIONAL por ejercicio, en segundos (0 / ausente = sin tope).
+    // La duración general vive en competencias.duracion_minutos; este campo solo
+    // se usa cuando un ejercicio concreto necesita su propio tope.
+    tiempo_cap: z.number().int().min(0).max(86400).nullable().optional(),
+    esquema: esquemaWodSchema,
+    puntaje_maximo: z.number().int().min(1).max(10000),
+  })
+  .superRefine((wod, ctx) => {
+    // La meta de distancia solo tiene sentido en WODs de distancia.
+    if (wod.esquema?.distancia_meta !== undefined && wod.tipo_medicion !== 'distancia') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'La distancia meta solo aplica a ejercicios de distancia',
+      });
+    }
+  });
 
 export type WodValidado = z.infer<typeof wodSchema>;

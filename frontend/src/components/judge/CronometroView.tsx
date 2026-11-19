@@ -58,7 +58,7 @@ const CronometroView = forwardRef<
     onVuelta,
     onDesempate,
   },
-  ref
+  ref,
 ) {
   const { elapsed, isRunning, start, stop, reset, formatTime } = useTimer();
   const capMs = cap * 1000;
@@ -75,7 +75,7 @@ const CronometroView = forwardRef<
       getTranscurridoMs: () => elapsedRef.current,
       getTextoActual: () => formatTime(elapsedRef.current),
     }),
-    [start, stop, reset, formatTime]
+    [start, stop, reset, formatTime],
   );
 
   // Informa transiciones al padre (misma referencia si no cambia: sin bucles).
@@ -140,7 +140,11 @@ const CronometroView = forwardRef<
                 Iniciar
               </Button>
             ) : (
-              <Button variant="danger" onClick={stop} className="min-w-[9rem] min-h-[3.5rem] text-lg">
+              <Button
+                variant="danger"
+                onClick={stop}
+                className="min-w-[9rem] min-h-[3.5rem] text-lg"
+              >
                 <Square className="w-6 h-6" aria-hidden="true" />
                 Detener
               </Button>

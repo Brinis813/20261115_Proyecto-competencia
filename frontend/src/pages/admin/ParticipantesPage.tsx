@@ -2,11 +2,30 @@ import { useEffect, useMemo, useState } from 'react';
 import { Pencil, Plus, Search, Trash2, UserPlus } from 'lucide-react';
 import api, { mensajeDeError } from '../../api/client';
 import AppShell from '../../components/layout/AppShell';
-import { Alert, Button, ConfirmDialog, EmptyState, Field, IconButton, Modal, Select, SkeletonList } from '../../components/ui';
+import {
+  Alert,
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  Field,
+  IconButton,
+  Modal,
+  Select,
+  SkeletonList,
+} from '../../components/ui';
 import type { Categoria, Participante } from '../../types';
 import { dedupCategorias } from '../../utils/formato';
 
-const FORM_VACIO = { nombre: '', apellidos: '', cedula: '', box: '', fecha_nacimiento: '', email: '', categoria: '', categoria_id: '' };
+const FORM_VACIO = {
+  nombre: '',
+  apellidos: '',
+  cedula: '',
+  box: '',
+  fecha_nacimiento: '',
+  email: '',
+  categoria: '',
+  categoria_id: '',
+};
 
 export default function ParticipantesPage() {
   const [participantes, setParticipantes] = useState<Participante[]>([]);
@@ -49,7 +68,9 @@ export default function ParticipantesPage() {
     const termino = busqueda.trim().toLowerCase();
     if (!termino) return participantes;
     return participantes.filter((p) =>
-      `${p.nombre} ${p.apellidos} ${p.cedula} ${p.box} ${p.categoria ?? ''}`.toLowerCase().includes(termino)
+      `${p.nombre} ${p.apellidos} ${p.cedula} ${p.box} ${p.categoria ?? ''}`
+        .toLowerCase()
+        .includes(termino),
     );
   }, [participantes, busqueda]);
 
@@ -106,7 +127,7 @@ export default function ParticipantesPage() {
     try {
       if (editando) {
         // La cedula identifica al atleta en el login: no se permite cambiarla.
-        const { cedula, ...editables } = cuerpo;
+        const { cedula: _cedula, ...editables } = cuerpo;
         await api.put(`/users/participantes/${editando.id}`, editables);
       } else {
         await api.post('/users/participantes', cuerpo);
@@ -188,13 +209,19 @@ export default function ParticipantesPage() {
             }
           />
         ) : filtrados.length === 0 ? (
-          <EmptyState icon={Search} title="Sin coincidencias" description={`Ningun atleta coincide con "${busqueda}".`} />
+          <EmptyState
+            icon={Search}
+            title="Sin coincidencias"
+            description={`Ningun atleta coincide con "${busqueda}".`}
+          />
         ) : (
           <div className="divide-y divide-white/[0.06]">
             {grupos.map(([categoria, lista]) => (
               <section key={categoria}>
                 <div className="px-4 sm:px-5 py-3 border-b border-white/[0.04] bg-white/[0.02] flex items-center justify-between gap-3">
-                  <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-hyrox-primary">{categoria}</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-hyrox-primary">
+                    {categoria}
+                  </h3>
                   <span className="text-2xs text-hyrox-ghost">{lista.length} atletas</span>
                 </div>
                 <ul className="divide-hairline">
@@ -213,8 +240,14 @@ export default function ParticipantesPage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
-                        <span className="badge-gray hidden sm:inline-flex">{p.categoria ?? 'Sin categoria'}</span>
-                        <IconButton icon={Pencil} label={`Editar a ${p.nombre}`} onClick={() => abrirEdicion(p)} />
+                        <span className="badge-gray hidden sm:inline-flex">
+                          {p.categoria ?? 'Sin categoria'}
+                        </span>
+                        <IconButton
+                          icon={Pencil}
+                          label={`Editar a ${p.nombre}`}
+                          onClick={() => abrirEdicion(p)}
+                        />
                         <IconButton
                           icon={Trash2}
                           label={`Eliminar a ${p.nombre}`}

@@ -59,7 +59,14 @@ import {
   getCompetenciasByJudge,
   getPublicCompetencias,
 } from '../services/competenciaService';
-import { Competencia, Wod, Resultado, Asignacion, Categoria, CompetenciaCategoria } from '../models';
+import {
+  Competencia,
+  Wod,
+  Resultado,
+  Asignacion,
+  Categoria,
+  CompetenciaCategoria,
+} from '../models';
 import { broadcastLeaderboard } from '../sockets/handlers';
 
 const mockCompetencia = Competencia as unknown as Record<string, jest.Mock>;
@@ -100,7 +107,11 @@ describe('sanearDivisionesSalida', () => {
   });
   it('convierte objetos {nombre,genero} a etiqueta', () => {
     expect(
-      sanearDivisionesSalida([{ nombre: 'RX', genero: 'Masculino' } as any, { nombre: '', genero: '' } as any, 42 as any])
+      sanearDivisionesSalida([
+        { nombre: 'RX', genero: 'Masculino' } as any,
+        { nombre: '', genero: '' } as any,
+        42 as any,
+      ]),
     ).toEqual(['RX Masculino']);
   });
   it('retorna null si queda vacia', () => {
@@ -150,7 +161,7 @@ describe('createCompetencia', () => {
         tipo_publicacion: 'tiempo_real',
         categoria_ids: [1, 2],
         wods: [wodBase()],
-      } as any)
+      } as any),
     ).rejects.toThrow('ya no existe');
   });
 
@@ -176,7 +187,9 @@ describe('createCompetencia', () => {
             modalidad: 'for_time',
             movimientos: [{ nombre: 'Pull', reps: { Otra: 10 } }],
             movimientos_por_division: {
-              'individual hombres Masculino': [{ nombre: 'Pull', reps: { 'individual hombres Masculino': 10 } }],
+              'individual hombres Masculino': [
+                { nombre: 'Pull', reps: { 'individual hombres Masculino': 10 } },
+              ],
             },
           },
         }),
@@ -193,10 +206,12 @@ describe('createCompetencia', () => {
       {
         modalidad: 'for_time',
         movimientos_por_division: {
-          'individual hombres Masculino': [{ nombre: 'Pull', reps: { 'individual hombres Masculino': 10 } }],
+          'individual hombres Masculino': [
+            { nombre: 'Pull', reps: { 'individual hombres Masculino': 10 } },
+          ],
         },
       } as any,
-      []
+      [],
     );
     expect(colapsado.movimientos_por_division.General[0].reps).toEqual({ General: 10 });
     const remapeado: any = podarEsquemaADivisiones(
@@ -206,15 +221,13 @@ describe('createCompetencia', () => {
           'rx masculino': [{ nombre: 'Pull', reps: { 'rx masculino': 8 } }],
         },
       } as any,
-      ['Rx Masculino']
+      ['Rx Masculino'],
     );
     expect(Object.keys(remapeado.movimientos_por_division)).toEqual(['Rx Masculino']);
   });
 
   it('crea competencia con divisiones normalizadas y wods (incluye splits y unidad)', async () => {
-    mockCategoria.findAll.mockResolvedValue([
-      { id: 1, nombre: 'RX', genero: 'M' },
-    ]);
+    mockCategoria.findAll.mockResolvedValue([{ id: 1, nombre: 'RX', genero: 'M' }]);
     mockCompetenciaCategoria.destroy.mockResolvedValue(0);
     mockCompetenciaCategoria.bulkCreate.mockResolvedValue([]);
     const fakeCompetencia: any = {
@@ -236,8 +249,19 @@ describe('createCompetencia', () => {
       tiebreak_policy: 'INVENTADA' as any,
       desempate_tipo_medicion: 'tiempo',
       wods: [
-        wodBase({ tipo_medicion: 'time_trial_splits', esquema: { modalidad: 'for_time' } as any, unidad_distancia: 'yardas' as any, tiempo_cap: -5 }),
-        wodBase({ orden: 2, nombre_ejercicio: 'Row', tipo_medicion: 'distancia', unidad_distancia: 'km', tiempo_cap: 99 }),
+        wodBase({
+          tipo_medicion: 'time_trial_splits',
+          esquema: { modalidad: 'for_time' } as any,
+          unidad_distancia: 'yardas' as any,
+          tiempo_cap: -5,
+        }),
+        wodBase({
+          orden: 2,
+          nombre_ejercicio: 'Row',
+          tipo_medicion: 'distancia',
+          unidad_distancia: 'km',
+          tiempo_cap: 99,
+        }),
       ],
     } as any);
 
@@ -245,12 +269,12 @@ describe('createCompetencia', () => {
     // rondas se acota a 100
     expect(mockCompetencia.create).toHaveBeenCalledWith(
       expect.objectContaining({ rondas: 100, duracion_minutos: null }),
-      expect.anything()
+      expect.anything(),
     );
     // time_trial_splits se normaliza a tiempo
     expect(mockWod.bulkCreate).toHaveBeenCalledWith(
       expect.arrayContaining([expect.objectContaining({ tipo_medicion: 'tiempo' })]),
-      expect.anything()
+      expect.anything(),
     );
   });
 
@@ -270,7 +294,7 @@ describe('createCompetencia', () => {
 
     expect(mockCompetencia.create).toHaveBeenCalledWith(
       expect.objectContaining({ divisiones: ['RX'] }),
-      expect.anything()
+      expect.anything(),
     );
   });
 });
@@ -282,22 +306,44 @@ describe('updateCompetencia', () => {
   });
 
   it('lanza error con tiebreak_policy invalida', async () => {
-    mockCompetencia.findByPk.mockResolvedValue({ id: 1, divisiones: null, update: jest.fn() } as any);
-    await expect(updateCompetencia(1, { tiebreak_policy: 'MALA' } as any)).rejects.toThrow('inválida');
+    mockCompetencia.findByPk.mockResolvedValue({
+      id: 1,
+      divisiones: null,
+      update: jest.fn(),
+    } as any);
+    await expect(updateCompetencia(1, { tiebreak_policy: 'MALA' } as any)).rejects.toThrow(
+      'inválida',
+    );
   });
 
   it('lanza error si el wod de desempate no pertenece', async () => {
-    mockCompetencia.findByPk.mockResolvedValue({ id: 1, divisiones: null, update: jest.fn() } as any);
+    mockCompetencia.findByPk.mockResolvedValue({
+      id: 1,
+      divisiones: null,
+      update: jest.fn(),
+    } as any);
     mockWod.findOne.mockResolvedValue(null);
     mockWod.findAll.mockResolvedValue([]);
-    await expect(updateCompetencia(1, { wod_desempate_id: 99 } as any)).rejects.toThrow('no pertenece');
+    await expect(updateCompetencia(1, { wod_desempate_id: 99 } as any)).rejects.toThrow(
+      'no pertenece',
+    );
   });
 
   it('actualiza campos simples y limpia wod_desempate_id con null', async () => {
     const update = jest.fn();
-    mockCompetencia.findByPk.mockResolvedValue({ id: 1, divisiones: ['RX'], rondas: 1, update } as any);
+    mockCompetencia.findByPk.mockResolvedValue({
+      id: 1,
+      divisiones: ['RX'],
+      rondas: 1,
+      update,
+    } as any);
     mockWod.findAll.mockResolvedValue([]);
-    (mockCompetencia.findByPk as jest.Mock).mockResolvedValueOnce({ id: 1, divisiones: ['RX'], rondas: 1, update } as any);
+    (mockCompetencia.findByPk as jest.Mock).mockResolvedValueOnce({
+      id: 1,
+      divisiones: ['RX'],
+      rondas: 1,
+      update,
+    } as any);
     // segunda llamada dentro de la transaccion (findByPk final)
     mockCompetencia.findByPk.mockResolvedValue({ id: 1 } as any);
 
@@ -316,8 +362,13 @@ describe('updateCompetencia', () => {
     } as any);
 
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ nombre: 'Nuevo', duracion_minutos: 30, rondas: 2, wod_desempate_id: null }),
-      expect.anything()
+      expect.objectContaining({
+        nombre: 'Nuevo',
+        duracion_minutos: 30,
+        rondas: 2,
+        wod_desempate_id: null,
+      }),
+      expect.anything(),
     );
   });
 
@@ -329,9 +380,9 @@ describe('updateCompetencia', () => {
     mockWod.findAll.mockResolvedValue([{ id: 5, imagen_url: null, esquema: null }] as any);
     mockResultado.count.mockResolvedValue(2);
 
-    await expect(
-      updateCompetencia(1, { wods: [wodBase({ id: 9 })] } as any)
-    ).rejects.toThrow('ya tienen resultados');
+    await expect(updateCompetencia(1, { wods: [wodBase({ id: 9 })] } as any)).rejects.toThrow(
+      'ya tienen resultados',
+    );
   });
 
   it('sincroniza wods: borra sin resultados, actualiza y crea', async () => {
@@ -376,7 +427,7 @@ describe('updateCompetencia', () => {
 
     expect(mockWod.update).toHaveBeenCalledWith(
       expect.objectContaining({ esquema: expect.objectContaining({ rondas: 4 }) }),
-      expect.anything()
+      expect.anything(),
     );
   });
 
@@ -394,7 +445,7 @@ describe('updateCompetencia', () => {
 
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ divisiones: ['Scaled F'] }),
-      expect.anything()
+      expect.anything(),
     );
   });
 });
@@ -403,7 +454,11 @@ describe('assignCompetencia / removeAssignment', () => {
   it('lanza error si la competencia no existe', async () => {
     mockCompetencia.findByPk.mockResolvedValue(null);
     await expect(
-      assignCompetencia({ competencia_id: 1, wod_id: null, pares: [{ usuario_id: 1, participante_id: 2 }] })
+      assignCompetencia({
+        competencia_id: 1,
+        wod_id: null,
+        pares: [{ usuario_id: 1, participante_id: 2 }],
+      }),
     ).rejects.toThrow('no encontrado');
   });
 
@@ -411,7 +466,11 @@ describe('assignCompetencia / removeAssignment', () => {
     mockCompetencia.findByPk.mockResolvedValue({ id: 1 } as any);
     mockWod.findOne.mockResolvedValue(null);
     await expect(
-      assignCompetencia({ competencia_id: 1, wod_id: 99, pares: [{ usuario_id: 1, participante_id: 2 }] })
+      assignCompetencia({
+        competencia_id: 1,
+        wod_id: 99,
+        pares: [{ usuario_id: 1, participante_id: 2 }],
+      }),
     ).rejects.toThrow('no pertenece');
   });
 
@@ -419,7 +478,7 @@ describe('assignCompetencia / removeAssignment', () => {
     mockCompetencia.findByPk.mockResolvedValue({ id: 1 } as any);
     mockWod.findOne.mockResolvedValue({ id: 3 } as any);
     await expect(assignCompetencia({ competencia_id: 1, wod_id: 3, pares: [] })).rejects.toThrow(
-      'al menos'
+      'al menos',
     );
   });
 
@@ -467,7 +526,15 @@ describe('getCompetenciasByJudge / getPublicCompetencias', () => {
       { competencia_id: 2, wod_id: null },
     ] as any);
     mockCompetencia.findAll.mockResolvedValue([
-      { id: 1, toJSON: () => ({ id: 1, divisiones: [{ nombre: 'RX', genero: 'M' }], rondas: 1, wods: [{ id: 10 }, { id: 11 }] }) },
+      {
+        id: 1,
+        toJSON: () => ({
+          id: 1,
+          divisiones: [{ nombre: 'RX', genero: 'M' }],
+          rondas: 1,
+          wods: [{ id: 10 }, { id: 11 }],
+        }),
+      },
       { id: 2, toJSON: () => ({ id: 2, divisiones: null, rondas: 1, wods: [{ id: 20 }] }) },
     ] as any);
 

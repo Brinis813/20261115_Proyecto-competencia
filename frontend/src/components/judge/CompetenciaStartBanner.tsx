@@ -148,7 +148,9 @@ export default function CompetenciaStartBanner({ competenciaId }: { competenciaI
       <div className="flex items-center justify-center gap-4">
         <button
           type="button"
-          onClick={() => useCompetenciaStartStore.getState().forzarSincronizacion(socket, competenciaId)}
+          onClick={() =>
+            useCompetenciaStartStore.getState().forzarSincronizacion(socket, competenciaId)
+          }
           disabled={sincronizando || fase === 'espera'}
           className="inline-flex items-center gap-1.5 text-2xs text-hyrox-mist underline underline-offset-2 disabled:opacity-40 cursor-pointer"
         >

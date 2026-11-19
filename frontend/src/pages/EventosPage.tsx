@@ -33,7 +33,11 @@ export default function EventosPage() {
         <Spinner label="Cargando eventos..." />
       ) : (
         <div className="space-y-8 animate-fade-in">
-          {error && <Alert tone="error" onDismiss={() => setError('')}>{error}</Alert>}
+          {error && (
+            <Alert tone="error" onDismiss={() => setError('')}>
+              {error}
+            </Alert>
+          )}
 
           {eventos.length === 0 && !error ? (
             <Panel>

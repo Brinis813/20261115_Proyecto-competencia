@@ -15,7 +15,15 @@ import {
 } from 'lucide-react';
 import api, { mensajeDeError } from '../../api/client';
 import AppShell from '../../components/layout/AppShell';
-import { Alert, Button, ConfirmDialog, EmptyState, IconButton, SkeletonList, cx } from '../../components/ui';
+import {
+  Alert,
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  IconButton,
+  SkeletonList,
+  cx,
+} from '../../components/ui';
 import ArranqueControl from '../../components/admin/ArranqueControl';
 import ResumenCompetencia from '../../components/admin/ResumenCompetencia';
 import { EstadoCompetencia } from './AdminDashboard';
@@ -176,7 +184,10 @@ function GruposCompetencias({
             <span className="font-display text-lg font-bold">Finalizadas</span>
             <span className="badge badge-gray">{finalizadas.length}</span>
             <ChevronDown
-              className={cx('w-4 h-4 transition-transform duration-200', verFinalizadas && 'rotate-180')}
+              className={cx(
+                'w-4 h-4 transition-transform duration-200',
+                verFinalizadas && 'rotate-180',
+              )}
               aria-hidden="true"
             />
           </button>
@@ -274,72 +285,78 @@ function TarjetaCompetencia({
         />
       )}
       <div className="p-5 flex flex-col flex-1">
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="min-w-0">
-          <h2 className="font-display text-xl font-bold text-hyrox-paper truncate">{competencia.nombre}</h2>
-          {competencia.descripcion && (
-            <p className="mt-1 text-xs text-hyrox-mist line-clamp-2">{competencia.descripcion}</p>
-          )}
-          <p className="mt-1 text-2xs text-hyrox-ghost truncate">Categorias: {formatearCategorias(competencia.divisiones)}</p>
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <span className="badge-gray">{competencia.tipo_participacion ?? 'Individual'}</span>
-            {/* Solo se anuncia el tope si la competencia tiene uno definido. */}
-            {(competencia.duracion_minutos ?? 0) > 0 && (
-              <span className="badge-gray">Cap {competencia.duracion_minutos} min</span>
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="min-w-0">
+            <h2 className="font-display text-xl font-bold text-hyrox-paper truncate">
+              {competencia.nombre}
+            </h2>
+            {competencia.descripcion && (
+              <p className="mt-1 text-xs text-hyrox-mist line-clamp-2">{competencia.descripcion}</p>
             )}
+            <p className="mt-1 text-2xs text-hyrox-ghost truncate">
+              Categorias: {formatearCategorias(competencia.divisiones)}
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="badge-gray">{competencia.tipo_participacion ?? 'Individual'}</span>
+              {/* Solo se anuncia el tope si la competencia tiene uno definido. */}
+              {(competencia.duracion_minutos ?? 0) > 0 && (
+                <span className="badge-gray">Cap {competencia.duracion_minutos} min</span>
+              )}
+            </div>
           </div>
+          <EstadoCompetencia estado={competencia.estado} />
         </div>
-        <EstadoCompetencia estado={competencia.estado} />
-      </div>
 
-      <ul className="space-y-1.5 mb-4 flex-1">
-        {(competencia.wods ?? []).slice(0, 4).map((c) => (
-          <li key={c.id} className="flex items-center gap-2 text-xs">
-            <span className="grid place-items-center w-5 h-5 rounded bg-white/[0.06] font-mono text-2xs font-bold text-hyrox-mist shrink-0">
-              {c.orden}
-            </span>
-            <span className="text-hyrox-paper/90 truncate flex-1">{c.nombre_ejercicio}</span>
-            <span className="text-hyrox-ghost shrink-0">{ETIQUETA_MEDICION[c.tipo_medicion]}</span>
-          </li>
-        ))}
-        {(competencia.wods?.length ?? 0) > 4 && (
-          <li className="text-2xs text-hyrox-ghost pl-7">
-            y {(competencia.wods?.length ?? 0) - 4} wods mas
-          </li>
-        )}
-        {(competencia.wods?.length ?? 0) === 0 && (
-          <li className="text-xs text-hyrox-warning">Sin wods definidos</li>
-        )}
-      </ul>
+        <ul className="space-y-1.5 mb-4 flex-1">
+          {(competencia.wods ?? []).slice(0, 4).map((c) => (
+            <li key={c.id} className="flex items-center gap-2 text-xs">
+              <span className="grid place-items-center w-5 h-5 rounded bg-white/[0.06] font-mono text-2xs font-bold text-hyrox-mist shrink-0">
+                {c.orden}
+              </span>
+              <span className="text-hyrox-paper/90 truncate flex-1">{c.nombre_ejercicio}</span>
+              <span className="text-hyrox-ghost shrink-0">
+                {ETIQUETA_MEDICION[c.tipo_medicion]}
+              </span>
+            </li>
+          ))}
+          {(competencia.wods?.length ?? 0) > 4 && (
+            <li className="text-2xs text-hyrox-ghost pl-7">
+              y {(competencia.wods?.length ?? 0) - 4} wods mas
+            </li>
+          )}
+          {(competencia.wods?.length ?? 0) === 0 && (
+            <li className="text-xs text-hyrox-warning">Sin wods definidos</li>
+          )}
+        </ul>
 
-      <div className="mb-3">
-        <ArranqueControl competenciaId={competencia.id} competenciaNombre={competencia.nombre} />
-      </div>
+        <div className="mb-3">
+          <ArranqueControl competenciaId={competencia.id} competenciaNombre={competencia.nombre} />
+        </div>
 
-      <div className="flex items-center gap-1 pt-3 border-t border-white/[0.06]">
-        <Link to={`/admin/competencias/${competencia.id}`} className="flex-1">
-          <Button variant="secondary" size="sm" icon={Pencil} fullWidth>
-            Editar
-          </Button>
-        </Link>
-        <IconButton
-          icon={Eye}
-          label={`Resumen de ${competencia.nombre}`}
-          onClick={() => onResumen(competencia.id)}
-        />
-        <Link to={`/admin/asignaciones/${competencia.id}`}>
-          <IconButton icon={ClipboardList} label={`Asignaciones de ${competencia.nombre}`} />
-        </Link>
-        <Link to={`/leaderboard/${competencia.id}`}>
-          <IconButton icon={Trophy} label={`Clasificacion de ${competencia.nombre}`} />
-        </Link>
-        <IconButton
-          icon={Trash2}
-          label={`Eliminar ${competencia.nombre}`}
-          onClick={() => onEliminar(competencia)}
-          className="hover:text-hyrox-danger hover:bg-hyrox-danger/10"
-        />
-      </div>
+        <div className="flex items-center gap-1 pt-3 border-t border-white/[0.06]">
+          <Link to={`/admin/competencias/${competencia.id}`} className="flex-1">
+            <Button variant="secondary" size="sm" icon={Pencil} fullWidth>
+              Editar
+            </Button>
+          </Link>
+          <IconButton
+            icon={Eye}
+            label={`Resumen de ${competencia.nombre}`}
+            onClick={() => onResumen(competencia.id)}
+          />
+          <Link to={`/admin/asignaciones/${competencia.id}`}>
+            <IconButton icon={ClipboardList} label={`Asignaciones de ${competencia.nombre}`} />
+          </Link>
+          <Link to={`/leaderboard/${competencia.id}`}>
+            <IconButton icon={Trophy} label={`Clasificacion de ${competencia.nombre}`} />
+          </Link>
+          <IconButton
+            icon={Trash2}
+            label={`Eliminar ${competencia.nombre}`}
+            onClick={() => onEliminar(competencia)}
+            className="hover:text-hyrox-danger hover:bg-hyrox-danger/10"
+          />
+        </div>
       </div>
     </article>
   );

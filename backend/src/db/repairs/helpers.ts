@@ -4,16 +4,20 @@ import mysql from 'mysql2/promise';
 export async function existeTabla(conn: mysql.Connection, tabla: string): Promise<boolean> {
   const [rows] = await conn.query<any[]>(
     `SELECT COUNT(*) AS total FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?`,
-    [tabla]
+    [tabla],
   );
   return (rows[0]?.total ?? 0) > 0;
 }
 
 /** ¿Existe la columna en la tabla? */
-export async function existeColumna(conn: mysql.Connection, tabla: string, columna: string): Promise<boolean> {
+export async function existeColumna(
+  conn: mysql.Connection,
+  tabla: string,
+  columna: string,
+): Promise<boolean> {
   const [rows] = await conn.query<any[]>(
     `SELECT COUNT(*) AS total FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
-    [tabla, columna]
+    [tabla, columna],
   );
   return (rows[0]?.total ?? 0) > 0;
 }

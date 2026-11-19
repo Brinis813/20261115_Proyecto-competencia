@@ -170,8 +170,12 @@ export default function AppShell({
           </button>
 
           <div className="min-w-0 flex-1">
-            <h1 className="text-base sm:text-lg font-bold text-hyrox-paper truncate leading-tight">{title}</h1>
-            {subtitle && <p className="text-xs text-hyrox-mist truncate hidden sm:block">{subtitle}</p>}
+            <h1 className="text-base sm:text-lg font-bold text-hyrox-paper truncate leading-tight">
+              {title}
+            </h1>
+            {subtitle && (
+              <p className="text-xs text-hyrox-mist truncate hidden sm:block">{subtitle}</p>
+            )}
           </div>
 
           {/* Un administrador de box puede tener varias eventos: conviene
@@ -229,7 +233,7 @@ function SidebarNav({ items }: { items: ItemNav[] }) {
               'flex items-center gap-3 min-h-[2.75rem] px-3 rounded-xl text-sm font-medium transition-colors duration-200',
               isActive
                 ? 'bg-hyrox-primary/12 text-hyrox-primary'
-                : 'text-hyrox-mist hover:text-hyrox-paper hover:bg-white/[0.05]'
+                : 'text-hyrox-mist hover:text-hyrox-paper hover:bg-white/[0.05]',
             )
           }
         >
@@ -237,7 +241,12 @@ function SidebarNav({ items }: { items: ItemNav[] }) {
             <>
               <item.icon className="w-4.5 h-4.5 shrink-0" aria-hidden="true" />
               <span className="truncate">{item.label}</span>
-              {isActive && <span className="ml-auto w-1 h-4 rounded-full bg-hyrox-primary" aria-hidden="true" />}
+              {isActive && (
+                <span
+                  className="ml-auto w-1 h-4 rounded-full bg-hyrox-primary"
+                  aria-hidden="true"
+                />
+              )}
             </>
           )}
         </NavLink>
@@ -246,8 +255,15 @@ function SidebarNav({ items }: { items: ItemNav[] }) {
   );
 }
 
-function SidebarFooter({ user, onLogout }: { user: { nombre: string; apellidos: string; rol: string } | null; onLogout: () => void }) {
-  const etiquetaRol = { admin: 'Administrador', juez: 'Juez', participante: 'Atleta' }[user?.rol ?? ''] ?? '';
+function SidebarFooter({
+  user,
+  onLogout,
+}: {
+  user: { nombre: string; apellidos: string; rol: string } | null;
+  onLogout: () => void;
+}) {
+  const etiquetaRol =
+    { admin: 'Administrador', juez: 'Juez', participante: 'Atleta' }[user?.rol ?? ''] ?? '';
 
   return (
     <div className="p-3 border-t border-white/[0.06]">

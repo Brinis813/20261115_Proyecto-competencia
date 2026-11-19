@@ -16,7 +16,9 @@ function wodBase(parche: Partial<WodUI> = {}): WodUI {
 describe('objetivoDeMovimiento', () => {
   it('tabla por medición', () => {
     const m = movimientoVacio();
-    expect(objetivoDeMovimiento({ ...m, tipo_medicion: 'repeticiones', repeticiones: 21 })).toBe(21);
+    expect(objetivoDeMovimiento({ ...m, tipo_medicion: 'repeticiones', repeticiones: 21 })).toBe(
+      21,
+    );
     expect(objetivoDeMovimiento({ ...m, tipo_medicion: 'calorías', calorias: 15 })).toBe(15);
     expect(objetivoDeMovimiento({ ...m, tipo_medicion: 'distancia', distancia: 500 })).toBe(500);
     expect(objetivoDeMovimiento({ ...m, tipo_medicion: 'peso', intentos: 3 })).toBe(3);
@@ -48,7 +50,9 @@ describe('esquemaDesdeUI', () => {
     const w = wodBase({
       medicion: 'calorías',
       movimientosPorCategoria: {
-        General: [{ ...movimientoVacio(), nombre: 'Remo', tipo_medicion: 'calorías', calorias: 15 }],
+        General: [
+          { ...movimientoVacio(), nombre: 'Remo', tipo_medicion: 'calorías', calorias: 15 },
+        ],
       },
     });
     const esquema = esquemaDesdeUI(w, ['General']);

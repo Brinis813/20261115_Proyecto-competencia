@@ -1,6 +1,13 @@
 import { Op } from 'sequelize';
 import { sequelize } from '../config/database';
-import { Heat, HeatParticipante, HeatHorario, Categoria, Participante, Competencia } from '../models';
+import {
+  Heat,
+  HeatParticipante,
+  HeatHorario,
+  Categoria,
+  Participante,
+  Competencia,
+} from '../models';
 import type { AlcanceEvento } from '../middleware/evento';
 
 /**
@@ -46,7 +53,10 @@ export interface VistaHeats {
 }
 
 /** La categoría debe existir y pertenecer al alcance del admin. */
-async function categoriaPermitida(categoriaId: number, alcance?: AlcanceEvento): Promise<Categoria> {
+async function categoriaPermitida(
+  categoriaId: number,
+  alcance?: AlcanceEvento,
+): Promise<Categoria> {
   const categoria = await Categoria.findByPk(categoriaId);
   if (!categoria) throw new Error('Categoría no encontrada');
   const compId = categoria.evento_id;
@@ -97,7 +107,7 @@ function mezclar<T>(lista: T[]): T[] {
 export async function obtenerHeats(
   categoriaId: number,
   competenciaId: number | null,
-  alcance?: AlcanceEvento
+  alcance?: AlcanceEvento,
 ): Promise<VistaHeats> {
   const categoria = await categoriaPermitida(categoriaId, alcance);
   return construirVista(categoria, competenciaId);
@@ -112,10 +122,11 @@ export async function generarHeats(
   categoriaId: number,
   capacidad: number,
   modo: ModoDistribucion,
-  alcance?: AlcanceEvento
+  alcance?: AlcanceEvento,
 ): Promise<VistaHeats> {
   const cap = validarCapacidad(capacidad);
-  if (modo !== 'alfabetico' && modo !== 'aleatorio') throw new Error('Modo inválido: usa alfabetico o aleatorio');
+  if (modo !== 'alfabetico' && modo !== 'aleatorio')
+    throw new Error('Modo inválido: usa alfabetico o aleatorio');
   const categoria = await categoriaPermitida(categoriaId, alcance);
 
   return sequelize.transaction(async (t) => {
@@ -147,7 +158,7 @@ export async function generarHeats(
           numero,
           capacidad_maxima: cap,
         },
-        { transaction: t }
+        { transaction: t },
       );
       await HeatParticipante.bulkCreate(
         bloque.map((a, idx) => ({
@@ -155,7 +166,7 @@ export async function generarHeats(
           participante_id: a.id,
           carril_numero: idx + 1,
         })),
-        { transaction: t }
+        { transaction: t },
       );
     }
 
@@ -167,18 +178,22 @@ export async function generarHeats(
 export async function crearHeatVacio(
   categoriaId: number,
   capacidad: number,
-  alcance?: AlcanceEvento
+  alcance?: AlcanceEvento,
 ): Promise<VistaHeats> {
   const cap = validarCapacidad(capacidad);
   const categoria = await categoriaPermitida(categoriaId, alcance);
-  const maximo = (await Heat.max('numero', { where: { categoria_id: categoriaId } }) as number | null) ?? 0;
+  const maximo =
+    ((await Heat.max('numero', { where: { categoria_id: categoriaId } })) as number | null) ?? 0;
   await sequelize.transaction(async (t) => {
-    await Heat.create({
-      evento_id: categoria.evento_id ?? 0,
-      categoria_id: categoriaId,
-      numero: maximo + 1,
-      capacidad_maxima: cap,
-    }, { transaction: t });
+    await Heat.create(
+      {
+        evento_id: categoria.evento_id ?? 0,
+        categoria_id: categoriaId,
+        numero: maximo + 1,
+        capacidad_maxima: cap,
+      },
+      { transaction: t },
+    );
   });
   return obtenerHeats(categoriaId, null, alcance);
 }
@@ -191,7 +206,7 @@ export async function moverAtleta(
   participanteId: number,
   heatDestinoId: number,
   carrilNumero: number | null,
-  alcance?: AlcanceEvento
+  alcance?: AlcanceEvento,
 ): Promise<VistaHeats> {
   const destino = await Heat.findByPk(heatDestinoId);
   if (!destino) throw new Error('Heat no encontrado');
@@ -215,24 +230,36 @@ export async function moverAtleta(
 
     let carril = carrilNumero;
     if (carril == null) {
-      const usados = new Set(ocupados.filter((o) => o.participante_id !== participanteId).map((o) => o.carril_numero));
-      carril = Array.from({ length: destino.capacidad_maxima }, (_, i) => i + 1).find((n) => !usados.has(n)) ?? null;
-      if (carril == null) throw new Error(`El Heat ${destino.numero} está lleno (${destino.capacidad_maxima})`);
+      const usados = new Set(
+        ocupados.filter((o) => o.participante_id !== participanteId).map((o) => o.carril_numero),
+      );
+      carril =
+        Array.from({ length: destino.capacidad_maxima }, (_, i) => i + 1).find(
+          (n) => !usados.has(n),
+        ) ?? null;
+      if (carril == null)
+        throw new Error(`El Heat ${destino.numero} está lleno (${destino.capacidad_maxima})`);
     } else {
       if (!Number.isInteger(carril) || carril < 1 || carril > destino.capacidad_maxima) {
         throw new Error(`El carril debe estar entre 1 y ${destino.capacidad_maxima}`);
       }
-      const choca = ocupados.some((o) => o.carril_numero === carril && o.participante_id !== participanteId);
-      if (choca) throw new Error(`El carril ${carril} ya está ocupado en el Heat ${destino.numero}`);
+      const choca = ocupados.some(
+        (o) => o.carril_numero === carril && o.participante_id !== participanteId,
+      );
+      if (choca)
+        throw new Error(`El carril ${carril} ya está ocupado en el Heat ${destino.numero}`);
     }
 
-    const actual = await HeatParticipante.findOne({ where: { participante_id: participanteId }, transaction: t });
+    const actual = await HeatParticipante.findOne({
+      where: { participante_id: participanteId },
+      transaction: t,
+    });
     if (actual) {
       await actual.update({ heat_id: destino.id, carril_numero: carril }, { transaction: t });
     } else {
       await HeatParticipante.create(
         { heat_id: destino.id, participante_id: participanteId, carril_numero: carril },
-        { transaction: t }
+        { transaction: t },
       );
     }
 
@@ -244,11 +271,14 @@ export async function moverAtleta(
 export async function quitarAtleta(
   participanteId: number,
   categoriaId: number,
-  alcance?: AlcanceEvento
+  alcance?: AlcanceEvento,
 ): Promise<VistaHeats> {
   await categoriaPermitida(categoriaId, alcance);
   await sequelize.transaction(async (t) => {
-    const eliminado = await HeatParticipante.destroy({ where: { participante_id: participanteId }, transaction: t });
+    const eliminado = await HeatParticipante.destroy({
+      where: { participante_id: participanteId },
+      transaction: t,
+    });
     if (!eliminado) throw new Error('El atleta no está en ningún heat');
   });
   return obtenerHeats(categoriaId, null, alcance);
@@ -262,7 +292,8 @@ export async function eliminarHeat(heatId: number, alcance?: AlcanceEvento): Pro
 
   return sequelize.transaction(async (t) => {
     const ocupados = await HeatParticipante.count({ where: { heat_id: heatId }, transaction: t });
-    if (ocupados > 0) throw new Error('Vacía el heat antes de eliminarlo (mueve o quita a sus atletas)');
+    if (ocupados > 0)
+      throw new Error('Vacía el heat antes de eliminarlo (mueve o quita a sus atletas)');
     const numero = heat.numero;
     await heat.destroy({ transaction: t });
     // Renumera para no dejar huecos: 1..N siempre consecutivos.
@@ -281,7 +312,7 @@ export async function eliminarHeat(heatId: number, alcance?: AlcanceEvento): Pro
 /** Borra todas las series de la categoría (series + horarios + carriles). */
 export async function limpiarCategoria(
   categoriaId: number,
-  alcance?: AlcanceEvento
+  alcance?: AlcanceEvento,
 ): Promise<{ message: string }> {
   await categoriaPermitida(categoriaId, alcance);
   const total = await sequelize.transaction(async (t) => {
@@ -290,7 +321,10 @@ export async function limpiarCategoria(
   return { message: total > 0 ? `${total} heats eliminados` : 'La categoría no tenía heats' };
 }
 
-async function competenciaDeEvento(competenciaId: number, eventoId: number | null): Promise<Competencia> {
+async function competenciaDeEvento(
+  competenciaId: number,
+  eventoId: number | null,
+): Promise<Competencia> {
   const competencia = await Competencia.findByPk(competenciaId);
   if (!competencia) throw new Error('Competencia no encontrado');
   if (eventoId != null && competencia.evento_id !== eventoId) {
@@ -308,8 +342,11 @@ export async function programarHorarioAuto(
   competenciaId: number,
   horaHeat1: string,
   transicionMin: number,
-  alcance?: AlcanceEvento
-): Promise<{ heats: Array<{ heat_id: number; numero: number; hora_inicio: string }>; sinDuracion: boolean }> {
+  alcance?: AlcanceEvento,
+): Promise<{
+  heats: Array<{ heat_id: number; numero: number; hora_inicio: string }>;
+  sinDuracion: boolean;
+}> {
   const categoria = await categoriaPermitida(categoriaId, alcance);
   const competencia = await competenciaDeEvento(competenciaId, categoria.evento_id);
   const transicion = Number(transicionMin);
@@ -342,7 +379,7 @@ export async function programarHorarioManual(
   categoriaId: number,
   competenciaId: number,
   horarios: Array<{ heat_id: number; hora_inicio: string }>,
-  alcance?: AlcanceEvento
+  alcance?: AlcanceEvento,
 ): Promise<{ heats: Array<{ heat_id: number; numero: number; hora_inicio: string }> }> {
   const categoria = await categoriaPermitida(categoriaId, alcance);
   await competenciaDeEvento(competenciaId, categoria.evento_id);
@@ -354,14 +391,22 @@ export async function programarHorarioManual(
   const validos = new Map(heats.map((h) => [h.id, h.numero]));
   const filas = horarios.map(({ heat_id, hora_inicio }) => {
     if (!validos.has(heat_id)) throw new Error(`El heat ${heat_id} no es de esta categoría`);
-    return { heat_id, competencia_id: competenciaId, hora_inicio: formatoHora(parseHora(hora_inicio)) };
+    return {
+      heat_id,
+      competencia_id: competenciaId,
+      hora_inicio: formatoHora(parseHora(hora_inicio)),
+    };
   });
   await HeatHorario.bulkCreate(filas, { updateOnDuplicate: ['hora_inicio'] });
   return { heats: filas.map((f) => ({ ...f, numero: validos.get(f.heat_id)! })) };
 }
 
 /** Constructor único de la vista (con o sin transacción). */
-async function construirVista(categoria: Categoria, competenciaId: number | null, t?: any): Promise<VistaHeats> {
+async function construirVista(
+  categoria: Categoria,
+  competenciaId: number | null,
+  t?: any,
+): Promise<VistaHeats> {
   const heats = await Heat.findAll({
     where: { categoria_id: categoria.id },
     order: [['numero', 'ASC']],
@@ -377,7 +422,10 @@ async function construirVista(categoria: Categoria, competenciaId: number | null
         })
       : [],
     competenciaId != null && heatIds.length > 0
-      ? HeatHorario.findAll({ where: { heat_id: { [Op.in]: heatIds }, competencia_id: competenciaId }, transaction: t })
+      ? HeatHorario.findAll({
+          where: { heat_id: { [Op.in]: heatIds }, competencia_id: competenciaId },
+          transaction: t,
+        })
       : [],
   ]);
   const horaPorHeat = new Map(horarios.map((h) => [h.heat_id, String(h.hora_inicio).slice(0, 5)]));
