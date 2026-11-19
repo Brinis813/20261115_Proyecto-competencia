@@ -1,15 +1,15 @@
 {
-  "_comment": "Suelo global de cobertura. Solo sube: si baja, se enmienda la constitución (regla 6). Valores medidos el 2026-11-16 al ratificar la política v1.1.0. Ver 02-DOCS/wiki/sdd/deuda-cobertura.md para el plan de pago.",
+  "_comment": "Suelo global de cobertura. Solo sube: si baja, se enmienda la constitución (regla 28). Medido el 2026-11-18. Plan de pago en 02-DOCS/wiki/sdd/deuda-cobertura.md.",
   "frontend": {
-    "lines": 14.6,
-    "statements": 14.6,
-    "functions": 30.1,
-    "branches": 67.8
+    "lines": 19.7,
+    "statements": 19.7,
+    "functions": 39.6,
+    "branches": 74.1
   },
   "backend": {
-    "lines": 51.6,
-    "statements": 50.3,
-    "functions": 42.8,
-    "branches": 38.5
+    "lines": 77.2,
+    "statements": 75.7,
+    "functions": 65.7,
+    "branches": 64.9
   }
 }
